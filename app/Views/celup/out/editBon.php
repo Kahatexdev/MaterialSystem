@@ -1,8 +1,17 @@
 <?php $this->extend($role . '/out/header'); ?>
 <?php $this->section('content'); ?>
 
+<style>
+    .disabled-btn {
+        opacity: 0.6;
+        cursor: not-allowed;
+        pointer-events: none;
+        /* biar click JS juga tidak jalan */
+    }
+</style>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
+
 
 <div class="container-fluid py-4">
     <!-- Flash Messages -->
@@ -166,16 +175,28 @@
 
                                     <?php $karungCount = is_array($data['karung']) ? count($data['karung']) : 0; ?>
                                     <?php if ($karungCount > 1): ?>
+                                        <?php
+                                        // kalau sudah ada pemasukan, tombol di-disable
+                                        $disabled      = !empty($karung['sudah_pemasukan']);
+                                        $disabledAttr  = $disabled ? 'disabled' : '';
+                                        $titleAttr     = $disabled ? 'title="Tidak bisa dihapus karena sudah ada pemasukan"' : '';
+                                        ?>
                                         <div class="col-md-2 mb-2 text-center">
                                             <label for="">Aksi</label><br>
-                                            <!-- tombol tanpa id duplikat, pakai class .btn-delete -->
                                             <button type="button"
-                                                class="btn btn-danger btn-md w-100 btn-delete"
+                                                class="btn btn-danger btn-md w-100 btn-delete <?= $disabled ? 'disabled-btn' : '' ?>"
                                                 data-id="<?= $karung['id_out_celup'] ?>"
                                                 data-id-bon="<?= $karung['id_bon'] ?>"
-                                                data-no="<?= esc($karung['no_karung']) ?>">
+                                                data-no="<?= esc($karung['no_karung']) ?>"
+                                                <?= $disabledAttr ?>
+                                                <?= $titleAttr ?>>
                                                 <i class="fas fa-trash me-1"></i>Hapus
                                             </button>
+                                            <?php if ($disabled): ?>
+                                                <small class="text-muted d-block mt-1">
+                                                    <!-- Sudah ada pemasukan -->
+                                                </small>
+                                            <?php endif; ?>
                                         </div>
                                     <?php else: ?>
                                         <div class="col-md-2 mb-2 text-center"></div>

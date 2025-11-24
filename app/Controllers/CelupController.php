@@ -12,6 +12,7 @@ use App\Models\ScheduleCelupModel;
 use App\Models\OutCelupModel;
 use App\Models\BonCelupModel;
 use App\Models\ReturModel;
+use App\Models\PemasukanModel;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class CelupController extends BaseController
@@ -28,6 +29,7 @@ class CelupController extends BaseController
     protected $outCelupModel;
     protected $bonCelupModel;
     protected $returModel;
+    protected $pemasukanModel;
 
     public function __construct()
     {
@@ -39,6 +41,7 @@ class CelupController extends BaseController
         $this->outCelupModel = new OutCelupModel();
         $this->bonCelupModel = new BonCelupModel();
         $this->returModel = new ReturModel();
+        $this->pemasukanModel = new PemasukanModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -421,6 +424,28 @@ class CelupController extends BaseController
             return $this->response->setJSON(['error' => 'Data tidak ditemukan']);
         }
 
+        // 1. Ambil semua id_out_celup dari hasil out_celup
+        $idOutList = array_column($data, 'id_out_celup'); // pastikan key-nya sesuai
+
+        if (!empty($idOutList)) {
+            // 2. Ambil semua pemasukan yang sudah pakai id_out_celup tsb
+            $pemasukan = $this->pemasukanModel
+                ->select('id_out_celup')
+                ->whereIn('id_out_celup', $idOutList)
+                ->findAll();
+
+            // 3. Bikin array [id_out_celup yang sudah ada di pemasukan]
+            $sudahAda = array_column($pemasukan, 'id_out_celup');
+        } else {
+            $sudahAda = [];
+        }
+
+        // 4. Tambahkan flag ke tiap item
+        foreach ($data as &$item) {
+            $item['sudah_pemasukan'] = in_array($item['id_out_celup'], $sudahAda);
+        }
+        unset($item); // good practice
+
         return $this->response->setJSON($data);
     }
 
@@ -649,55 +674,65 @@ class CelupController extends BaseController
 
     public function editBon($id_bon)
     {
-        $bonData = $this->bonCelupModel->where('id_bon', $id_bon)->first();
+        $bonData   = $this->bonCelupModel->where('id_bon', $id_bon)->first();
         $celupData = $this->scheduleCelupModel->getScheduleBon($id_bon);
-        $items = [];
+        $items     = [];
 
         foreach ($celupData as $dt) {
-            $idCelup = $dt['id_celup'];
+            $idCelup    = $dt['id_celup'];
             $karungData = $this->outCelupModel->dataCelup($id_bon, $idCelup);
 
             // Buat array baru untuk setiap item
             $item = [
-                'id_celup'   => $idCelup,
-                'model'      => $dt['no_model'],
-                'itemType'   => $dt['item_type'],
-                'kodeWarna'  => $dt['kode_warna'],
-                'warna'      => $dt['warna'],
-                'karung'     => [] // Inisialisasi array karung kosong
+                'id_celup'  => $idCelup,
+                'model'     => $dt['no_model'],
+                'itemType'  => $dt['item_type'],
+                'kodeWarna' => $dt['kode_warna'],
+                'warna'     => $dt['warna'],
+                'karung'    => [], // Inisialisasi array karung kosong
             ];
 
             // Tambahkan semua data karung ke dalam array
             foreach ($karungData as $out) {
+
+                // CEK PEMASUKAN UNTUK KARUNG INI
+                $cekPemasukan = $this->pemasukanModel
+                    ->where('id_out_celup', $out['id_out_celup'])
+                    ->first();
+
                 $item['karung'][] = [
-                    'id_out_celup' => $out['id_out_celup'],
-                    'id_bon'       => $out['id_bon'],
-                    'l_m_d'        => $out['l_m_d'],
-                    'harga'        => $out['harga'],
-                    'no_karung'    => $out['no_karung'],
-                    'gw_kirim'     => $out['gw_kirim'],
-                    'kgs_kirim'    => $out['kgs_kirim'],
-                    'cones_kirim'  => $out['cones_kirim'],
-                    'lot_kirim'    => $out['lot_kirim'],
+                    'id_out_celup'      => $out['id_out_celup'],
+                    'id_bon'            => $out['id_bon'],
+                    'l_m_d'             => $out['l_m_d'],
+                    'harga'             => $out['harga'],
+                    'no_karung'         => $out['no_karung'],
+                    'gw_kirim'          => $out['gw_kirim'],
+                    'kgs_kirim'         => $out['kgs_kirim'],
+                    'cones_kirim'       => $out['cones_kirim'],
+                    'lot_kirim'         => $out['lot_kirim'],
+                    // FLAG: sudah ada pemasukan atau belum
+                    'sudah_pemasukan'   => $cekPemasukan ? true : false,
                 ];
-                $item['l_m_d'] = $out['l_m_d'];
-                $item['harga'] = $out['harga'];
-                $item['ganti_retur'] = $out['ganti_retur'];
+
+                // kalau mau copy ke level item (untuk input atas)
+                $item['l_m_d']        = $out['l_m_d'];
+                $item['harga']        = $out['harga'];
+                $item['ganti_retur']  = $out['ganti_retur'];
             }
 
-            // Tambahkan item ke dalam array utama
             $items[] = $item;
         }
 
+        // dd($items); // cek dulu kalau perlu
+
         $data = [
-            'role' => $this->role,
+            'role'  => $this->role,
             'active' => $this->active,
             'title' => "Out Celup",
-            'bon' => $bonData,
-            'item' => $items
-
+            'bon'   => $bonData,
+            'item'  => $items,
         ];
-        // dd($data);
+
         return view($this->role . '/out/editBon', $data);
     }
 

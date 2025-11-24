@@ -1,6 +1,11 @@
 <?php $this->extend($role . '/out/header'); ?>
 <?php $this->section('content'); ?>
 <style>
+    .disabled-btn {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     @media (min-width: 992px) {
         .modal-dialog-custom {
             max-width: 90%;
@@ -141,7 +146,7 @@
             let id_bon = $(this).data("id");
             let idCelup = $(this).data("id-celup");
             console.log(idCelup);
-            // Fetch data dari server
+
             $.ajax({
                 url: "<?= base_url($role . '/outCelup/getDetail/') ?>" + id_bon,
                 type: "GET",
@@ -150,14 +155,18 @@
                     let detailBody = $("#detailModalBody");
                     let footerModal = $("#footerModal");
 
-                    detailBody.empty(); // Hapus isi sebelumnya
-                    footerModal.empty(); // Hapus footer sebelumnya
+                    detailBody.empty();
+                    footerModal.empty();
 
                     if (data.error) {
-                        detailBody.html(`<tr><td colspan="11" class="text-center">${data.error}</td></tr>`);
+                        detailBody.html(
+                            `<tr><td colspan="11" class="text-center">${data.error}</td></tr>`
+                        );
                     } else {
+                        // ====== 1. Render detail baris ======
                         $.each(data, function(index, item) {
                             let gantiReturText = item.ganti_retur == 1 ? "Ya" : "Tidak";
+
                             detailBody.append(`
                             <tr>
                                 <td class="text-center">${item.no_model}</td>
@@ -174,16 +183,41 @@
                             </tr>
                         `);
                         });
+
+                        // ====== 2. Cek apakah ada pemasukan ======
+                        // kalau salah satu item sudah_pemasukan = true, maka delete di-disable
+                        let adaPemasukan = false;
+                        $.each(data, function(i, item) {
+                            if (item.sudah_pemasukan) {
+                                adaPemasukan = true;
+                                return false; // break
+                            }
+                        });
+
+                        // Siapkan attribute untuk tombol Delete
+                        let disabledAttr = adaPemasukan ? 'disabled' : '';
+                        let titleAttr = adaPemasukan ?
+                            'title="Tidak bisa dihapus karena sudah ada pemasukan"' :
+                            '';
+
+                        // ====== 3. Tambahkan tombol footer ======
+                        footerModal.append(`
+                        <a type="button" 
+                           href="<?= base_url($role . '/outCelup/editBon/') ?>${id_bon}" 
+                           class="btn btn-warning btn-edit me-2">
+                            Edit
+                        </a>
+                        <button type="button" 
+                                class="btn btn-danger btn-delete" 
+                                data-id="${id_bon}" 
+                                data-id-celup="${idCelup}"
+                                ${disabledAttr}
+                                ${titleAttr}>
+                            Delete
+                        </button>
+                    `);
                     }
 
-                    // Tambahkan tombol edit dan delete ke footer modal
-                    footerModal.append(`
-                    <a type="button" href="<?= base_url($role . '/outCelup/editBon/') ?>${id_bon}" 
-                        class="btn btn-warning btn-edit me-2">Edit</a>
-                    <button type="button" class="btn btn-danger btn-delete" data-id="${id_bon}" data-id-celup="${idCelup}">Delete</button>
-                `);
-
-                    // Menampilkan modal setelah data di-load
                     $("#detailModal").modal("show");
                 },
                 error: function(xhr, status, error) {
@@ -193,6 +227,7 @@
             });
         });
     });
+
 
     // Event listener untuk tombol delete (AJAX DELETE)
     $(document).on("click", ".btn-delete", function() {

@@ -577,7 +577,7 @@ class WarehouseController extends BaseController
                 }
                 // dd($JsonData);
                 // send data to ERP
-                $url = 'http://172.23.44.21/ERP/UpdateStockErp';
+                // $url = 'http://172.23.44.21/ERP/UpdateStockErp';
 
                 session()->setFlashdata('success', 'Data berhasil dimasukkan.');
             }
