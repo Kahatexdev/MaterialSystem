@@ -718,6 +718,14 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="lotSelect" class="form-label">Pilih Lot</label>
+                                <select id="lotSelect" name="lot" class="form-select mb-3">
+                                    <option value="">-- Pilih Lot --</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="row" id="formDetailPinjamOrder"></div>
                     `;
 
@@ -756,10 +764,59 @@
                                 }));
                         });
 
+                        // On change cluster -> load LOT
+                        $('#clusterSelect').on('change', function() {
+                            const cluster = $(this).val();
+                            const sel = $('#noModelSelect').find('option:selected');
+                            const nm = sel.val();
+                            const itemTypePinjam = sel.data('item_type');
+                            const kodeWarnaPinjam = sel.data('kode_warna');
+
+                            if (!cluster) {
+                                $('#lotSelect').html('<option value="">-- Pilih Lot --</option>');
+                                return;
+                            }
+
+                            fetch(`<?= base_url('/gbn/pinjamOrder/getLot') ?>?no_model=${encodeURIComponent(nm)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}&cluster=${encodeURIComponent(cluster)}`)
+                                .then(r => r.json())
+                                .then(lots => {
+                                    let opts = '<option value="">-- Pilih Lot --</option>';
+
+                                    if (Array.isArray(lots) && lots.length) {
+
+                                        // Untuk menghindari duplikat lot
+                                        let lotList = [];
+
+                                        lots.forEach(row => {
+                                            if (row.lot_awal && !lotList.includes(row.lot_awal)) {
+                                                lotList.push(row.lot_awal);
+                                            }
+                                            if (row.lot_stock && !lotList.includes(row.lot_stock)) {
+                                                lotList.push(row.lot_stock);
+                                            }
+                                        });
+
+                                        // Render ke option
+                                        lotList.forEach(l => {
+                                            opts += `<option value="${l}">${l}</option>`;
+                                        });
+                                    }
+
+                                    $('#lotSelect').html(opts);
+                                })
+                                .catch(() => Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Gagal mengambil data lot.'
+                                }));
+                        });
+
                         // Load detail per cluster
                         function loadDetailPinjamOrder() {
                             const nm = $('#noModelSelect').val();
                             const cl = $('#clusterSelect').val();
+                            const lot = $('#lotSelect').val();
+                            console.log('Lot:', lot);
                             const sel = $('#noModelSelect option:selected');
                             const itemTypePinjam = sel.data('item_type');
                             const kodeWarnaPinjam = sel.data('kode_warna');
@@ -767,60 +824,63 @@
 
                             const target = document.getElementById('formDetailPinjamOrder');
                             target.innerHTML = '';
-                            if (!nm || !cl) return;
-
-                            fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?no_model=${encodeURIComponent(nm)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}&cluster=${encodeURIComponent(cl)}`)
-                                .then(r => r.json())
+                            if (!nm || !cl || !lot) return;
+                            fetch(`<?= base_url('/gbn/pemasukan/getDataByLot') ?>?no_model=${encodeURIComponent(nm)}&item_type=${encodeURIComponent(itemTypePinjam)}&kode_warna=${encodeURIComponent(kodeWarnaPinjam)}&cluster=${encodeURIComponent(cl)}&lot=${encodeURIComponent(lot)}`)
+                                .then(r => r.text())
+                                .then(t => {
+                                    console.log("RAW RESPONSE:", t);
+                                    return JSON.parse(t); // karena kita sudah ambil raw
+                                })
                                 .then(d => {
                                     target.innerHTML = '';
                                     if (Array.isArray(d) && d.length) {
                                         d.forEach(it => {
                                             const html = `
-                                            <div class="card mb-2">
-                                                <div class="card-body">
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <h5><strong>Pinjam Per Karung</strong></h5>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${it.id_pemasukan}" id="pemasukan_${it.id_pemasukan}">
-                                                                <label class="form-check-label" for="pemasukan_${it.id_pemasukan}">
-                                                                    <strong>No Karung:</strong> ${it.no_karung}<br>
-                                                                    <strong>Tanggal Masuk:</strong> ${it.tgl_masuk}<br>
-                                                                    <strong>Cluster:</strong> ${it.nama_cluster}<br>
-                                                                    <strong>PDK:</strong> ${it.no_model}<br>
-                                                                    <strong>Item Type:</strong> ${it.item_type}<br>
-                                                                    <strong>Kode Warna:</strong> ${it.kode_warna}<br>
-                                                                    <strong>Warna:</strong> ${it.warna}<br>
-                                                                    <strong>Lot Celup:</strong> ${it.lot_kirim}<br>
-                                                                    <strong>Total Kg:</strong> ${it.kgs_kirim} KG<br>
-                                                                    <strong>Total Cones:</strong> ${it.cones_kirim} CNS
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <h5><strong>Pinjam Per Kones</strong></h5>
-                                                            <div class="row gx-2">
-                                                                <div class="col-6">
-                                                                    <label for="kgs_out_${it.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
-                                                                    <input type="number" step="0.01" max="${it.kgs_kirim}" min=0 class="form-control form-control-sm"
-                                                                           name="kgs_out[${it.id_pemasukan}]" id="kgs_out_${it.id_pemasukan}" placeholder="Kg" disabled>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <label for="cns_out_${it.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
-                                                                    <input type="number" step="1" max="${it.cones_kirim}" min=0 class="form-control form-control-sm"
-                                                                           name="cns_out[${it.id_pemasukan}]" id="cns_out_${it.id_pemasukan}" placeholder="CNS" disabled>
-                                                                </div>
-                                                            </div>
-                                                            <div class="mt-2">
-                                                                <label for="keterangan_${it.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
-                                                                <textarea class="form-control form-control-sm" name="keterangan[${it.id_pemasukan}]"
-                                                                          id="keterangan_${it.id_pemasukan}" rows="3" placeholder="Masukkan keterangan…" disabled></textarea>
-                                                            </div>
-                                                            <input type="hidden" name="keterangan_pinjam[${it.id_pemasukan}]" id="keterangan_pinjam_${it.id_pemasukan}"
+                                        <div class="card mb-2">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h5><strong>Pinjam Per Karung</strong></h5>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="id_pemasukan[]" value="${it.id_pemasukan}" id="pemasukan_${it.id_pemasukan}">
+                                                            <label class="form-check-label" for="pemasukan_${it.id_pemasukan}">
+                                                                <strong>No Karung:</strong> ${it.no_karung}<br>
+                                                                <strong>Tanggal Masuk:</strong> ${it.tgl_masuk}<br>
+                                                                <strong>Cluster:</strong> ${it.nama_cluster}<br>
+                                                                <strong>PDK:</strong> ${it.no_model}<br>
+                                                                <strong>Item Type:</strong> ${it.item_type}<br>
+                                                                <strong>Kode Warna:</strong> ${it.kode_warna}<br>
+                                                                <strong>Warna:</strong> ${it.warna}<br>
+                                                                <strong>Lot Celup:</strong> ${it.lot_kirim}<br>
+                                                                <strong>Total Kg:</strong> ${it.kgs_kirim} KG<br>
+                                                                <strong>Total Cones:</strong> ${it.cones_kirim} CNS
+                                                            </label>
                                                         </div>
                                                     </div>
+                                                    <div class="col-md-6">
+                                                        <h5><strong>Pinjam Per Kones</strong></h5>
+                                                        <div class="row gx-2">
+                                                            <div class="col-6">
+                                                                <label for="kgs_out_${it.id_pemasukan}" class="form-label small mb-1">Kg Out Manual</label>
+                                                                <input type="number" step="0.01" max="${it.kgs_kirim}" min=0 class="form-control form-control-sm"
+                                                                        name="kgs_out[${it.id_pemasukan}]" id="kgs_out_${it.id_pemasukan}" placeholder="Kg" disabled>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label for="cns_out_${it.id_pemasukan}" class="form-label small mb-1">Cones Out Manual</label>
+                                                                <input type="number" step="1" max="${it.cones_kirim}" min=0 class="form-control form-control-sm"
+                                                                        name="cns_out[${it.id_pemasukan}]" id="cns_out_${it.id_pemasukan}" placeholder="CNS" disabled>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <label for="keterangan_${it.id_pemasukan}" class="form-label small">Keterangan Pengeluaran</label>
+                                                            <textarea class="form-control form-control-sm" name="keterangan[${it.id_pemasukan}]"
+                                                                        id="keterangan_${it.id_pemasukan}" rows="3" placeholder="Masukkan keterangan…" disabled></textarea>
+                                                        </div>
+                                                        <input type="hidden" name="keterangan_pinjam[${it.id_pemasukan}]" id="keterangan_pinjam_${it.id_pemasukan}">
+                                                    </div>
                                                 </div>
-                                            </div>`;
+                                            </div>
+                                        </div>`;
                                             target.insertAdjacentHTML('beforeend', html);
                                         });
                                     } else {
@@ -860,7 +920,7 @@
                             }
                         });
 
-                        $('#clusterSelect').on('change', loadDetailPinjamOrder);
+                        $('#lotSelect').on('change', loadDetailPinjamOrder);
 
                         new bootstrap.Modal(document.getElementById('pinjamOrderModal')).show();
                     })
