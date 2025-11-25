@@ -93,6 +93,10 @@
         background: #14b8a6 !important;
     }
 
+    .role-covering {
+        background: #fb7185 !important;
+    }
+
     .meta-time {
         color: var(--text-muted);
         font-size: .875rem;
