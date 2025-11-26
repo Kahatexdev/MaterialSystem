@@ -738,4 +738,20 @@ class StockModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getLotPinjamOrder($noModel, $item_type, $kode_warna, $cluster)
+    {
+        return $this->select('stock.lot_awal, stock.lot_stock, stock.nama_cluster')
+            ->join('pemasukan', 'pemasukan.id_stock=stock.id_stock')
+            ->where('stock.no_model', $noModel)
+            ->where('stock.item_type', $item_type)
+            ->where('stock.kode_warna', $kode_warna)
+            ->where('stock.nama_cluster', $cluster)
+            ->groupStart() // <-- Mulai grup untuk OR
+            ->where('stock.kgs_stock_awal >', 0)
+            ->orWhere('stock.kgs_in_out >', 0)
+            ->groupEnd()   // <-- Tutup grup
+            ->groupBy('stock.id_stock')
+            ->findAll();
+    }
 }

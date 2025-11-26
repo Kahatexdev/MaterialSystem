@@ -93,6 +93,10 @@
         background: #14b8a6 !important;
     }
 
+    .role-covering {
+        background: #fb7185 !important;
+    }
+
     .meta-time {
         color: var(--text-muted);
         font-size: .875rem;
@@ -243,6 +247,7 @@
                         <option value="gbn">GBN</option>
                         <option value="sudo">Monitoring Planning & Produksi</option>
                         <option value="monitoring">Monitoring Bahan Baku</option>
+                        <option value="covering">Covering</option>
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
@@ -432,6 +437,7 @@
                         <option value="celup">Celup Cones</option>
                         <option value="sudo">Monitoring Planning & Produksi</option>
                         <option value="monitoring">Monitoring Bahan Baku</option>
+                        <option value="covering">Covering</option>
                     </select>
                 </div>
 

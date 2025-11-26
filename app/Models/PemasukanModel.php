@@ -321,6 +321,42 @@ class PemasukanModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getDataByLot($data)
+    {
+        return
+            $this->select('
+                COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) AS no_model,
+                COALESCE(retur.item_type, other_bon.item_type, stock.item_type) AS item_type,
+                COALESCE(retur.kode_warna, other_bon.kode_warna, stock.kode_warna) AS kode_warna,
+                COALESCE(retur.warna, other_bon.warna, stock.warna) AS warna,
+                pemasukan.*,
+                out_celup.no_karung, 
+                out_celup.lot_kirim, out_celup.kgs_kirim, out_celup.cones_kirim,
+                stock.nama_cluster AS cluster_real
+                ')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('retur', 'retur.id_retur = out_celup.id_retur', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left') // tambahkan join
+            ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
+            ->where('stock.nama_cluster', $data['cluster'])
+            ->groupStart()
+            ->where('stock.lot_awal', $data['lot'])
+            ->orWhere('stock.lot_stock', $data['lot'])
+            ->groupEnd()
+            ->where('pemasukan.out_jalur', '0')
+            ->where("COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
+            ->where("COALESCE(retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
+            ->where("COALESCE(retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
+            // ->where("COALESCE(retur.lot_retur, stock.lot_awal, stock.lot_stock, stock.lot_kirim) = ", $data['lot'])
+            // ->orWhere('stock.kgs_in_out >', 0)
+            // ->orWhere('stock.kgs_stock_awal >', 0)
+            ->groupBy('out_celup.id_out_celup')
+            ->get()
+            ->getResultArray();
+    }
+
     public function getDataInput($idPemasukan)
     {
         return $this->select('pemasukan.*, out_celup.no_karung, out_celup.lot_kirim')

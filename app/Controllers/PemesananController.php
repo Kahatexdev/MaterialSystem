@@ -2113,6 +2113,63 @@ class PemesananController extends BaseController
         return $this->response->setJSON($data);
     }
 
+    public function getDataByLot()
+    {
+        $dataRaw = $this->request->getGet();
+        log_message('debug', 'ini data cluster : ' . json_encode($dataRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+        // normalize $data (trim + bersihkan whitespace aneh + samakan slash)
+        $data = array_map(static function ($v) {
+            if (!is_string($v)) return $v;
+            // hapus zero-width & BOM
+            $v = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $v);
+            // ganti NBSP dan full-width slash -> normal
+            $v = str_replace(["\xC2\xA0", "／"], [' ', '/'], $v);
+            // trim unicode-safe
+            $v = preg_replace('/^\s+|\s+$/u', '', $v);
+            return $v;
+        }, $dataRaw);
+
+        log_message('debug', 'ini trim data : ' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+        $stock = $this->pemasukanModel->getDataByLot($data);
+        log_message('debug', 'ini : ' . json_encode($stock));
+
+        $output = [];
+        foreach ($stock as $dt) {
+            $other = $this->otherOutModel->getQty($dt['id_out_celup'], $dt['nama_cluster']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($dt['id_out_celup']);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($dt['id_out_celup']);
+            $returCelup = $this->historyStock->getKgsReturCelup($dt['id_out_celup']);
+            $sisaKg  = round($dt['kgs_kirim'] - ($other['kgs_other_out'] ?? 0) - ($outByCns['kgs_out'] ?? 0) - ((float) $pindahOrder['kgs_pindah_order'] ?? 0) - ((float) $returCelup['kgs_retur_celup'] ?? 0), 2);
+            $sisaCns = (int)$dt['cones_kirim'] - (int)($other['cns_other_out'] ?? 0) - (int)($outByCns['cns_out'] ?? 0) - ((int) $pindahOrder['cns_pindah_order'] ?? 0) - ((int) $returCelup['cns_retur_celup'] ?? 0);
+            // log_message('info', "ini sisaKg $sisaKg, sisaCns $sisaCns");
+            if ($sisaKg <= 0 && $sisaCns <= 0) {
+                // lewati baris ini; tidak layak tampil
+                continue;
+            }
+
+            $output[] = [
+                'id_pemasukan' => $dt['id_pemasukan'],
+                'no_karung' => $dt['no_karung'],
+                'tgl_masuk' => $dt['tgl_masuk'],
+                'nama_cluster' => $dt['cluster_real'],
+                'no_model' => $dt['no_model'],
+                'item_type' => $dt['item_type'],
+                'kode_warna' => $dt['kode_warna'],
+                'warna' => $dt['warna'],
+                'lot_kirim' => $dt['lot_kirim'],
+                'kgs_kirim' => $sisaKg,
+                'cones_kirim' => $sisaCns,
+                'id_out_celup' => $dt['id_out_celup']
+            ];
+        }
+        // Debugging
+        // dd($data);
+
+        return $this->response->setJSON($output);
+    }
+
     public function saveUsage()
     {
         $session = session();
@@ -3081,6 +3138,18 @@ class PemesananController extends BaseController
         log_message('info', 'item type :' . $itemType);
         log_message('info', 'kode warna :' . $kodeWarna);
         log_message('info', 'kode warna :' . json_encode($getData));
+        return $this->response->setJSON($getData);
+    }
+
+    public function getLotPinjamOrder()
+    {
+        $noModel  = $this->request->getGet('no_model');
+        $itemType  = $this->request->getGet('item_type');
+        $kodeWarna = $this->request->getGet('kode_warna');
+        $cluster = $this->request->getGet('cluster');
+
+        $getData = $this->stockModel->getLotPinjamOrder($noModel, $itemType, $kodeWarna, $cluster);
+        log_message('info', 'get data lot :' . json_encode($getData));
         return $this->response->setJSON($getData);
     }
 
