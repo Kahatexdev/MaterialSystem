@@ -146,7 +146,7 @@ class PoManualController extends BaseController
                 'contoh_warna'        => $post['contoh_warna']      ?? null,
                 'penerima'            => $post['penerima']          ?? null,
                 'penanggung_jawab'    => $post['penanggung_jawab']  ?? null,
-                'po_plus'             => '0',
+                'po_plus'             => $post['po_plus']  ?? null,
                 'po_Booking'          => '0',
                 'po_manual'           => '1',
                 'admin'               => session()->get('username'),

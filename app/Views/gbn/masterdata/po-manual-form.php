@@ -204,6 +204,31 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="">Po Tambahan</label>
+                            <select class="form-control" name="po_plus" required>
+                                <option value="">Pilih</option>
+                                <option value="1">YA</option>
+                                <option value="0">TIDAK</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Penerima</label>
+                            <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Penanggung Jawab</label>
+                            <select class="form-control" name="penanggung_jawab" required>
+                                <option value="">Pilih</option>
+                                <option value="Hartanto">Hartanto</option>
+                                <option value="Megah">Megah</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -215,23 +240,6 @@
                         <div class="form-group">
                             <label for="exampleFormControlInput1">Keterangan Celup</label>
                             <textarea class="form-control" name="ket_celup" id="ket_celup"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Penerima</label>
-                            <input type="text" class="form-control" id="penerima" name="penerima" readonly required>
-                        </div>
-                        <div class="col-md-6">
-                            <label>Penanggung Jawab</label>
-                            <select class="form-control" name="penanggung_jawab" required>
-                                <option value="">Pilih</option>
-                                <option value="Hartanto">Hartanto</option>
-                                <option value="Megah">Megah</option>
-                            </select>
                         </div>
                     </div>
                 </div>
