@@ -144,6 +144,7 @@ class MasterOrderModel extends Model
     {
         return $this->select('id_order')
             ->where('no_model', $noModel)
+            ->where('no_order <>', '-')
             ->first();
     }
 
