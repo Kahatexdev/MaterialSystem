@@ -145,8 +145,8 @@ class ScheduleController extends BaseController
                 $modelAnakPoGabung = $this->openPoModel->getNoModelAnakDariPoGabung($item['no_model']);
                 $delivPoGabung = $this->openPoModel->getDelivPoGabungan($modelAnakPoGabung);
 
-                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
-                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'] ?? '';
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'] ?? '';
             } else {
                 // Ada induk: ambil no_model induk terlebih dahulu
                 $parentPo = $this->openPoModel
@@ -622,8 +622,8 @@ class ScheduleController extends BaseController
                 $modelAnakPoGabung = $this->openPoModel->getNoModelAnakDariPoGabung($item['no_model']);
                 $delivPoGabung = $this->openPoModel->getDelivPoGabungan($modelAnakPoGabung);
 
-                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'];
-                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'];
+                $item['delivery_awal']  = $masterOrder['delivery_awal'] ?? $delivPoGabung['delivery_awal'] ?? '';
+                $item['delivery_akhir'] = $masterOrder['delivery_akhir'] ?? $delivPoGabung['delivery_akhir'] ?? '';
             } else {
                 // Ada induk: ambil no_model induk terlebih dahulu
                 $parentPo = $this->openPoModel

@@ -389,11 +389,11 @@ $this->extend($role . '/schedule/header'); ?>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="delivery_awal" class="form-label">Delivery Awal</label>
-                                    <input type="date" class="form-control" id="delivery_awal" value="${item.delivery_awal}" readonly>
+                                    <input type="date" class="form-control" id="delivery_awal" value="${item.delivery_awal || ''}" readonly>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="delivery_akhir" class="form-label">Delivery Akhir</label>
-                                    <input type="date" class="form-control" id="delivery_akhir" value="${item.delivery_akhir}" readonly>
+                                    <input type="date" class="form-control" id="delivery_akhir" value="${item.delivery_akhir || ''}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
