@@ -173,6 +173,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->post('pemasukan', 'WarehouseController::pemasukan');
     $routes->get('pemasukan/getDataByIdStok/(:any)', 'PemesananController::getDataByIdStok/$1');
     $routes->get('pemasukan/getDataByCluster', 'PemesananController::getDataByCluster');
+    $routes->get('pemasukan/getDataByLot', 'PemesananController::getDataByLot');
     $routes->post('reset_pemasukan', 'WarehouseController::reset_pemasukan');
     $routes->post('hapus_pemasukan', 'WarehouseController::hapusListPemasukan');
     $routes->post('proses_pemasukan', 'WarehouseController::prosesPemasukan');
@@ -314,6 +315,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pinjamOrder/options', 'PemesananController::optionsPinjamOrder');
     $routes->get('pinjamOrder/getNoModel', 'PemesananController::getNoModelPinjamOrder');
     $routes->get('pinjamOrder/getCluster', 'PemesananController::getClusterPinjamOrder');
+    $routes->get('pinjamOrder/getLot', 'PemesananController::getLotPinjamOrder');
     // $routes->get('pinjamOrder/detail', 'PemesananController::detailPinjamOrder');
     // $routes->get('pinjamOrder/options/(:segment)?', 'PemesananController::optionsPinjamOrder/$1');
     // $routes->get('pinjamOrder/options/(:any)', 'PemesananController::optionsPinjamOrder');
