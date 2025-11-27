@@ -491,7 +491,7 @@ class MaterialController extends BaseController
             $material = $this->materialModel->getMaterialForPPH($noModel);
 
             //
-            $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getQtyOrderPerArea?model=' . urlencode($noModel);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrderPerArea?model=' . urlencode($noModel);
             // $order = $this->ApsPerstyleModel->getQtyArea($noModel) ?: [];
 
             $orders = @file_get_contents($apiUrl);
