@@ -8,47 +8,20 @@ use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\MasterOrderModel;
-use App\Models\MaterialModel;
-use App\Models\MasterMaterialModel;
-use App\Models\OpenPoModel;
 use App\Models\EstimasiStokModel;
 use App\Models\MasterMaterialTypeModel;
-use App\Models\StockModel;
-use App\Models\TrackingPoCovering;
-use App\Models\PoTambahanModel;
-use App\Models\ScheduleCelupModel;
 
 class MasterdataController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $request;
-    protected $masterOrderModel;
-    protected $materialModel;
-    protected $masterMaterialModel;
-    protected $estimasiStokModel;
-    protected $openPoModel;
-    protected $stockModel;
-    protected $trackingPoCoveringModel;
-    protected $poTambahanModel;
-    protected $scheduleCelupModel;
-    protected $masterMaterialTypeModel;
 
+    protected $masterMaterialTypeModel;
+    protected $estimasiStokModel;
     public function __construct()
     {
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->materialModel = new MaterialModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->estimasiStokModel = new EstimasiStokModel();
-        $this->openPoModel = new OpenPoModel();
-        $this->stockModel = new StockModel();
-        $this->trackingPoCoveringModel = new TrackingPoCovering();
-        $this->poTambahanModel = new PoTambahanModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
-        $this->masterMaterialTypeModel = new MasterMaterialTypeModel();
 
+
+        $this->masterMaterialTypeModel = new MasterMaterialTypeModel();
+        $this->estimasiStokModel = new EstimasiStokModel();
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -361,7 +334,7 @@ class MasterdataController extends BaseController
         $style_size_encoded = str_replace(' ', '%20', $style_size);
         $param = $no_model . '/' . $style_size_encoded;
 
-        $url = 'http://172.23.44.14/CapacityApps/public/api/orderMaterial/' . $param;
+        $url = api_url('capacity') . 'orderMaterial/' . $param;
 
         try {
             $json = @file_get_contents($url);

@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\MasterBuyerModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class MasterBuyerController extends BaseController
@@ -12,11 +11,9 @@ class MasterBuyerController extends BaseController
     protected $active;
     protected $filters;
     protected $request;
-    protected $masterBuyerModel;
 
     public function __construct()
     {
-        $this->masterBuyerModel = new MasterBuyerModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');

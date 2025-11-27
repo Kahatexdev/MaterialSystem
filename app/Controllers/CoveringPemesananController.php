@@ -4,38 +4,13 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\MasterMaterialModel;
-use App\Models\PemesananModel;
-use App\Models\PemesananSpandexKaretModel;
-use App\Models\CoveringStockModel;
-use App\Models\HistoryStockCoveringModel;
-use App\Models\PengeluaranModel;
-use App\Models\TrackingPoCovering;
 
 class CoveringPemesananController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $request;
-    protected $masterMaterialModel;
-    protected $pemesananModel;
-    protected $pemesananSpandexKaretModel;
-    protected $coveringStockModel;
-    protected $historyCoveringStockModel;
-    protected $pengeluaranModel;
-    protected $trackingPoCoveringModel;
+
 
     public function __construct()
     {
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->pemesananModel = new PemesananModel();
-        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
-        $this->coveringStockModel = new CoveringStockModel();
-        $this->historyCoveringStockModel = new HistoryStockCoveringModel();
-        $this->pengeluaranModel = new PengeluaranModel();
-        $this->trackingPoCoveringModel = new TrackingPoCovering();
-
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['covering']] != session()->get('role')) {
@@ -419,7 +394,7 @@ class CoveringPemesananController extends BaseController
             ->select('id_total_pemesanan')
             ->where('id_psk', $id_psk)
             ->first();
-            // dd ($total);
+        // dd ($total);
         if (!$total) {
             return redirect()->back()->with('error', 'ID Total Pemesanan tidak ditemukan.');
         }
@@ -448,7 +423,7 @@ class CoveringPemesananController extends BaseController
             ->select('id_pengeluaran')
             ->where('id_psk', $id_psk)
             ->first();
-            // dd ($pengeluaran);
+        // dd ($pengeluaran);
         if (!$pengeluaran) {
             return redirect()->back()->with('error', 'ID Pengeluaran tidak ditemukan.');
         }
@@ -456,7 +431,7 @@ class CoveringPemesananController extends BaseController
             ->select('admin')
             ->where('id_total_pemesanan', $total['id_total_pemesanan'])
             ->first();
-            // dd ($areaOut);
+        // dd ($areaOut);
         $this->pengeluaranModel->update($pengeluaran['id_pengeluaran'], [
             'area_out' => $areaOut['admin'] ?? '',
             'tgl_out' => date('Y-m-d'),
@@ -522,7 +497,7 @@ class CoveringPemesananController extends BaseController
         foreach ($rows as $r) {
             $pskMap[$r['id_psk']] = $r;
         }
-        
+
         // Ambil pengeluaran yang SUDAH ADA untuk id_psk yang dipilih
         $existing = $this->pengeluaranModel
             ->select('id_pengeluaran,id_psk,status')

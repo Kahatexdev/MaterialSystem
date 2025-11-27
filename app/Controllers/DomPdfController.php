@@ -5,8 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Libraries\DompdfService;
-use App\Models\BonCelupModel;
-use App\Models\OutCelupModel;
+
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Dompdf\Options;
 
@@ -15,14 +14,9 @@ class DomPdfController extends BaseController
     protected $role;
     protected $active;
     protected $filters;
-    protected $bonCelupModel;
-    protected $outCelupModel;
 
     public function __construct()
     {
-        $this->bonCelupModel = new BonCelupModel();
-        $this->outCelupModel = new OutCelupModel();
-
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {

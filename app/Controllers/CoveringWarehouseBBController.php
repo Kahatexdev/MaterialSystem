@@ -4,8 +4,6 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\WarehouseBBModel;
-use App\Models\HistoryStockBBModel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
@@ -15,15 +13,13 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class CoveringWarehouseBBController extends BaseController
 {
-    protected $warehouseBBModel;
-    protected $historyStockBBModel;
+
     protected $role;
     protected $active;
 
     public function __construct()
     {
-        $this->warehouseBBModel = new WarehouseBBModel();
-        $this->historyStockBBModel = new HistoryStockBBModel();
+
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
     }
