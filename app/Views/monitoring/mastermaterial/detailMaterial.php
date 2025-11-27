@@ -75,6 +75,7 @@
     </div>
 
     <!-- Tabel Data -->
+    <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
@@ -82,6 +83,7 @@
                     <thead>
                         <tr>
                             <th class="text-center"></th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Material NR</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Style Size</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Inisial</th>
@@ -94,6 +96,8 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Material Type</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Action</th>
                         </tr>
                     </thead>
@@ -103,6 +107,7 @@
                                 <td>
                                     <input type="checkbox" class="form-check delete-checkbox" data-id="<?= $data['id_material'] ?>">
                                 </td>
+                                <td><?= $data['material_nr'] ?></td>
                                 <td><?= $data['style_size'] ?></td>
                                 <td><?= $data['area'] ?></td>
                                 <td><?= $data['inisial'] ?></td>
@@ -115,6 +120,8 @@
                                 <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
                                 <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
+                                <td><?= $data['material_type'] ?></td>
+                                <td><?= $data['keterangan'] ?></td>
                                 <td class="d-flex justify-content-start align-items-center gap-1">
                                     <button class="btn btn-warning btn-xs btn-edit" data-id="<?= $data['id_material'] ?>">
                                         <i class="fas fa-edit"></i>
@@ -167,6 +174,24 @@
                             </div>
 
                             <div class="mb-3">
+                                <label for="st" class="form-label">Material Nr:</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <?php foreach ($materialNr as $mn): ?>
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                type="radio"
+                                                name="material_nr"
+                                                value="<?= $mn['material_nr'] ?>"
+                                                id="mn_<?= $mn['material_nr'] ?>">
+                                            <label class="form-check-label" for="mn_<?= $mn['material_nr'] ?>">
+                                                <?= esc($mn['material_nr']) ?>
+                                            </label>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="area" class="form-label">Area</label>
                                 <select class="form-control" name="area" id="add_area">
                                     <option value="">Pilih Area</option>
@@ -184,6 +209,9 @@
                                     <option value="KK9">KK9</option>
                                     <option value="KK10">KK10</option>
                                     <option value="KK11M">KK11M</option>
+                                    <option value="Gedung 1">Gedung 1</option>
+                                    <option value="Gedung 2">Gedung 2</option>
+                                    <option value="MJ">MJ</option>
                                     <option value="Belum Ada Area">Belum Ada Area</option>
                                 </select>
                             </div>
@@ -239,6 +267,11 @@
                                     <label for="qty_pcs" class="form-label">Kgs</label>
                                     <input type="number" step="0.01" class="form-control" id="add_kgs" name="kgs" required>
                                 </div>
+
+                                <div class="col-3">
+                                    <label for="keterangan" class="form-label">Keterangan</label>
+                                    <textarea name="keterangan" id="add_keterangan" class="form-control" rows="2"></textarea>
+                                </div>
                             </div>
 
                             <div class="modal-footer">
@@ -264,6 +297,11 @@
                             <input type="hidden" name="id_material" id="id_material">
                             <input type="hidden" name="id_order" id="id_order">
                             <div class="mb-3">
+                                <label for="material_nr" class="form-label">Material Nr</label>
+                                <input type="text" class="form-control" id="material_nr" name="material_nr" required>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="style_size" class="form-label">Style Size</label>
                                 <input type="text" class="form-control" id="style_size" name="style_size" required>
                             </div>
@@ -283,10 +321,12 @@
                                 <input type="text" class="form-control" id="color" name="color" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="item_type" class="form-label">Item Type</label>
-                                <input type="text" class="form-control" id="item_type" name="item_type" required>
-                            </div>
+                            <select class="" id="item_type" name="item_type" required>
+                                <option value="">Pilih Item Type</option>
+                                <?php foreach ($itemType as $item): ?>
+                                    <option value="<?= $item['item_type'] ?>"><?= $item['item_type'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
 
                             <div class="mb-3">
                                 <label for="kode_warna" class="form-label">Kode Warna</label>
@@ -321,6 +361,11 @@
                             <div class="mb-3">
                                 <label for="kgs" class="form-label">Kgs</label>
                                 <input type="number" step="0.01" class="form-control" id="kgs" name="kgs" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="keterangan" class="form-label">Keterangan</label>
+                                <textarea class="form-control" id="keterangan" name="keterangan" rows="2"></textarea>
                             </div>
                             <!-- Button update dan batal di sebelah kanan -->
                             <div class="modal-footer">
@@ -607,7 +652,22 @@
             });
         });
     });
-
+    $(document).ready(function() {
+        $('#materialTypeModal').on('shown.bs.modal', function() {
+            $('#itemTypeByIdOrder').select2({
+                dropdownParent: $('#materialTypeModal'),
+                width: '100%',
+            });
+        });
+    });
+    $(document).ready(function() {
+            $('#updateModal').on('shown.bs.modal', function() {
+                $('#item_type').select2({
+                    dropdownParent: $('#updateModal'),
+                    width: '100%',
+                });
+            });
+        });
     $(document).ready(function() {
         $('#dataTable').DataTable({
             "pageLength": 35,
@@ -629,6 +689,7 @@
                     // Isi data ke dalam form modal
                     $('#id_material').val(response.id_material);
                     $('#id_order').val(response.id_order);
+                    $('#material_nr').val(response.material_nr);
                     $('#style_size').val(response.style_size);
                     $('#area').val(response.area);
                     $('#inisial').val(response.inisial);
@@ -641,6 +702,7 @@
                     $('#qty_pcs').val(response.qty_pcs);
                     $('#loss').val(response.loss);
                     $('#kgs').val(response.kgs);
+                    $('#keterangan').val(response.keterangan);
                     // Show modal dialog
                     $('#updateModal').modal('show');
                 },
