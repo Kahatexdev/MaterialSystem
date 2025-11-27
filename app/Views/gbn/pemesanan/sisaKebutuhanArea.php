@@ -379,7 +379,7 @@
             const urlAreaByPemesanan = "<?= base_url($role . '/pemesanan/getFilterByPemesanan?no_model=') ?>" + encodeURIComponent(noModel);
 
             const [resApi, resPemesanan] = await Promise.all([
-                fetch(`http://172.23.44.14/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`),
+                fetch(`http://172.23.39.117/CapacityApps/public/api/getFilterArea?no_model=${encodeURIComponent(noModel)}`),
                 fetch(urlAreaByPemesanan, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'

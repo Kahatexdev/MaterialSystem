@@ -13,6 +13,17 @@
             });
         </script>
     <?php endif; ?>
+    <?php if (session()->getFlashdata('warning')) : ?>
+        <script>
+            $(document).ready(function() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning!',
+                    html: '<?= session()->getFlashdata('warning') ?>',
+                });
+            });
+        </script>
+    <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')) : ?>
         <script>
@@ -24,27 +35,6 @@
                 });
             });
         </script>
-    <?php endif; ?>
-    <?php if (session()->getFlashdata('invalid_material')): ?>
-        <div class="alert alert-warning">
-            <strong>Beberapa data gagal diimport:</strong>
-            <table class="table table-bordered mt-2">
-                <thead>
-                    <tr>
-                        <th>Baris</th>
-                        <th>Alasan Gagal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach (session()->getFlashdata('invalid_material') as $invalid): ?>
-                        <tr>
-                            <td><?= esc($invalid['row']) ?></td>
-                            <td><?= esc($invalid['reason']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
     <?php endif; ?>
     <div class="modal fade" id="modalPoNylon" tabindex="-1" aria-labelledby="modalPoNylonLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -104,21 +94,28 @@
                 </div>
                 <form action="import/mu" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
+
+                        <!-- Input File -->
+                        <div class="">
+                            <label for="" class="form-label">Jarum</label>
+                            <input type="text" class="form-control" name="jarum">
+                        </div>
                         <div class="mb-3">
                             <label for="excelFile" class="form-label">Pilih File Excel</label>
                             <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx, .xls, .csv" required>
                             <small class="text-muted">Hanya file dengan format .xlsx, .xls, atau .csv yang didukung.</small>
                         </div>
+
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-info">Upload</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
     <!-- Modal untuk Revise MU -->
     <div class="modal fade" id="reviseModal" tabindex="-1" aria-labelledby="reviseModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -165,7 +162,6 @@
         </div>
     </div>
 
-
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
@@ -177,12 +173,16 @@
                             <th>LCO Date</th>
                             <th>No Model</th>
                             <th>No Order</th>
+                            <th>Jarum</th>
                             <th>Buyer</th>
                             <th>Memo</th>
+                            <th>Start Mc</th>
                             <th>Delivery Awal</th>
                             <th>Delivery Akhir</th>
                             <th>Unit</th>
-                            <th>Admin</th>
+                            <th>Area</th>
+                            <th>Tanggal Buka PO</th>
+                            <th>Tanggal Import</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -196,6 +196,7 @@
             <div id="no-data-message" class="text-center mt-4 d-none">
                 <p>No data available in the table.</p>
             </div>
+
         </div>
     </div>
 
@@ -257,140 +258,155 @@
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "pageLength": 10,
-                "ajax": {
-                    "url": "<?= base_url($role . '/getMasterData') ?>",
-                    "type": "POST"
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#dataTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "pageLength": 10,
+            "ajax": {
+                "url": "<?= base_url($role . '/getMasterData') ?>",
+                "type": "POST"
+            },
+            "columns": [{
+                    "data": "foll_up"
                 },
-                "columns": [{
-                        "data": "foll_up"
-                    },
-                    {
-                        "data": "lco_date"
-                    },
-                    {
-                        "data": "no_model"
-                    },
-                    {
-                        "data": "no_order"
-                    },
-                    {
-                        "data": "buyer"
-                    },
-                    {
-                        "data": "memo"
-                    },
-                    {
-                        "data": "delivery_awal"
-                    },
-                    {
-                        "data": "delivery_akhir"
-                    },
-                    {
-                        "data": "unit"
-                    },
-                    {
-                        "data": "admin"
-                    },
-                    {
-                        "data": "action",
-                        "orderable": false,
-                        "searchable": false
-                    }
-                ],
-                "language": {
-                    "emptyTable": "Data belum tersedia untuk saat ini."
+                {
+                    "data": "lco_date"
+                },
+                {
+                    "data": "no_model"
+                },
+                {
+                    "data": "no_order"
+                },
+                {
+                    "data": "jarum"
+                },
+                {
+                    "data": "buyer"
+                },
+                {
+                    "data": "memo"
+                },
+                {
+                    "data": "start_mc"
+                },
+                {
+                    "data": "delivery_awal"
+                },
+                {
+                    "data": "delivery_akhir"
+                },
+                {
+                    "data": "unit"
+                },
+                {
+                    "data": "area"
+                },
+                {
+                    "data": "tanggal_po"
+                },
+                {
+                    "data": "tanggal_import"
+                },
+                {
+                    "data": "action",
+                    "orderable": false,
+                    "searchable": false
+                }
+            ],
+            "language": {
+                "emptyTable": "Data belum tersedia untuk saat ini."
+            }
+        });
+
+
+        // Event listener untuk submit form update
+
+        $('#dataTable').on('click', '.btn-edit', function() {
+            const id = $(this).data('id');
+            console.log(id);
+
+            // Lakukan AJAX request untuk mendapatkan data
+            $.ajax({
+                url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
+                type: 'GET',
+                success: function(response) {
+                    // Isi data ke dalam form modal
+                    $('#id_order').val(response.id_order);
+                    $('#foll_up').val(response.foll_up);
+                    $('#lco_date').val(response.lco_date);
+                    $('#no_model').val(response.no_model);
+                    $('#no_order').val(response.no_order);
+                    $('#buyer').val(response.buyer);
+                    $('#memo').val(response.memo);
+                    $('#delivery_awal').val(response.delivery_awal);
+                    $('#delivery_akhir').val(response.delivery_akhir);
+                    $('#unit').val(response.unit);
+                    $('#area').val(response.area);
+
+                    // Tambahkan data lain sesuai kebutuhan
+
+                    // Tampilkan modal
+                    $('#updateModal').modal('show');
+                },
+                error: function() {
+                    alert('Gagal memuat data.');
                 }
             });
-
-            // Event listener untuk submit form update
-
-            $('#dataTable').on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-                console.log(id);
-
-                // Lakukan AJAX request untuk mendapatkan data
-                $.ajax({
-                    url: '<?= base_url($role . '/getOrderDetails') ?>/' + id,
-                    type: 'GET',
-                    success: function(response) {
-                        // Isi data ke dalam form modal
-                        $('#id_order').val(response.id_order);
-                        $('#foll_up').val(response.foll_up);
-                        $('#lco_date').val(response.lco_date);
-                        $('#no_model').val(response.no_model);
-                        $('#no_order').val(response.no_order);
-                        $('#buyer').val(response.buyer);
-                        $('#memo').val(response.memo);
-                        $('#delivery_awal').val(response.delivery_awal);
-                        $('#delivery_akhir').val(response.delivery_akhir);
-                        $('#unit').val(response.unit);
-
-                        // Tambahkan data lain sesuai kebutuhan
-
-                        // Tampilkan modal
-                        $('#updateModal').modal('show');
-                    },
-                    error: function() {
-                        alert('Gagal memuat data.');
-                    }
-                });
-            });
-
-            // Event listener untuk submit form update
-
-            // // Event listener untuk tombol delete
-            // $('#example').on('click', '.btn-delete', function() {
-            //     const id = $(this).data('id');
-            //     // Tampilkan konfirmasi
-            //     Swal.fire({
-            //         title: 'Apakah Anda yakin?',
-            //         text: "Data yang dihapus tidak dapat dikembalikan!",
-            //         icon: 'warning',
-            //         showCancelButton: true,
-            //         confirmButtonColor: '#3085d6',
-            //         cancelButtonColor: '#d33',
-            //         confirmButtonText: 'Ya, hapus!',
-            //         cancelButtonText: 'Batal'
-            //     }).then((result) => {
-            //         if (result.isConfirmed) {
-            //             // Kirim request ke server
-            //             $.ajax({
-            //                 url: '<?= base_url($role . '/deleteOrder') ?>',
-            //                 type: 'POST',
-            //                 data: {
-            //                     id: id
-            //                 },
-            //                 success: function(response) {
-            //                     // Tampilkan pesan sukses
-            //                     Swal.fire({
-            //                         icon: 'success',
-            //                         title: 'Berhasil!',
-            //                         text: response,
-            //                     });
-            //                     // Refresh tabel
-            //                     $('#example').DataTable().ajax.reload();
-            //                 },
-            //                 error: function(xhr, status, error) {
-            //                     // Tampilkan pesan error
-            //                     Swal.fire({
-            //                         icon: 'error',
-            //                         title: 'Error!',
-            //                         text: xhr.responseText,
-            //                     });
-            //                 }
-            //             });
-            //         }
-            //     });
-            // });
         });
-    </script>
 
-    <?php $this->endSection(); ?>
+        // Event listener untuk submit form update
+
+        // // Event listener untuk tombol delete
+        // $('#example').on('click', '.btn-delete', function() {
+        //     const id = $(this).data('id');
+        //     // Tampilkan konfirmasi
+        //     Swal.fire({
+        //         title: 'Apakah Anda yakin?',
+        //         text: "Data yang dihapus tidak dapat dikembalikan!",
+        //         icon: 'warning',
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Ya, hapus!',
+        //         cancelButtonText: 'Batal'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             // Kirim request ke server
+        //             $.ajax({
+        //                 url: '<?= base_url($role . '/deleteOrder') ?>',
+        //                 type: 'POST',
+        //                 data: {
+        //                     id: id
+        //                 },
+        //                 success: function(response) {
+        //                     // Tampilkan pesan sukses
+        //                     Swal.fire({
+        //                         icon: 'success',
+        //                         title: 'Berhasil!',
+        //                         text: response,
+        //                     });
+        //                     // Refresh tabel
+        //                     $('#example').DataTable().ajax.reload();
+        //                 },
+        //                 error: function(xhr, status, error) {
+        //                     // Tampilkan pesan error
+        //                     Swal.fire({
+        //                         icon: 'error',
+        //                         title: 'Error!',
+        //                         text: xhr.responseText,
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
+    });
+</script>
+
+<?php $this->endSection(); ?>
