@@ -1451,6 +1451,7 @@ class MasterdataController extends BaseController
             'kode_warna' => $this->request->getPost('kode_warna'),
             'composition' => $this->request->getPost('composition'),
             'gw' => $this->request->getPost('gw'),
+            'gw_aktual' => $this->request->getPost('gw_aktual'),
             'qty_pcs' => $this->request->getPost('qty_pcs'),
             'loss' => $this->request->getPost('loss'),
             'kgs' => $this->request->getPost('kgs'),

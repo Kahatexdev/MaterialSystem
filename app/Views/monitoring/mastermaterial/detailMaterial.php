@@ -92,6 +92,7 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Color</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Composition (%)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">GW Aktual</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty(pcs)</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kgs</th>
@@ -115,6 +116,7 @@
                                 <td><?= $data['color'] ?></td>
                                 <td><?= ($data['composition'] == 1) ? '-' : $data['composition'] . ' %' ?></td>
                                 <td><?= ($data['gw'] == 1) ? '-' : $data['gw'] ?></td>
+                                <td><?= ($data['gw_aktual'] == 1) ? '-' : $data['gw_aktual'] ?></td>
                                 <td><?= ($data['qty_pcs'] == 1) ? '-' : $data['qty_pcs'] ?></td>
                                 <td><?= ($data['loss'] == 1) ? '-' : $data['loss'] ?></td>
                                 <td><?= $data['kgs'] ?></td>
@@ -339,6 +341,11 @@
                             <div class="mb-3">
                                 <label for="gw" class="form-label">GW</label>
                                 <input type="number" step="0.01" class="form-control" id="gw" name="gw" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="gw_aktual" class="form-label">GW Aktual</label>
+                                <input type="number" step="0.01" class="form-control" id="gw_aktual" name="gw_aktual" required>
                             </div>
 
                             <div class="mb-3">
@@ -691,6 +698,7 @@
                     $('#kode_warna').val(response.kode_warna);
                     $('#composition').val(response.composition);
                     $('#gw').val(response.gw);
+                    $('#gw_aktual').val(response.gw_aktual);
                     $('#qty_pcs').val(response.qty_pcs);
                     $('#loss').val(response.loss);
                     $('#kgs').val(response.kgs);
