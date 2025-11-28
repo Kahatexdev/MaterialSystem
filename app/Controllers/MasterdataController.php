@@ -596,7 +596,7 @@ class MasterdataController extends BaseController
     private function detectHeader(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, array $aliases): array
     {
         // Scan 1..50 baris pertama untuk cari header
-        $maxScanRows = min(50, $sheet->getHighestRow());
+        $maxScanRows = min(70, $sheet->getHighestRow());
         $highestCol  = $sheet->getHighestColumn();
         $maxColIndex = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString($highestCol);
 
