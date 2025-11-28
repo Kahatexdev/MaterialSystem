@@ -260,7 +260,7 @@ class ScheduleCelupModel extends Model
 
         // sortby order by created_at DESC 
         $builder->orderBy('schedule_celup.created_at', 'DESC');
-        $builder->limit(30);
+        // $builder->limit(30);
 
         return $builder->get()->getResultArray();
     }
