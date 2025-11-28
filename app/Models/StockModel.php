@@ -600,7 +600,7 @@ class StockModel extends Model
 
     public function getNoModelPinjamOrder($noModel, $item_type, $kode_warna)
     {
-        return $this->select('no_model, item_type, kode_warna, warna, kgs_stock_awal, kgs_in_out')
+        return $this->select('no_model, item_type, kode_warna, warna, kgs_stock_awal, kgs_in_out, lot_awal, lot_stock')
             ->where('no_model !=', $noModel)
             // ->where('item_type', $item_type)
             // ->where('kode_warna', $kode_warna)
@@ -612,16 +612,37 @@ class StockModel extends Model
             ->groupBy('item_type')
             ->groupBy('kode_warna')
             ->groupBy('warna')
+            ->groupBy('id_stock')
             ->findAll();
     }
 
-    public function getClusterPinjamOrder($noModel, $item_type, $kode_warna)
+    // public function getClusterPinjamOrder($noModel, $item_type, $kode_warna)
+    // {
+    //     return $this->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(stock.kgs_stock_awal) AS stock_awal, SUM(stock.cns_stock_awal) AS cns_awal, SUM(stock.krg_stock_awal) AS krg_awal, stock.lot_awal, stock.kgs_in_out, stock.cns_in_out, stock.krg_in_out, stock.lot_stock, stock.nama_cluster, pemasukan.id_pemasukan')
+    //         ->join('pemasukan', 'pemasukan.id_stock=stock.id_stock')
+    //         ->where('no_model', $noModel)
+    //         ->where('item_type', $item_type)
+    //         ->where('kode_warna', $kode_warna)
+    //         ->groupStart() // <-- Mulai grup untuk OR
+    //         ->where('kgs_stock_awal >', 0)
+    //         ->orWhere('kgs_in_out >', 0)
+    //         ->groupEnd()   // <-- Tutup grup
+    //         ->groupBy('nama_cluster')
+    //         ->orderBy('nama_cluster', 'ASC')
+    //         ->findAll();
+    // }
+
+    public function getClusterPinjamOrder($noModel, $item_type, $kode_warna, $lot)
     {
         return $this->select('stock.no_model, stock.item_type, stock.kode_warna, stock.warna, SUM(stock.kgs_stock_awal) AS stock_awal, SUM(stock.cns_stock_awal) AS cns_awal, SUM(stock.krg_stock_awal) AS krg_awal, stock.lot_awal, stock.kgs_in_out, stock.cns_in_out, stock.krg_in_out, stock.lot_stock, stock.nama_cluster, pemasukan.id_pemasukan')
             ->join('pemasukan', 'pemasukan.id_stock=stock.id_stock')
             ->where('no_model', $noModel)
             ->where('item_type', $item_type)
             ->where('kode_warna', $kode_warna)
+            ->groupStart()
+            ->where('stock.lot_awal', $lot)
+            ->orWhere('stock.lot_stock', $lot)
+            ->groupEnd()
             ->groupStart() // <-- Mulai grup untuk OR
             ->where('kgs_stock_awal >', 0)
             ->orWhere('kgs_in_out >', 0)
@@ -754,4 +775,138 @@ class StockModel extends Model
             ->groupBy('stock.id_stock')
             ->findAll();
     }
+
+    public function getStockDataByIdStock($idStok)
+    {
+        $builder = $this->db->table('pemasukan p');
+
+        $builder->select([
+            'p.id_pemasukan',
+            'p.id_out_celup as idOcPem',
+            'p.tgl_masuk',
+            'p.nama_cluster as clusterPem',
+            'p.out_jalur',
+            'p.admin as admPem',
+            'p.id_stock as idstockPem',
+
+            's.nama_cluster',
+            's.id_stock',
+            's.no_model',
+            's.item_type',
+            's.kode_warna',
+            's.warna',
+            's.kgs_stock_awal',
+            's.kgs_in_out',
+            's.krg_stock_awal',
+            's.krg_in_out',
+            's.lot_awal',
+            's.lot_stock',
+
+            'oc.id_out_celup',
+            'oc.id_retur',
+            'oc.id_bon',
+            'oc.id_other_bon',
+            'oc.id_celup',
+            'oc.l_m_d',
+            'oc.harga',
+            'oc.no_karung',
+            'oc.gw_kirim',
+            'oc.kgs_kirim',
+            'oc.cones_kirim',
+            'oc.lot_kirim',
+            'oc.ganti_retur',
+            'oc.operator_packing',
+            'oc.shift',
+            'oc.admin',
+            'oc.created_at',
+            'oc.updated_at',
+
+            'ob.id_other_bon',
+            'ob.no_model',
+            'ob.item_type',
+            'ob.kode_warna',
+            'ob.warna',
+            'ob.tgl_datang',
+            'ob.no_surat_jalan',
+            'ob.detail_sj',
+            'ob.keterangan',
+            'ob.po_tambahan',
+            'ob.admin as adminOb',
+
+            'pe.id_pengeluaran',
+            'pe.id_out_celup as idOcPeng',
+            'pe.id_stock as idstockPeng',
+            'pe.id_total_pemesanan',
+            'pe.area_out',
+            'pe.tgl_out',
+            'pe.kgs_out',
+            'pe.cns_out',
+            'pe.krg_out',
+            'pe.lot_out',
+            'pe.status',
+            'pe.keterangan_gbn',
+            'pe.admin as adminPeng',
+
+            'oo.id_other_out',
+            'oo.id_out_celup as ocOther',
+            'oo.kategori',
+            'oo.tgl_other_out',
+            'oo.kgs_other_out',
+            'oo.cns_other_out',
+            'oo.krg_other_out',
+            'oo.lot_other_out',
+            'oo.nama_cluster as clusterOther',
+            'oo.keterangan as ketOther',
+            'oo.admin as adminOther',
+
+            'hs.id_history_pindah',
+            'hs.id_stock_old',
+            'hs.id_stock_new',
+            'hs.cluster_old',
+            'hs.cluster_new',
+            'hs.id_out_celup as oldOc',
+            'hs.kgs',
+            'hs.cns',
+            'hs.lot',
+            'hs.krg',
+            'hs.keterangan as ketHs',
+            'hs.admin as adminHs',
+        ]);
+
+        $builder->join('stock s', 's.id_stock = p.id_stock', 'left');
+        $builder->join('out_celup oc', 'oc.id_out_celup = p.id_out_celup', 'left');
+
+        $builder->join(
+            'other_bon ob',
+            'ob.id_other_bon = oc.id_other_bon
+            OR (s.no_model = ob.no_model
+                AND s.item_type = ob.item_type
+                AND s.kode_warna = ob.kode_warna)',
+            'left'
+        );
+
+        $builder->join(
+            'history_stock hs',
+            '(hs.id_stock_old = s.id_stock OR hs.id_stock_new = s.id_stock)
+            AND hs.id_out_celup = oc.id_out_celup',
+            'left'
+        );
+
+        $builder->join(
+            'pengeluaran pe',
+            'pe.id_out_celup = oc.id_out_celup
+            AND pe.id_stock = s.id_stock',
+            'left'
+        );
+
+        $builder->join('other_out oo', 'oo.id_out_celup = oc.id_out_celup', 'left');
+
+        $builder->where('p.id_stock', $idStok);
+
+        $builder->orderBy('p.id_pemasukan', 'DESC');
+
+
+        return $builder->get()->getResultArray();
+    }
+
 }

@@ -83,6 +83,48 @@
         border-radius: 20px;
         font-size: 0.9rem;
     }
+
+    /* ===== FIX STOCK MODAL – MONITORING DETAIL ===== */
+    #modalfixStockData .result-card-meta {
+        border-top: 1px dashed #e5e7eb;
+        margin-top: .5rem;
+        padding-top: .4rem;
+        font-size: 0.78rem;
+        color: #6b7280;
+    }
+
+    #modalfixStockData .result-card-meta span {
+        margin-right: 0.75rem;
+    }
+
+    #modalfixStockData .text-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        color: #9ca3af;
+        margin-bottom: .1rem;
+    }
+
+    #modalfixStockData .text-value {
+        font-size: 0.86rem;
+        font-weight: 500;
+    }
+
+    #modalfixStockData .truncate-1 {
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    #modalfixStockData .truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+
 </style>
 
 <div class="container-fluid">
@@ -314,6 +356,73 @@
         </div>
     </div>
     <!-- modal Pengeluaran Selain Order end -->
+     <!-- modal Fix Data Stock -->
+    <div class="modal fade" id="modalfixStockData" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white border-0">
+                    <h5 class="modal-title text-white" id="modalfixStockDataLabel">Fix Data Stock</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formfixStockData">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain mb-0">
+                            <div class="card-body">
+
+                                <!-- SUMMARY BAR: total & cluster -->
+                                <div class="summary-bar">
+                                    <div class="row g-3 align-items-end">
+                                        <!-- Total Kgs/Cns/Krg -->
+                                        <!-- <div class="col-md-6">
+                                            <div class="row g-2">
+                                                <div class="col-md-4 col-4">
+                                                    <div class="summary-bar-label">Total Kgs</div>
+                                                    <input type="text" class="form-control form-control-sm" name="ttl_kgs_pindah" readonly placeholder="0.00">
+                                                </div>
+                                                <div class="col-md-4 col-4">
+                                                    <div class="summary-bar-label">Total Cones</div>
+                                                    <input type="text" class="form-control form-control-sm" name="ttl_cns_pindah" readonly placeholder="0">
+                                                </div>
+                                                <div class="col-md-4 col-4">
+                                                    <div class="summary-bar-label">Total Karung</div>
+                                                    <input type="text" class="form-control form-control-sm" name="ttl_krg_pindah" readonly placeholder="0">
+                                                </div>
+                                            </div>
+                                        </div> -->
+
+                                        <!-- Cluster & Sisa Kapasitas -->
+                                        <!-- <div class="col-md-6">
+                                            <div class="row g-2">
+                                                <div class="col-md-8">
+                                                    <div class="summary-bar-label">Cluster Tujuan</div>
+                                                    <select id="ClusterSelect" class="form-select form-select-sm" style="width: 100%" >
+                                                        <option value="">Pilih Cluster</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="summary-bar-label">Sisa Kapasitas (KG)</div>
+                                                    <input type="text" class="form-control form-control-sm" id="SisaKapasitas" readonly>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                    </div>
+                                </div>
+
+                                <!-- LIST KARUNG -->
+                                <div class="row g-3 mt-2" id="fixStockDataContainer">
+                                    <!-- Isi kartu akan di-inject via JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                        <button type="submit" class="btn btn-info">Pindah</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
@@ -399,6 +508,11 @@
                                             data-nama-cluster="${item.nama_cluster}"
                                             >
                                             Pengeluaran Selain Order
+                                        </button>
+                                        <button 
+                                            class="btn btn-outline-danger btn-sm fixStockData"
+                                            data-id="${item.id_stock}">
+                                            Fix Stock Data
                                         </button>
                                     </div>
                                 </div>
@@ -1125,6 +1239,675 @@
                 });
             }
         });
+    });
+
+    $(document).on('click', '.fixStockData', function() {
+        const idStock = $(this).data('id');
+        const base = '<?= base_url() ?>';
+        const role = '<?= session()->get('role') ?>';
+        const namaCluster = $(this).data('nama-cluster-old');
+
+        $('#modalfixStockData').modal('show');
+        // Perbarui judul modal dengan nama cluster
+        $('#modalfixStockDataLabel').text(`Fix Stock Data - ${namaCluster}`);
+
+        const $select = $('#ClusterSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
+        const $container = $('#fixStockDataContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
+
+        // Fetch detail palet
+        $.get(`${base}${role}/warehouse/getFixStockData`, {
+            id_stock: idStock
+        }, res => {
+            $container.empty();
+            if (!res.success || !res.data.length) {
+                return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
+            }
+
+            res.data.forEach(d => {
+                const lotStock = d.lot_stock || '';
+                const lotAwal  = d.lot_awal || '';
+                const lotKirim = d.lot_kirim || '';
+                const lotFinal = d.lot || d.lot_stock || d.lot_awal || d.lot_kirim || '';
+
+                const clusterNow  = d.nama_cluster || d.cluster_new || '';
+                const clusterOld  = d.cluster_old || '';
+                const idStockNow  = d.id_stock_new || d.id_stock || '';
+                const idStockOld  = d.id_stock_old || '';
+
+                const kgsKirim = d.kgs_kirim ?? 0;
+                const cnsKirim = d.cones_kirim ?? 0;
+                const gwKirim  = d.gw_kirim ?? 0;
+
+                // alias utk rekap (dari history_stock kalau ada)
+                const kgsAlias = d.kgs ?? 0;
+                const cnsAlias = d.cns ?? 0;
+                const krgAlias = d.krg ?? 0;
+
+                $container.append(`
+                    <div class="col-md-12">
+                        <div class="card result-card h-100">
+
+                            <!-- HEADER CARD -->
+                            <div class="result-card-header">
+                                <div class="flex-grow-1">
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-auto">
+                                            <div class="form-check mb-0">
+                                                <input class="form-check-input row-check"
+                                                    type="checkbox"
+                                                    name="pindah[]"
+                                                    value="${d.idOcPem || d.id_out_celup || ''}"
+                                                >
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row g-2">
+                                                <div class="col-md-4">
+                                                    <label class="text-label mb-0">No Model</label>
+                                                    <input type="text" class="form-control form-control-sm text-value"
+                                                        data-field="no_model"
+                                                        value="${d.no_model || ''}">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="text-label mb-0">Item Type</label>
+                                                    <input type="text" class="form-control form-control-sm text-value"
+                                                        data-field="item_type"
+                                                        value="${d.item_type || ''}">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="text-label mb-0">Kode Warna</label>
+                                                    <input type="text" class="form-control form-control-sm text-value"
+                                                        data-field="kode_warna"
+                                                        value="${d.kode_warna || ''}">
+                                                </div>
+                                            </div>
+                                            <div class="row g-2 mt-1">
+                                                <div class="col-md-6">
+                                                    <label class="text-label mb-0">Warna</label>
+                                                    <input type="text" class="form-control form-control-sm text-value"
+                                                        data-field="warna"
+                                                        value="${d.warna || ''}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="text-label mb-0">Lot (Final)</label>
+                                                    <input type="text" class="form-control form-control-sm text-value"
+                                                        data-field="lot"
+                                                        value="${lotFinal}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BODY CARD -->
+                            <div class="result-card-body result-main">
+                                <div class="row">
+                                    <!-- KOLOM 1: STOCK & CLUSTER -->
+                                    <div class="col-md-4 mb-3">
+                                        <label class="text-label">Cluster Sekarang (Stock)</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="cluster_new"
+                                            value="${clusterNow}">
+                                        
+                                        <label class="text-label">Cluster Lama (History)</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="cluster_old"
+                                            value="${clusterOld}">
+                                        
+                                        <label class="text-label">ID Stock Sekarang</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="id_stock_new"
+                                            value="${idStockNow}">
+                                        
+                                        <label class="text-label">ID Stock Lama</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="id_stock_old"
+                                            value="${idStockOld}">
+                                        
+                                        <label class="text-label">Lot Awal / Stock / Kirim</label>
+                                        <div class="row g-1">
+                                            <div class="col-4">
+                                                <input type="text" class="form-control form-control-sm"
+                                                    placeholder="Awal"
+                                                    data-field="lot_awal"
+                                                    value="${lotAwal}">
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="text" class="form-control form-control-sm"
+                                                    placeholder="Stock"
+                                                    data-field="lot_stock"
+                                                    value="${lotStock}">
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="text" class="form-control form-control-sm"
+                                                    placeholder="Kirim"
+                                                    data-field="lot_kirim"
+                                                    value="${lotKirim}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- KOLOM 2: QTY / KARUNG -->
+                                    <div class="col-md-4 mb-3">
+                                        <label class="text-label">No Karung</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="no_karung"
+                                            value="${d.no_karung || ''}">
+                                        
+                                        <label class="text-label">GW Kirim (Brutto)</label>
+                                        <input type="number" step="0.01" class="form-control form-control-sm mb-1"
+                                            data-field="gw_kirim"
+                                            value="${gwKirim}">
+                                        
+                                        <label class="text-label">Kgs Kirim (Netto / OC)</label>
+                                        <input type="number" step="0.01" class="form-control form-control-sm mb-1"
+                                            data-field="kgs_kirim"
+                                            value="${kgsKirim}">
+                                        
+                                        <label class="text-label">Cones Kirim (OC)</label>
+                                        <input type="number" class="form-control form-control-sm mb-1"
+                                            data-field="cones_kirim"
+                                            value="${cnsKirim}">
+                                        
+                                        <label class="text-label">Rekap Pindah (History Kgs / Cns / Krg)</label>
+                                        <div class="row g-1">
+                                            <div class="col-4">
+                                                <input type="number" step="0.01" class="form-control form-control-sm"
+                                                    placeholder="Kgs"
+                                                    data-field="kgs"
+                                                    value="${kgsAlias}">
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    placeholder="Cns"
+                                                    data-field="cns"
+                                                    value="${cnsAlias}">
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="number" class="form-control form-control-sm"
+                                                    placeholder="Krg"
+                                                    data-field="krg"
+                                                    value="${krgAlias}">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- KOLOM 3: DOKUMEN & ADMIN (OB / OC) -->
+                                    <div class="col-md-4 mb-3">
+                                        <label class="text-label">Tgl Datang (Other Bon)</label>
+                                        <input type="date" class="form-control form-control-sm mb-1"
+                                            data-field="tgl_datang"
+                                            value="${d.tgl_datang || ''}">
+                                        
+                                        <label class="text-label">No Surat Jalan</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="no_surat_jalan"
+                                            value="${d.no_surat_jalan || ''}">
+                                        
+                                        <label class="text-label">Detail SJ</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="detail_sj"
+                                            value="${d.detail_sj || ''}">
+                                        
+                                        <label class="text-label">Admin Other Bon</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="adminOb"
+                                            value="${d.adminOb || ''}">
+                                        
+                                        <label class="text-label">Admin Out Celup</label>
+                                        <input type="text" class="form-control form-control-sm mb-1"
+                                            data-field="admin"
+                                            value="${d.admin || ''}">
+
+                                        <label class="text-label mt-2">Keterangan / Kategori Other Bon</label>
+                                        <textarea class="form-control form-control-sm"
+                                            rows="2"
+                                            data-field="keterangan">${d.keterangan || ''}</textarea>
+                                        <input type="text" class="form-control form-control-sm mt-1"
+                                            placeholder="Kategori Other Out"
+                                            data-field="kategori"
+                                            value="${d.kategori || ''}">
+                                    </div>
+                                </div>
+
+                                <!-- BLOK INFO PEMASUKAN (P) -->
+                                <div class="mt-2 p-2 border-top">
+                                    <div class="row g-2 small">
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">Tgl Masuk (Pemasukan)</label>
+                                            <input type="date" class="form-control form-control-sm"
+                                                data-field="tgl_masuk"
+                                                value="${d.tgl_masuk || ''}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">Cluster Pemasukan</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                data-field="clusterPem"
+                                                value="${d.clusterPem || ''}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">Out Jalur</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                data-field="out_jalur"
+                                                value="${d.out_jalur || ''}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">Admin Pemasukan</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                data-field="admPem"
+                                                value="${d.admPem || ''}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">ID Stock Pemasukan</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                data-field="idstockPem"
+                                                value="${d.idstockPem || ''}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="text-label mb-0">ID OC (Pemasukan)</label>
+                                            <input type="text" class="form-control form-control-sm"
+                                                data-field="idOcPem"
+                                                value="${d.idOcPem || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BLOK INFO PENGELUARAN & OTHER OUT & HISTORY -->
+                                <div class="mt-2 p-2 border-top">
+                                    <div class="row g-2 small">
+                                        <!-- Pengeluaran -->
+                                        <div class="col-md-4">
+                                            <div class="fw-bold mb-1">Pengeluaran</div>
+                                            <label class="text-label mb-0">ID Pengeluaran</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="id_pengeluaran"
+                                                value="${d.id_pengeluaran || ''}">
+                                            <label class="text-label mb-0">Area Out</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="area_out"
+                                                value="${d.area_out || ''}">
+                                            <label class="text-label mb-0">Tgl Out</label>
+                                            <input type="date" class="form-control form-control-sm mb-1"
+                                                data-field="tgl_out"
+                                                value="${d.tgl_out || ''}">
+                                            <label class="text-label mb-0">Qty Out (Kgs / Cns / Krg)</label>
+                                            <div class="row g-1">
+                                                <div class="col-4">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm"
+                                                        placeholder="Kgs"
+                                                        data-field="kgs_out"
+                                                        value="${d.kgs_out || ''}">
+                                                </div>
+                                                <div class="col-4">
+                                                    <input type="number" class="form-control form-control-sm"
+                                                        placeholder="Cns"
+                                                        data-field="cns_out"
+                                                        value="${d.cns_out || ''}">
+                                                </div>
+                                                <div class="col-4">
+                                                    <input type="number" class="form-control form-control-sm"
+                                                        placeholder="Krg"
+                                                        data-field="krg_out"
+                                                        value="${d.krg_out || ''}">
+                                                </div>
+                                            </div>
+                                            <label class="text-label mb-0 mt-1">Lot Out</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="lot_out"
+                                                value="${d.lot_out || ''}">
+                                            <label class="text-label mb-0">Status / Ket GBN / Admin</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Status"
+                                                data-field="status"
+                                                value="${d.status || ''}">
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Ket GBN"
+                                                data-field="keterangan_gbn"
+                                                value="${d.keterangan_gbn || ''}">
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Admin Pengeluaran"
+                                                data-field="adminPeng"
+                                                value="${d.adminPeng || ''}">
+                                        </div>
+
+                                        <!-- Other Out -->
+                                        <div class="col-md-4">
+                                            <div class="fw-bold mb-1">Other Out</div>
+                                            <label class="text-label mb-0">ID Other Out</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="id_other_out"
+                                                value="${d.id_other_out || ''}">
+                                            <label class="text-label mb-0">OC Other</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="ocOther"
+                                                value="${d.ocOther || ''}">
+                                            <label class="text-label mb-0">Kategori Other Out</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="kategori"
+                                                value="${d.kategori || ''}">
+                                            <label class="text-label mb-0">Tgl Other Out</label>
+                                            <input type="date" class="form-control form-control-sm mb-1"
+                                                data-field="tgl_other_out"
+                                                value="${d.tgl_other_out || ''}">
+                                            <label class="text-label mb-0">Qty Other Out (Kgs / Cns / Krg)</label>
+                                            <div class="row g-1">
+                                                <div class="col-4">
+                                                    <input type="number" step="0.01" class="form-control form-control-sm"
+                                                        placeholder="Kgs"
+                                                        data-field="kgs_other_out"
+                                                        value="${d.kgs_other_out || ''}">
+                                                </div>
+                                                <div class="col-4">
+                                                    <input type="number" class="form-control form-control-sm"
+                                                        placeholder="Cns"
+                                                        data-field="cns_other_out"
+                                                        value="${d.cns_other_out || ''}">
+                                                </div>
+                                                <div class="col-4">
+                                                    <input type="number" class="form-control form-control-sm"
+                                                        placeholder="Krg"
+                                                        data-field="krg_other_out"
+                                                        value="${d.krg_other_out || ''}">
+                                                </div>
+                                            </div>
+                                            <label class="text-label mb-0 mt-1">Lot Other Out</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="lot_other_out"
+                                                value="${d.lot_other_out || ''}">
+                                            <label class="text-label mb-0">Cluster / Ket / Admin Other</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Cluster Other"
+                                                data-field="clusterOther"
+                                                value="${d.clusterOther || ''}">
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Ket Other"
+                                                data-field="ketOther"
+                                                value="${d.ketOther || ''}">
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                placeholder="Admin Other"
+                                                data-field="adminOther"
+                                                value="${d.adminOther || ''}">
+                                        </div>
+
+                                        <!-- History Stock -->
+                                        <div class="col-md-4">
+                                            <div class="fw-bold mb-1">History Stock</div>
+                                            <label class="text-label mb-0">ID History Pindah</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="id_history_pindah"
+                                                value="${d.id_history_pindah || ''}">
+                                            <label class="text-label mb-0">Old OC (History)</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="oldOc"
+                                                value="${d.oldOc || ''}">
+                                            <label class="text-label mb-0">Keterangan History</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="ketHs"
+                                                value="${d.ketHs || ''}">
+                                            <label class="text-label mb-0">Admin History</label>
+                                            <input type="text" class="form-control form-control-sm mb-1"
+                                                data-field="adminHs"
+                                                value="${d.adminHs || ''}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                `);
+            });
+
+            $container.on('change', '.row-check', function() {
+                let totalKgs = 0,
+                    totalCns = 0,
+                    totalKrg = 0;
+
+                $container.find('.row-check:checked').each(function() {
+                    const $card = $(this).closest('.result-card');
+
+                    const kgs = parseFloat($card.find('[data-field="kgs"]').val() || 0);
+                    const cns = parseInt($card.find('[data-field="cns"]').val() || 0, 10);
+                    const krg = parseInt($card.find('[data-field="krg"]').val() || 0, 10);
+
+                    totalKgs += isNaN(kgs) ? 0 : kgs;
+                    totalCns += isNaN(cns) ? 0 : cns;
+                    totalKrg += isNaN(krg) ? 0 : krg;
+                });
+
+                $('input[name="ttl_kgs_pindah"]').val(totalKgs.toFixed(2));
+                $('input[name="ttl_cns_pindah"]').val(totalCns);
+                $('input[name="ttl_krg_pindah"]').val(totalKrg);
+
+                const selectedClusterValue = $select.val();
+
+                if (totalKgs > 0) {
+                    fetchClusters(totalKgs, selectedClusterValue);
+                    $select.prop('disabled', false);
+                } else {
+                    $select.prop('disabled', true).empty().append('<option value="">Pilih Cluster</option>');
+                    $('#SisaKapasitas').val('');
+                }
+            });
+        }).fail((_, __, err) => {
+            $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
+        });
+
+        // Fungsi untuk mengambil cluster berdasarkan totalKgs
+        function fetchClusters(totalKgs, previousCluster) {
+            console.log("Fetching clusters with parameters:", {
+                namaCluster,
+                totalKgs,
+            });
+            $.getJSON(`${base}${role}/warehouse/getNamaCluster`, {
+                namaCluster,
+                totalKgs,
+            }, res => {
+                $select.empty();
+                if (res.success && res.data.length) {
+                    $select.append('<option value="" data-sisa-kapasitas="">Pilih Cluster</option>');
+                    res.data.forEach(d => {
+                        $select.append(`<option value="${d.nama_cluster}" data-sisa-kapasitas="${d.sisa_kapasitas}">${d.nama_cluster}</option>`);
+                    });
+
+                    // Pilih kembali cluster sebelumnya jika masih ada dalam opsi
+                    if (previousCluster && $select.find(`option[value="${previousCluster}"]`).length) {
+                        $select.val(previousCluster).trigger('change');
+                    } else {
+                        $('#SisaKapasitas').val(''); // Kosongkan kapasitas jika cluster sebelumnya tidak tersedia
+                    }
+
+                    // Update Sisa Kapasitas berdasarkan pilihan dropdown
+                    $select.off('change').on('change', function() {
+                        const selectedOption = $select.find('option:selected');
+                        const sisaKapasitas = selectedOption.data('sisa-kapasitas');
+                        $('#SisaKapasitas').val(selectedOption.val() ? parseFloat(sisaKapasitas || 0).toFixed(2) : '');
+                    });
+                } else {
+                    $select.append('<option>Tidak Ada Cluster</option>');
+                    $('#SisaKapasitas').val(''); // Kosongkan jika tidak ada cluster
+                }
+            });
+        }
+    });
+
+    // Reset total fields when modal is closed
+    $('#modalfixStockData').on('hidden.bs.modal', function() {
+        $('input[name="ttl_kgs_pindah"]').val('');
+        $('input[name="ttl_cns_pindah"]').val('');
+        $('input[name="ttl_krg_pindah"]').val('');
+        $('#SisaKapasitas').val('');
+    });
+    // simpan data Pindah Cluster
+    $('#formfixStockData').on('submit', function(e) {
+        e.preventDefault();
+
+        const role = '<?= session()->get("role") ?>';
+        const base = '<?= base_url() ?>';
+        const cluster = $('#ClusterSelect').val();
+
+        // Ambil semua checkbox ter-centang
+        const $checked = $("input[name='pindah[]']:checked");
+
+        // Jika tidak ada yang dipilih, abort
+        if (!$checked.length) {
+            return Swal.fire({
+                icon: 'warning',
+                text: 'Pilih setidaknya satu karung untuk dipindah!'
+            });
+        }
+
+        // Jika tidak ada yang dipilih, abort
+        // if (!cluster) {
+        //     return Swal.fire({
+        //         icon: 'warning',
+        //         text: 'Pilih cluster terlebih dahulu!'
+        //     });
+        // }
+
+        // Bangun array detail lengkap
+        const fields = [
+            // Pemasukan (p)
+            'id_pemasukan',
+            'idOcPem',
+            'tgl_masuk',
+            'clusterPem',
+            'out_jalur',
+            'admPem',
+            'idstockPem',
+
+            // Stock (s)
+            'nama_cluster',
+            'id_stock',
+            'no_model',
+            'item_type',
+            'kode_warna',
+            'warna',
+            'kgs_stock_awal',
+            'kgs_in_out',
+            'krg_stock_awal',
+            'krg_in_out',
+            'lot_awal',
+            'lot_stock',
+
+            // Out Celup (oc)
+            'id_out_celup',
+            'id_retur',
+            'id_bon',
+            'id_other_bon',
+            'id_celup',
+            'l_m_d',
+            'harga',
+            'no_karung',
+            'gw_kirim',
+            'kgs_kirim',
+            'cones_kirim',
+            'lot_kirim',
+            'ganti_retur',
+            'operator_packing',
+            'shift',
+            'admin',
+
+            // Other Bon (ob)
+            'tgl_datang',
+            'no_surat_jalan',
+            'detail_sj',
+            'keterangan',
+            'po_tambahan',
+            'adminOb',
+
+            // Pengeluaran (pe)
+            'id_pengeluaran',
+            'idstockPeng',
+            'id_total_pemesanan',
+            'area_out',
+            'tgl_out',
+            'kgs_out',
+            'cns_out',
+            'krg_out',
+            'lot_out',
+            'status',
+            'keterangan_gbn',
+            'adminPeng',
+
+            // Other Out (oo)
+            'id_other_out',
+            'ocOther',
+            'kategori',
+            'tgl_other_out',
+            'kgs_other_out',
+            'cns_other_out',
+            'krg_other_out',
+            'lot_other_out',
+            'clusterOther',
+            'ketOther',
+            'adminOther',
+
+            // History Stock (hs)
+            'id_history_pindah',
+            'id_stock_old',
+            'id_stock_new',
+            'cluster_old',
+            'cluster_new',
+            'oldOc',
+            'kgs',
+            'cns',
+            'lot',
+            'krg',
+            'ketHs',
+            'adminHs'
+        ];
+
+        const detail = $checked.map((_, chk) => {
+            const $card = $(chk).closest('.result-card');
+            const rowData = {};
+
+            fields.forEach(f => {
+                rowData[f] = $card.find(`[data-field="${f}"]`).val();
+            });
+
+            return rowData;
+        }).get();
+
+
+        // Sekarang kirim ke server
+        $.get(`${base}${role}/warehouse/savefixStockData`, {
+                cluster_tujuan: cluster,
+                detail: detail
+            }, res => {
+                // Menampilkan SweetAlert2 saat respons berhasil
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: res.message || 'Pindah cluster berhasil',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        // Reload halaman setelah modal ditutup
+                        $('#modalfixStockData').modal('hide');
+                        $('#formfixStockData')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
+                    }
+                });
+            }, 'json')
+            .fail(xhr => {
+                // Menampilkan SweetAlert2 saat terjadi error
+                Swal.fire({
+                    title: 'Terjadi Kesalahan!',
+                    text: xhr.responseText || 'Ada masalah dengan permintaan Anda.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    willClose: () => {
+                        // Reload halaman setelah modal ditutup
+                        $('#modalfixStockData').modal('hide');
+                        $('#formfixStockData')[0].reset();
+                        // location.reload();
+                        reloadSearchResult(); // refresh data stock tanpa reload page
+                    }
+                });
+            });
     });
 
     function reloadSearchResult() {

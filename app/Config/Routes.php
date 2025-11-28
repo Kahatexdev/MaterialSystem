@@ -315,7 +315,6 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pinjamOrder/options', 'PemesananController::optionsPinjamOrder');
     $routes->get('pinjamOrder/getNoModel', 'PemesananController::getNoModelPinjamOrder');
     $routes->get('pinjamOrder/getCluster', 'PemesananController::getClusterPinjamOrder');
-    $routes->get('pinjamOrder/getLot', 'PemesananController::getLotPinjamOrder');
     // $routes->get('pinjamOrder/detail', 'PemesananController::detailPinjamOrder');
     // $routes->get('pinjamOrder/options/(:segment)?', 'PemesananController::optionsPinjamOrder/$1');
     // $routes->get('pinjamOrder/options/(:any)', 'PemesananController::optionsPinjamOrder');
@@ -781,6 +780,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->post('warehouse/getPindahOrderTest', 'WarehouseController::getPindahOrderTest');
     $routes->post('warehouse/savePindahCluster', 'WarehouseController::savePindahCluster');
     $routes->post('warehouse/getPindahCluster', 'WarehouseController::getPindahCluster');
+    $routes->get('warehouse/getFixStockData', 'WarehouseController::getFixStockData');
+    $routes->get('warehouse/savefixStockData', 'WarehouseController::savefixStockData');
     $routes->post('warehouse/updateNoModel', 'WarehouseController::updateNoModel');
     // $routes->get('warehouse/reportPoBenang', 'WarehouseController::reportPoBenang');
     $routes->get('warehouse/reportPo/(:any)', 'WarehouseController::reportPoBenang/$1');

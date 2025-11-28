@@ -341,10 +341,7 @@ class PemasukanModel extends Model
             ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left') // tambahkan join
             ->join('stock', 'stock.id_stock=pemasukan.id_stock', 'left')
             ->where('stock.nama_cluster', $data['cluster'])
-            ->groupStart()
-            ->where('stock.lot_awal', $data['lot'])
-            ->orWhere('stock.lot_stock', $data['lot'])
-            ->groupEnd()
+            ->where('out_celup.lot_kirim', $data['lot'])
             ->where('pemasukan.out_jalur', '0')
             ->where("COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
             ->where("COALESCE(retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
