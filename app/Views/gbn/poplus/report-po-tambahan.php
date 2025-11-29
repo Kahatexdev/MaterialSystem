@@ -173,7 +173,7 @@
                             <tr>
                                 <td><?= $no++ ?></td>
                                 <td><?= $data['tgl_poplus'] ?></td>
-                                <td><?= $data['area'] ?? '-' ?></td>
+                                <td><?= $data['admin'] ?? '-' ?></td>
                                 <td><?= $data['no_model'] ?? '-' ?></td>
                                 <td><?= $data['item_type'] ?></td>
                                 <td><?= $data['kode_warna'] ?></td>
