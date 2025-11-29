@@ -4810,14 +4810,8 @@ class WarehouseController extends BaseController
 
         $clusterTujuan = trim((string) $this->request->getGet('cluster_tujuan'));
         $detail        = $this->request->getGet('detail');
-        dd($detail);
-        // Validasi dasar
-        if ($clusterTujuan === '' || empty($detail) || !is_array($detail)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Cluster tujuan dan detail tidak boleh kosong.'
-            ])->setStatusCode(400);
-        }
+        log_message('debug', 'DATA CEK = '.$detail);
+        var_dump($detail);
 
         $db = \Config\Database::connect();
         $db->transStart();
