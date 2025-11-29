@@ -361,9 +361,10 @@
         <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white border-0">
-                    <h5 class="modal-title text-white" id="modalfixStockDataLabel">Fix Data Stock</h5>
+                    <h5 class="modal-title text-white" id="modalfixStockDataLabel"></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <div class="mt-2 text-center"><span class="badge bg-danger">SEBAIKNYA JANGAN DIKLIK KALAU TIDAK TAU TEKNISNYA!!!</span></div>
                 <form id="formfixStockData">
                     <div class="modal-body p-0">
                         <div class="card card-plain mb-0">
@@ -417,7 +418,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                        <button type="submit" class="btn btn-info">Pindah</button>
+                        <button type="submit" class="btn btn-danger">Update</button>
                     </div>
                 </form>
             </div>
@@ -1249,7 +1250,8 @@
 
         $('#modalfixStockData').modal('show');
         // Perbarui judul modal dengan nama cluster
-        $('#modalfixStockDataLabel').text(`Fix Stock Data - ${namaCluster}`);
+        // gunakan .html() untuk mengganti seluruh isi dan tambahkan badge yang dipusatkan
+        $('#modalfixStockDataLabel').html('Fix Stock Data');
 
         const $select = $('#ClusterSelect').prop('disabled', true).empty().append('<option>Loading…</option>');
         const $container = $('#fixStockDataContainer').html('<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i></div>');
@@ -1694,43 +1696,6 @@
         }).fail((_, __, err) => {
             $container.html(`<div class="alert alert-danger text-center">Error: ${err}</div>`);
         });
-
-        // Fungsi untuk mengambil cluster berdasarkan totalKgs
-        function fetchClusters(totalKgs, previousCluster) {
-            console.log("Fetching clusters with parameters:", {
-                namaCluster,
-                totalKgs,
-            });
-            $.getJSON(`${base}${role}/warehouse/getNamaCluster`, {
-                namaCluster,
-                totalKgs,
-            }, res => {
-                $select.empty();
-                if (res.success && res.data.length) {
-                    $select.append('<option value="" data-sisa-kapasitas="">Pilih Cluster</option>');
-                    res.data.forEach(d => {
-                        $select.append(`<option value="${d.nama_cluster}" data-sisa-kapasitas="${d.sisa_kapasitas}">${d.nama_cluster}</option>`);
-                    });
-
-                    // Pilih kembali cluster sebelumnya jika masih ada dalam opsi
-                    if (previousCluster && $select.find(`option[value="${previousCluster}"]`).length) {
-                        $select.val(previousCluster).trigger('change');
-                    } else {
-                        $('#SisaKapasitas').val(''); // Kosongkan kapasitas jika cluster sebelumnya tidak tersedia
-                    }
-
-                    // Update Sisa Kapasitas berdasarkan pilihan dropdown
-                    $select.off('change').on('change', function() {
-                        const selectedOption = $select.find('option:selected');
-                        const sisaKapasitas = selectedOption.data('sisa-kapasitas');
-                        $('#SisaKapasitas').val(selectedOption.val() ? parseFloat(sisaKapasitas || 0).toFixed(2) : '');
-                    });
-                } else {
-                    $select.append('<option>Tidak Ada Cluster</option>');
-                    $('#SisaKapasitas').val(''); // Kosongkan jika tidak ada cluster
-                }
-            });
-        }
     });
 
     // Reset total fields when modal is closed
