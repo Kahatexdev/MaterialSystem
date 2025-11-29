@@ -27,6 +27,7 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpParser\Node\Expr\FuncCall;
+use CodeIgniter\Exceptions\PageNotFoundException;
 
 use function PHPUnit\Framework\returnSelf;
 
@@ -97,28 +98,28 @@ class WarehouseController extends BaseController
     {
         $updateOrder = $this->masterOrderModel->getNullMc();
 
-        foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        // foreach ($updateOrder as $od) {
+        //     $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
 
-            try {
-                // Fetch data dari API
-                $json = file_get_contents($reqStartMc);
-                // Decode JSON response
-                $startMc = json_decode($json, true);
-                if (empty($startMc)) {
-                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-                } else {
-                    $this->masterOrderModel->update(
-                        $od['id_order'],
-                        ['start_mc' => $startMc['start_mc']]
-                    );
-                }
-            } catch (\Exception $e) {
+        //     try {
+        //         // Fetch data dari API
+        //         $json = file_get_contents($reqStartMc);
+        //         // Decode JSON response
+        //         $startMc = json_decode($json, true);
+        //         if (empty($startMc)) {
+        //             log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+        //         } else {
+        //             $this->masterOrderModel->update(
+        //                 $od['id_order'],
+        //                 ['start_mc' => $startMc['start_mc']]
+        //             );
+        //         }
+        //     } catch (\Exception $e) {
 
-                // Log error
-                log_message('error', 'Error fetching API data: ' . $e->getMessage());
-            }
-        }
+        //         // Log error
+        //         log_message('error', 'Error fetching API data: ' . $e->getMessage());
+        //     }
+        // }
 
         $kategori = $this->kategoriModel->findAll();
 
@@ -4756,5 +4757,211 @@ class WarehouseController extends BaseController
         $data = $this->stockModel->searchStockOrder($jenis, $modelCluster, $kodeWarna, $deliveryAwal, $deliveryAkhir);
         // dd($data);
         return $this->response->setJSON($data);
+    }
+
+    public function getFixStockData()
+    {
+        $idStock = $this->request->getGet('id_stock');
+        $data = $this->stockModel->getStockDataByIdStock($idStock);
+        // dd($data);
+        $dataArray = json_decode(json_encode($data), true);
+        // dd($dataArray);
+        foreach ($dataArray as &$id) {
+            $other = $this->otherOutModel->getQty($id['id_out_celup']);
+            $outByCns = $this->pengeluaranModel->getQtyOutByCns($id['id_out_celup']);
+            $pindahOrder = $this->historyStock->getKgsPindahOrder($id['id_out_celup']);
+            $returCelup = $this->historyStock->getKgsReturCelup($id['id_out_celup']);
+
+            $kgsOther = !empty($other) ? (float) $other['kgs_other_out'] : 0;
+            $kgsOutByCns = !empty($outByCns) ? (float) $outByCns['kgs_out'] : 0;
+            $kgsPindahOrder = !empty($pindahOrder) ? (float) $pindahOrder['kgs_pindah_order'] : 0;
+            $cnsOther = !empty($other) ? (int) $other['cns_other_out'] : 0;
+            $cnsOutByCns = !empty($outByCns) ? (int) $outByCns['cns_out'] : 0;
+            $cnsPindahOrder = !empty($pindahOrder) ? (int) $pindahOrder['cns_pindah_order'] : 0;
+            $kgsReturCelup = !empty($returCelup) ? (float) $returCelup['kgs_retur_celup'] : 0;
+            $cnsReturCelup = !empty($returCelup) ? (int) $returCelup['cns_retur_celup'] : 0;
+
+            // kurangi other out & pengeluaran by cones
+            $id['kgs_kirim'] = round((float) $id['kgs_kirim'] - $kgsPindahOrder - $kgsOther - $kgsOutByCns - $kgsReturCelup, 2);
+            $id['cones_kirim'] = (int) $id['cones_kirim'] - $cnsOther - $cnsOutByCns - $cnsPindahOrder - $cnsReturCelup;
+        }
+        // var_dump($dataArray);
+        // log_message('debug', 'Data Stock: ' . print_r($dataArray, true));
+        // log_message('debug', 'pindah order: ' . print_r($kgsPindahOrder, true));
+        // log_message('info', 'Kgs Retur Celup : ' . print_r($kgsReturCelup, true));
+        // log_message('info', 'Data Array : ' . print_r($dataArray, true));
+        if (empty($dataArray)) {
+            return $this->response->setJSON(['error' => false, 'message' => 'Data tidak ditemukan']);
+        } else {
+            return $this->response->setJSON([
+                'success' => true,
+                'data' => $dataArray
+            ]);
+        }
+
+        return $this->response->setJSON($dataArray);
+    }
+
+    public function savefixStockData()
+    {
+        if (!$this->request->isAJAX()) {
+            throw new PageNotFoundException();
+        }
+
+        $clusterTujuan = trim((string) $this->request->getGet('cluster_tujuan'));
+        $detail        = $this->request->getGet('detail');
+        dd($detail);
+        // Validasi dasar
+        if ($clusterTujuan === '' || empty($detail) || !is_array($detail)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cluster tujuan dan detail tidak boleh kosong.'
+            ])->setStatusCode(400);
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            foreach ($detail as $row) {
+                // Normalisasi array (biar gak notice undefined index)
+                $row = is_array($row) ? $row : [];
+
+                $idPemasukan      = (int) ($row['id_pemasukan']      ?? 0);
+                $idOutCelup       = (int) ($row['id_out_celup']       ?? 0);
+                $idHistoryPindah  = (int) ($row['id_history_pindah']  ?? 0);
+                $idStockNew       = (int) ($row['id_stock_new']       ?? 0);
+                $idStockOld       = (int) ($row['id_stock_old']       ?? 0);
+
+                // ========== 1. UPDATE TABEL PEMASUKAN ==========
+                if ($idPemasukan > 0) {
+                    $pemasukanUpdate = [
+                        'no_model'       => $row['no_model']      ?? null,
+                        'item_type'      => $row['item_type']     ?? null,
+                        'kode_warna'     => $row['kode_warna']    ?? null,
+                        'warna'          => $row['warna']         ?? null,
+                        'lot_awal'       => $row['lot_awal']      ?? null,
+                        'lot_stock'      => $row['lot_stock']     ?? null,
+                        'lot_kirim'      => $row['lot_kirim']     ?? null,
+                        'no_karung'      => $row['no_karung']     ?? null,
+                        'gw_kirim'       => $row['gw_kirim']      ?? null,
+                        'kgs_kirim'      => $row['kgs_kirim']     ?? null,
+                        'cones_kirim'    => $row['cones_kirim']   ?? null,
+                        'tgl_datang'     => $row['tgl_datang']    ?? null,
+                        'no_surat_jalan' => $row['no_surat_jalan'] ?? null,
+                        'detail_sj'      => $row['detail_sj']     ?? null,
+                        'keterangan'     => $row['keterangan']    ?? null,
+                        'kategori'       => $row['kategori']      ?? null,
+                        'admin'          => $row['admin']         ?? null,
+                        'operator_packing' => $row['operator_packing'] ?? null,
+                        'shift'          => $row['shift']         ?? null,
+                        // 'updated_at'   => date('Y-m-d H:i:s'), // kalau pakai timestamps bisa di-skip
+                    ];
+
+                    // Buang null/null string kalau kamu mau lebih rapih
+                    $pemasukanUpdate = array_filter(
+                        $pemasukanUpdate,
+                        fn($v) => $v !== null
+                    );
+
+                    if (!empty($pemasukanUpdate)) {
+                        $this->pemasukanModel->update($idPemasukan, $pemasukanUpdate);
+                    }
+                }
+
+                // ========== 2. UPDATE TABEL OUT_CELUP (kalau relevan) ==========
+                if ($idOutCelup > 0) {
+                    $outUpdate = [
+                        'kgs_out'   => $row['kgs'] ?? null,
+                        'cns_out'   => $row['cns'] ?? null,
+                        'krg_out'   => $row['krg'] ?? null,
+                        'lot_out'   => $row['lot'] ?? null,
+                        // tambahkan field lain kalau memang ada di tabel out_celup
+                    ];
+
+                    $outUpdate = array_filter(
+                        $outUpdate,
+                        fn($v) => $v !== null
+                    );
+
+                    if (!empty($outUpdate)) {
+                        $this->outCelupModel->update($idOutCelup, $outUpdate);
+                    }
+                }
+
+                // ========== 3. UPDATE TABEL STOCK (cluster & lot) ==========
+                if ($idStockNew > 0) {
+                    $stockUpdate = [
+                        'nama_cluster' => $clusterTujuan, // cluster tujuan dipaksa sesuai dropdown
+                        'lot_stock'    => $row['lot_stock'] ?: ($row['lot'] ?? null),
+                    ];
+
+                    $stockUpdate = array_filter(
+                        $stockUpdate,
+                        fn($v) => $v !== null
+                    );
+
+                    if (!empty($stockUpdate)) {
+                        $this->stockModel->update($idStockNew, $stockUpdate);
+                    }
+                }
+
+                // ========== 4. UPDATE / INSERT HISTORY PINDAH ==========
+                $historyData = [
+                    'id_stock_old'  => $idStockOld ?: null,
+                    'id_stock_new'  => $idStockNew ?: null,
+                    'cluster_old'   => $row['cluster_old'] ?? null,
+                    'cluster_new'   => $clusterTujuan, // pakai cluster tujuan
+                    'id_out_celup'  => $idOutCelup ?: null,
+                    'kgs'           => $row['kgs'] ?? null,
+                    'cns'           => $row['cns'] ?? null,
+                    'krg'           => $row['krg'] ?? null,
+                    'lot'           => $row['lot'] ?? null,
+                    // misal ada created_by/updated_by bisa diisi dari session
+                    // 'updated_at'  => date('Y-m-d H:i:s'),
+                ];
+
+                $historyData = array_filter(
+                    $historyData,
+                    fn($v) => $v !== null
+                );
+
+                if (!empty($historyData)) {
+                    if ($idHistoryPindah > 0) {
+                        // update existing history
+                        $this->historyStock->update($idHistoryPindah, $historyData);
+                    } else {
+                        // insert baru
+                        $this->historyStock->insert($historyData);
+                    }
+                }
+            } // end foreach
+
+        } catch (\Throwable $e) {
+            $db->transRollback();
+
+            log_message('error', 'savefixStockData error: {msg}', [
+                'msg' => $e->getMessage(),
+            ]);
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
+            ])->setStatusCode(500);
+        }
+
+        $db->transComplete();
+
+        if (!$db->transStatus()) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Transaksi database gagal.',
+            ])->setStatusCode(500);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Data fix stock berhasil disimpan.',
+        ]);
     }
 }

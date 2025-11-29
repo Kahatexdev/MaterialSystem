@@ -7649,7 +7649,7 @@ class ExcelController extends BaseController
 
         // 1) Ambil data
         $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
-
+        // dd($dataPoPlus);
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -7748,7 +7748,7 @@ class ExcelController extends BaseController
 
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $data['tgl_poplus']);
-            $sheet->setCellValue('C' . $row, $data['area']);
+            $sheet->setCellValue('C' . $row, $data['admin']);
             $sheet->setCellValue('D' . $row, $data['no_model']);
             $sheet->setCellValue('E' . $row, $data['item_type']);
             $sheet->setCellValue('F' . $row, $data['kode_warna']);
