@@ -223,7 +223,7 @@ class HistoryStock extends Model
     public function getDataReturGbn($key, $jenis = null)
     {
         $builder = $this->db->table('history_stock')
-            ->select('history_stock.id_history_pindah, history_stock.id_stock_old, history_stock.keterangan, s.no_model, s.item_type, s.kode_warna, s.warna, mm.jenis, kr.tipe_kategori, kr.nama_kategori')
+            ->select('history_stock.id_history_pindah, history_stock.id_stock_old, history_stock.keterangan, s.no_model, s.item_type, s.kode_warna, s.warna, mm.jenis, kr.tipe_kategori, kr.nama_kategori, DATE(history_stock.created_at) AS tgl_retur, history_stock.cluster_old, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.krg, history_stock.lot')
             ->join('stock s', 's.id_stock = history_stock.id_stock_old', 'left')
             ->join('master_material mm', 'mm.item_type = s.item_type', 'left')
             ->join(
@@ -236,10 +236,10 @@ class HistoryStock extends Model
                 )
             )",
                 'left',
-                false // <-- FIX INTI
+                false
             )
             ->where('s.no_model', $key)
-            ->like('history_stock.keterangan', 'Retur Celup') // tambahan biar pasti dapat pola kurung
+            ->like('history_stock.keterangan', 'Retur Celup')
             ->where('kr.tipe_kategori', 'PENGEMBALIAN');
 
         if (!empty($jenis)) {

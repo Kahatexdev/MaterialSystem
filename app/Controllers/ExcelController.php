@@ -2795,20 +2795,20 @@ class ExcelController extends BaseController
                 $no = 1;
                 foreach ($dataReturGbn as $item) {
                     $newSheet->setCellValue('A' . $row, $no++);
-                    $newSheet->setCellValue('B' . $row, $item['no_model'] ?: '-');
-                    $newSheet->setCellValue('C' . $row, $item['item_type'] ?: '-');
-                    $newSheet->setCellValue('D' . $row, $item['kode_warna'] ?: '-');
-                    $newSheet->setCellValue('E' . $row, $item['warna'] ?: '-');
-                    $newSheet->setCellValue('F' . $row, $item['area_retur']);
-                    $newSheet->setCellValue('G' . $row, $item['tgl_retur'] ?: '-');
-                    $newSheet->setCellValue('H' . $row, $item['nama_cluster']);
-                    $newSheet->setCellValue('I' . $row, isset($item['kgs_retur']) ? number_format($item['kgs_retur'], 2, '.', '') : 0);
-                    $newSheet->setCellValue('J' . $row, $item['cns_retur'] ?: 0);
-                    $newSheet->setCellValue('K' . $row, $item['krg_retur'] ?: 0);
-                    $newSheet->setCellValue('L' . $row, $item['lot_retur'] ?: '-');
-                    $newSheet->setCellValue('M' . $row, $item['kategori'] ?: '-');
-                    $newSheet->setCellValue('N' . $row, $item['keterangan_area'] ?: '-');
-                    $newSheet->setCellValue('O' . $row, $item['keterangan_gbn'] ?: '-');
+                    $newSheet->setCellValue('B' . $row, $item['no_model'] ?? '-');
+                    $newSheet->setCellValue('C' . $row, $item['item_type'] ?? '-');
+                    $newSheet->setCellValue('D' . $row, $item['kode_warna'] ?? '-');
+                    $newSheet->setCellValue('E' . $row, $item['warna'] ?? '-');
+                    $newSheet->setCellValue('F' . $row, 'GUDANG BENANG');
+                    $newSheet->setCellValue('G' . $row, $item['tgl_retur'] ?? '-');
+                    $newSheet->setCellValue('H' . $row, $item['cluster_old']);
+                    $newSheet->setCellValue('I' . $row, isset($item['kgs']) ? number_format($item['kgs'], 2, '.', '') : 0);
+                    $newSheet->setCellValue('J' . $row, $item['cns'] ?? 0);
+                    $newSheet->setCellValue('K' . $row, $item['krg'] ?? 0);
+                    $newSheet->setCellValue('L' . $row, $item['lot'] ?? '-');
+                    $newSheet->setCellValue('M' . $row, $item['nama_kategori'] ?? '-');
+                    $newSheet->setCellValue('N' . $row, $item['keterangan_area'] ?? '-');
+                    $newSheet->setCellValue('O' . $row, $item['keterangan'] ?? '-');
                     $row++;
                 }
 
@@ -2904,13 +2904,13 @@ class ExcelController extends BaseController
             // ========================= PAKAI AREA =========================
             if ($name === 'PAKAI AREA ' . $key) {
                 // Judul
-                $newSheet->mergeCells('A1:N1');
+                $newSheet->mergeCells('A1:O1');
                 $newSheet->setCellValue('A1', 'REPORT ORDER PAKAI AREA ' . $key);
                 $newSheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
                 $newSheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                 // Header
-                $headerPakaiArea = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'AREA', 'TGL PAKAI', 'TAMBAHAN', 'NAMA CLUSTER', 'QTY PAKAI', 'CONES PAKAI', 'LOT PAKAI', 'KET GBN', 'ADMIN'];
+                $headerPakaiArea = ['NO', 'NO MODEL', 'ITEM TYPE', 'KODE WARNA', 'WARNA', 'AREA', 'TGL PAKAI', 'TAMBAHAN', 'NAMA CLUSTER',  'QTY PAKAI', 'CONES PAKAI', 'KARUNG PAKAI', 'LOT PAKAI', 'KET GBN', 'ADMIN'];
                 $col = 'A';
                 foreach ($headerPakaiArea as $header) {
                     $newSheet->setCellValue($col . '3', $header);
@@ -2918,7 +2918,7 @@ class ExcelController extends BaseController
                     $col++;
                 }
 
-                $newSheet->getStyle('A3:N3')->applyFromArray([
+                $newSheet->getStyle('A3:O3')->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -2943,12 +2943,13 @@ class ExcelController extends BaseController
                     $newSheet->setCellValue('K' . $row, $item['cns_out'] ?: 0);
                     $newSheet->setCellValue('L' . $row, $item['krg_out'] ?: 0);
                     $newSheet->setCellValue('M' . $row, $item['lot_out'] ?: '-');
-                    $newSheet->setCellValue('N' . $row, $item['admin'] ?: '-');
+                    $newSheet->setCellValue('N' . $row, $item['keterangan_gbn'] ?: '-');
+                    $newSheet->setCellValue('O' . $row, $item['admin'] ?: '-');
                     $row++;
                 }
 
                 $lastRow = $row - 1;
-                $newSheet->getStyle("A3:N{$lastRow}")->applyFromArray([
+                $newSheet->getStyle("A3:O{$lastRow}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -7648,7 +7649,7 @@ class ExcelController extends BaseController
 
         // 1) Ambil data
         $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
-
+        // dd($dataPoPlus);
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -7747,7 +7748,7 @@ class ExcelController extends BaseController
 
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $data['tgl_poplus']);
-            $sheet->setCellValue('C' . $row, $data['area']);
+            $sheet->setCellValue('C' . $row, $data['admin']);
             $sheet->setCellValue('D' . $row, $data['no_model']);
             $sheet->setCellValue('E' . $row, $data['item_type']);
             $sheet->setCellValue('F' . $row, $data['kode_warna']);
