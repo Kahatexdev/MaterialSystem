@@ -2319,8 +2319,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('X' . $row, isset($item['stock_akhir']) ? number_format($item['stock_akhir'], 2, '.', '') : 0); // stock akhir
 
             // Tagihan GBN dan Jatah Area perhitungan
-            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - ($item['datang_solid'] + $item['plus_datang_solid'] + $item['stock_awal']) : 0;
-            $jatahArea = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - $item['pakai_area'] : 0;
+            $tagihanGbn = isset($item['kgs_stock_awal']) ? ($item['kgs_stock_awal'] + $item['datang_solid'] + $item['plus_datang_solid'] + $item['retur_stock'] - $item['kgs'] - $item['qty_poplus']) : 0;
+
+            $jatahArea = isset($item['pakai_area']) ? (($item['pakai_area'] ?? 0) - ($item['retur_pb_area'] ?? 0) - ($item['kgs'] ?? 0) - ($item['qty_poplus'] ?? 0)) : 0;
 
             // Format Tagihan GBN dan Jatah Area
             $sheet->setCellValue('Y' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
@@ -7496,7 +7497,12 @@ class ExcelController extends BaseController
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
+        // 1) Ambil data
+        if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
+        }
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
@@ -7605,13 +7611,13 @@ class ExcelController extends BaseController
             $sheet->setCellValue('C' . $row, $data['delivery_awal']);
             $sheet->setCellValue('D' . $row, $data['delivery_akhir']);
             $sheet->setCellValue('E' . $row, $data['item_type']);
-            $sheet->setCellValue('F' . $row, $data['kode_warna']);
-            $sheet->setCellValue('G' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, $data['kode_warna_old']);
+            $sheet->setCellValue('G' . $row, $data['warna_old']);
             $sheet->setCellValue('H' . $row, $data['kgs']);
             $sheet->setCellValue('I' . $row, $data['cns']);
             $sheet->setCellValue('J' . $row, $data['lot']);
             $sheet->setCellValue('K' . $row, $data['cluster_old']);
-            $sheet->setCellValue('L' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' KE ' . $data['no_model_new'] . ' KODE ' . $data['kode_warna']);
+            $sheet->setCellValue('L' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' KE ' . $data['no_model_new'] . ' KODE ' . $data['kode_warna_new']);
 
             // style body
             $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
