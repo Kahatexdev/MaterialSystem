@@ -208,92 +208,11 @@
                                 </tr>
                             </thead>
                             <tbody id="sisaKebutuhanTable">
-                                <?php
-                                if (empty($dataPemesanan) && !empty($area) && !empty($noModel)) { ?>
-                                    <tr>
-                                        <th colspan="16">Tidak Ada Data</th>
-                                    </tr>
-                                <?php
-                                } elseif (empty($dataPemesanan) && empty($area) && empty($noModel)) { ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center">Silakan pilih area dan isi no model untuk menampilkan data.</td>
-                                    </tr>
-                                    <?php
-                                } elseif (!empty($dataPemesanan) && !empty($area) && !empty($noModel)) {
-                                    $prevKey = null;
-                                    $ttlKgPesan = $ttlCnsPesan = $ttlKgOut = $ttlCnsOut = $ttlKgRetur = $ttlCnsRetur = $ttlKebTotal = $sisa = 0;
-                                    foreach ($dataPemesanan as $key => $id) {
-                                        $currentKey = $id['item_type'] . '|' . $id['kode_warna'] . '|' . $id['color'];
-                                        if ($prevKey !== null && $currentKey !== $prevKey) { ?>
-                                            <tr style="font-weight:bold;background-color:#f0f0f0;">
-                                                <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsPesan ?></th>
-                                                <th></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsOut ?></th>
-                                                <th></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
-                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
-                                                <th colspan="2"></th>
-                                                <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $sisa < 0 ? 'danger' : 'success'; ?>"><?= number_format($sisa, 2) ?></th>
-                                            </tr>
-                                        <?php
-                                            $ttlKgPesan = $ttlCnsPesan = $ttlKgOut = $ttlCnsOut = $ttlKgRetur = $ttlCnsRetur = $ttlKebTotal = $sisa = 0;
-                                        }
-                                        $ttlKgPesan += $id['ttl_kg'];
-                                        $ttlCnsPesan += $id['ttl_cns'];
-                                        $ttlKgOut   += $id['kg_out'];
-                                        $ttlCnsOut  += $id['cns_out'];
-                                        $ttlKgRetur += $id['kgs_retur'];
-                                        $ttlCnsRetur += $id['cns_retur'];
-                                        if (!isset($shownKebutuhan[$currentKey])) {
-                                            $ttlKebTotal = $id['ttl_keb'];
-                                            $shownKebutuhan[$currentKey] = true;
-                                        }
-                                        $sisa = $ttlKebTotal - $ttlKgOut + $ttlKgRetur;
-                                        ?>
-                                        <tr>
-                                            <td class="text-xs text-center"><?= $id['tgl_pakai']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['tgl_retur']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['no_model']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['max_loss'] ?? ''; ?>%</td>
-                                            <td class="text-xs text-center"><?= $id['item_type']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['kode_warna']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['color']; ?></td>
-                                            <td></td>
-                                            <td class="text-xs text-center"><?= number_format($id['ttl_kg'], 2) ?></td>
-                                            <td class="text-xs text-center"><?= $id['ttl_cns']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['po_tambahan'] == 1 ? 'PO(+)' : ''; ?></td>
-                                            <td class="text-xs text-center"><?= number_format($id['kg_out'], 2) ?></td>
-                                            <td class="text-xs text-center"><?= $id['cns_out']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['lot_out']; ?></td>
-                                            <td class="text-xs text-center"><?= number_format($id['kgs_retur'], 2) ?></td>
-                                            <td class="text-xs text-center"><?= $id['cns_retur']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['lot_retur']; ?></td>
-                                            <td class="text-xs text-center"><?= $id['ket_gbn']; ?></td>
-                                            <td></td>
-                                        </tr>
-                                    <?php $prevKey = $currentKey;
-                                    }
-                                    if ($prevKey !== null) { ?>
-                                        <tr style="font-weight:bold;background-color:#f0f0f0;">
-                                            <th colspan="7" class="text-uppercase text-secondary text-xxs font-weight-bolder text-center">Total Kebutuhan</th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKebTotal, 2) ?></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgPesan, 2) ?></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsPesan ?></th>
-                                            <th></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgOut, 2) ?></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsOut ?></th>
-                                            <th></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= number_format($ttlKgRetur, 2) ?></th>
-                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder text-center"><?= $ttlCnsRetur ?></th>
-                                            <th colspan="2"></th>
-                                            <th class="text-uppercase text-xs font-weight-bolder text-center text-<?= $sisa < 0 ? 'danger' : 'success'; ?>"><?= number_format($sisa, 2) ?></th>
-                                        </tr>
-                                <?php }
-                                } ?>
+                                <?= view($role . '/pemesanan/partials/_sisa_kebutuhan_rows', [
+                                    'dataPemesanan' => $dataPemesanan ?? [],
+                                    'area'          => $area ?? '',
+                                    'noModel'       => $noModel ?? ''
+                                ]) ?>
                             </tbody>
                         </table>
                     </div>
@@ -386,28 +305,6 @@
                     }
                 })
             ]);
-            // const payloadApi = await resApi.json();
-            // const payloadPemesanan = await resPemesanan.json();
-
-            // // Ambil area dari API utama
-            // const areasFromApi = parseAreasPayload(payloadApi); // hasil = array ["ROSSO", "TWIST", ...]
-
-            // // Ambil area dari pemesanan (CI4)
-            // const areasFromPemesanan = payloadPemesanan.map(item => item.admin);
-
-            // // Gabungkan lalu GROUP (hilangkan duplikat)
-            // const allAreas = [...new Set([
-            //     ...areasFromApi,
-            //     ...areasFromPemesanan
-            // ])];
-
-            // // Atur kembali select option
-            // const currentValue = keepSelected ? areaSelect.value : null;
-            // setAreaOptions(allAreas, currentValue);
-
-            // if (!keepSelected) {
-            //     areaSelect.value = '';
-            // }
 
             const payloadApi = await resApi.json();
             const payloadPemesanan = await resPemesanan.json();
@@ -446,16 +343,18 @@
 
     // ====== Saat halaman pertama kali dibuka ======
     document.addEventListener('DOMContentLoaded', async () => {
-        const params = new URLSearchParams(window.location.search);
+        const params       = new URLSearchParams(window.location.search);
         const modelFromUrl = params.get('filter_model');
-        const areaFromUrl = params.get('filter_area');
+        const areaFromUrl  = params.get('filter_area');
 
         if (modelFromUrl && !modelInput.value) {
             modelInput.value = modelFromUrl;
         }
 
         if (modelFromUrl) {
+            // isi dropdown area dulu
             await fetchAreasNow(true);
+
             if (areaFromUrl) {
                 const exists = [...areaSelect.options].some(opt => opt.value === areaFromUrl);
                 if (!exists) {
@@ -464,6 +363,37 @@
                 }
                 areaSelect.value = areaFromUrl;
                 console.log(`✅ Area di-set otomatis dari URL: ${areaFromUrl}`);
+            }
+
+            // kalau model & area ada, langsung load tabel via AJAX
+            if (modelFromUrl && areaFromUrl) {
+                fetchTableData(modelFromUrl, areaFromUrl, false); // false = jangan pushState lagi
+            }
+        }
+    });
+
+    window.addEventListener('popstate', async (event) => {
+        const state = event.state;
+
+        if (state && (state.filter_model || state.filter_area)) {
+            modelInput.value = state.filter_model || '';
+            await fetchAreasNow(true); // refresh dropdown area
+
+            if (state.filter_area) {
+                const exists = [...areaSelect.options].some(opt => opt.value === state.filter_area);
+                if (!exists) {
+                    areaSelect.add(new Option(state.filter_area, state.filter_area));
+                }
+                areaSelect.value = state.filter_area;
+            } else {
+                areaSelect.value = '';
+            }
+
+            if (state.filter_model && state.filter_area) {
+                fetchTableData(state.filter_model, state.filter_area, false);
+            } else {
+                // kalau salah satu kosong, kosongkan tabel
+                tableBody.innerHTML = '';
             }
         }
     });
@@ -500,8 +430,8 @@
     }
 
     // ====== Tombol Filter ======
-    document.getElementById('filterButton').addEventListener('click', function() {
-        const filterArea = areaSelect.value.trim();
+    document.getElementById('filterButton').addEventListener('click', function () {
+        const filterArea  = areaSelect.value.trim();
         const filterModel = modelInput.value.trim();
 
         if (!filterArea || !filterModel) {
@@ -514,31 +444,79 @@
             return;
         }
 
-        const url = '<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>' +
-            '?filter_model=' + encodeURIComponent(filterModel) +
-            '&filter_area=' + encodeURIComponent(filterArea);
-
-        showLoading();
-        let p = 20;
-        updateProgress(p);
-        const tick = setInterval(() => {
-            p = Math.min(98, p + 8);
-            updateProgress(p);
-        }, 120);
-
-        setTimeout(() => {
-            clearInterval(tick);
-            window.location.href = url;
-        }, 900);
+        fetchTableData(filterModel, filterArea, true);
     });
 
     // ====== Tombol Export ======
     document.getElementById('exportExcelBtn')?.addEventListener('click', () => {
         const nm = modelInput.value.trim();
         const ar = areaSelect.value.trim();
+
+        if (!nm || !ar) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Input Tidak Lengkap',
+                text: 'Area dan No Model harus diisi sebelum export!',
+            });
+            return;
+        }
+
         const u = `<?= base_url($role . '/pemesanan/reportSisaKebutuhanArea') ?>?filter_model=${encodeURIComponent(nm)}&filter_area=${encodeURIComponent(ar)}`;
         window.location.href = u;
     });
+
+
+    const tableBody = document.getElementById('sisaKebutuhanTable');
+    const baseListUrl = '<?= base_url($role . '/pemesanan/sisaKebutuhanArea') ?>';
+    const ajaxDataUrl = '<?= base_url($role . '/pemesanan/sisaKebutuhanAreaData') ?>';
+
+    async function fetchTableData(filterModel, filterArea, pushState = true) {
+        showLoading();
+        updateProgress(25);
+
+        const params = new URLSearchParams({
+            filter_model: filterModel,
+            filter_area: filterArea
+        });
+
+        try {
+            const res = await fetch(`${ajaxDataUrl}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+
+            tableBody.innerHTML = json.html || '';
+
+            updateProgress(80);
+
+            // update URL tanpa reload (SPA feel)
+            if (pushState) {
+                window.history.pushState(
+                    { filter_model: filterModel, filter_area: filterArea },
+                    '',
+                    `${baseListUrl}?${params.toString()}`
+                );
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal memuat data',
+                text: 'Terjadi kesalahan saat mengambil data. Silakan coba lagi.'
+            });
+        } finally {
+            updateProgress(100);
+            setTimeout(() => {
+                hideLoading();
+                updateProgress(0);
+            }, 300);
+        }
+    }
+
 </script>
 
 
