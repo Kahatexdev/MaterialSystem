@@ -570,20 +570,37 @@ class CoveringWarehouseController extends BaseController
 
     public function importStokCovering()
     {
-        // Validate upload
+        // ---------- 1. VALIDASI FILE UPLOAD ----------
         $file = $this->request->getFile('file_excel');
+
+        // Antisipasi kalau field name salah / tidak ada file
+        if (!$file) {
+            return redirect()->back()->with('error', 'File tidak ditemukan. Pastikan input name="file_excel".');
+        }
+
         if (!$file->isValid()) {
             return redirect()->back()->with('error', 'File tidak valid atau gagal di-upload.');
         }
 
         $ext = strtolower($file->getClientExtension());
-        if (!in_array($ext, ['xls', 'xlsx'])) {
+        if (!in_array($ext, ['xls', 'xlsx'], true)) {
             return redirect()->back()->with('error', 'Format file harus .xls atau .xlsx');
         }
 
-        $reader = ($ext === 'xlsx') ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
-            : new \PhpOffice\PhpSpreadsheet\Reader\Xls();
-        $spreadsheet = $reader->load($file->getTempName());
+        // ---------- 2. BACA FILE EXCEL DENGAN TRY/CATCH ----------
+        try {
+            $reader = ($ext === 'xlsx')
+                ? new \PhpOffice\PhpSpreadsheet\Reader\Xlsx()
+                : new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+
+            // Kalau file besar, bisa matikan kalkulasi & format untuk hemat memori
+            $reader->setReadDataOnly(true);
+
+            $spreadsheet = $reader->load($file->getTempName());
+        } catch (\Throwable $e) {
+            log_message('error', 'IMPORT COVERING: Gagal membaca file excel. Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'File Excel tidak bisa dibaca. Pastikan formatnya benar.');
+        }
 
         $headerRow = 3;
         $mapping   = [
@@ -600,23 +617,23 @@ class CoveringWarehouseController extends BaseController
             'KETERANGAN'   => 'keterangan',
         ];
 
-        $admin     = session()->get('username') ?? session()->get('email');
-        $nowLabel  = 'Import ' . date('Y-m-d H:i:s');
-        $errors    = [];
-        $updates   = [];
-        $history   = [];
-        $tanggal   = null;
+        $admin    = session()->get('username') ?? session()->get('email') ?? 'SYSTEM';
+        $errors   = [];
+        $updates  = [];
+        $history  = [];
 
-        $sheet = $spreadsheet->getActiveSheet();
+        $sheet     = $spreadsheet->getActiveSheet();
         $sheetName = $sheet->getTitle();
 
-        // Capture import date
+        // ---------- 3. TANGKAP TANGGAL IMPORT ----------
         $rawDate = trim((string)$sheet->getCell('B2')->getValue());
         $tanggal = $this->parseDate($rawDate, $errors, $sheetName);
         if (!$tanggal) {
-            return redirect()->back()->with('error', 'Tanggal tidak valid di sheet aktif.');
+            // Kalau tanggal invalid, langsung stop supaya tidak tersimpan setengah-setengah
+            return redirect()->back()->with('error', 'Tanggal tidak valid di sheet aktif (B2).');
         }
 
+        // ---------- 4. AMBIL SEMUA ROW ----------
         $rows = $sheet->toArray(null, true, true, true);
 
         if (!isset($rows[$headerRow])) {
@@ -625,7 +642,7 @@ class CoveringWarehouseController extends BaseController
 
         $rawHeader = $this->normalizeHeader($rows[$headerRow]);
 
-        // Build header index => key mapping (so 'KETERANGAN' dapat diambil dinamis)
+        // Mapping kolom Excel (A,B,C,...) -> field DB (jenis, color, dst)
         $colToKey = [];
         foreach ($rawHeader as $col => $heading) {
             if (isset($mapping[$heading])) {
@@ -633,12 +650,22 @@ class CoveringWarehouseController extends BaseController
             }
         }
 
+        if (empty($colToKey)) {
+            return redirect()->back()->with('error', 'Header tidak dikenali. Pastikan judul kolom sesuai template (JENIS BARANG, WARNA, KODE, dst).');
+        }
+
+        // ---------- 5. LOOP BARIS DATA ----------
         foreach ($rows as $rowIndex => $row) {
-            if ($rowIndex <= $headerRow) continue;
-            if (empty(array_filter($row))) continue; // skip empty row
-            // dd($row);
-            // if ($row['J'] == 0) continue; // skip if ttl_kg is 0
-            // Build parsed record (new totals from file)
+            if ($rowIndex <= $headerRow) {
+                continue;
+            }
+
+            // Skip kalau semua kolom kosong
+            if (empty(array_filter($row, fn($v) => $v !== null && $v !== ''))) {
+                continue;
+            }
+
+            // Build data baru dari file
             $new = [
                 'admin'      => $admin,
                 'created_at' => "{$tanggal} 00:00:00",
@@ -653,86 +680,107 @@ class CoveringWarehouseController extends BaseController
                 }
             }
 
-            // Required fields
+            // Required fields (identity)
             if (empty($new['jenis']) || empty($new['code']) || empty($new['dr'])) {
                 $errors[] = "Sheet {$sheetName} baris {$rowIndex}: 'jenis' atau 'code' atau 'dr' kosong.";
                 continue;
             }
 
-            // Build where clause WITHOUT ttl_kg/ttl_cns
+            // Build where clause TANPA ttl_kg / ttl_cns
             $where = $this->buildWhereClause($new);
 
-            // Debug log untuk mempermudah troubleshooting (hapus/disable setelah oke)
             log_message('debug', "IMPORT COVERING: mencari stok (sheet {$sheetName} row {$rowIndex}) where=" . json_encode($where));
 
-            // Cari stok (matching berdasarkan identity fields saja)
-            $stock = $this->coveringStockModel->where($where)->first();
+            // Cari stok yang cocok
+            try {
+                $stock = $this->coveringStockModel->where($where)->first();
+            } catch (\Throwable $e) {
+                // Kalau query where aneh (misal karena karakter spesial), catat dan lanjut baris lain
+                $errors[] = "Sheet {$sheetName} baris {$rowIndex}: gagal mencari stok. (" . $e->getMessage() . ")";
+                log_message('error', 'IMPORT COVERING: Error saat mencari stok: ' . $e->getMessage());
+                continue;
+            }
 
             if (!$stock) {
-                // log data file supaya bisa dilihat perbedaan
                 log_message('debug', "IMPORT COVERING: Tidak ditemukan stok untuk baris {$rowIndex}. data file=" . json_encode($new));
                 $errors[] = "Sheet {$sheetName} baris {$rowIndex}: Tidak ada stok yang cocok.";
                 continue;
             }
 
-            $id = $stock['id_covering_stock'];
-            $old_kg = (float) $stock['ttl_kg'];
-            $old_cns = (float) $stock['ttl_cns'];
-            $new_kg = (float) ($new['ttl_kg'] ?? 0);
+            $id      = (int) $stock['id_covering_stock'];
+            $old_kg  = (float) ($stock['ttl_kg'] ?? 0);
+            $old_cns = (float) ($stock['ttl_cns'] ?? 0);
+            $new_kg  = (float) ($new['ttl_kg'] ?? 0);
             $new_cns = (float) ($new['ttl_cns'] ?? 0);
 
-            // jika tidak ada perubahan skip
+            // Kalau tidak ada perubahan, skip
             if ($new_kg == $old_kg && $new_cns == $old_cns) {
                 continue;
             }
 
-            $delta_kg = $new_kg - $old_kg;
+            $delta_kg  = $new_kg - $old_kg;
             $delta_cns = $new_cns - $old_cns;
 
-            // Siapkan record update (set totals terbaru)
+            // Siapkan record update
             $updates[] = [
                 'id_covering_stock' => $id,
-                'ttl_kg'  => $new_kg,
-                'ttl_cns' => $new_cns,
+                'ttl_kg'            => $new_kg,
+                'ttl_cns'           => $new_cns,
             ];
 
-            // Siapkan history: pisahkan masuk / keluar
-            $h = [
-                'no_model' => NULL,
-                'jenis' => $new['jenis'],
-                'jenis_benang' => $new['jenis_benang'] ?? NULL,
-                'jenis_cover' => $new['jenis_cover'] ?? NULL,
-                'color' => $new['color'] ?? NULL,
-                'code' => $new['code'],
-                'lmd' => $new['lmd'] ?? NULL,
-                'ttl_cns' => $delta_cns,
-                'ttl_kg' => $delta_kg,
-                'admin' => $admin,
-                'keterangan' => $new['keterangan'] ?? '',
-                'created_at' => "{$tanggal} 00:00:00",
+            // Siapkan history
+            $history[] = [
+                'no_model'      => null,
+                'jenis'         => $new['jenis'],
+                'jenis_benang'  => $new['jenis_benang'] ?? null,
+                'jenis_cover'   => $new['jenis_cover'] ?? null,
+                'color'         => $new['color'] ?? null,
+                'code'          => $new['code'],
+                'lmd'           => $new['lmd'] ?? null,
+                'ttl_cns'       => $delta_cns,
+                'ttl_kg'        => $delta_kg,
+                'admin'         => $admin,
+                'keterangan'    => $new['keterangan'] ?? '',
+                'created_at'    => "{$tanggal} 00:00:00",
             ];
-
-            $history[] = $h;
         }
 
-        // DB transaction
+        // ---------- 6. SIMPAN KE DATABASE DENGAN TRANSAKSI + CHUNK ----------
+        if (empty($updates) && empty($history)) {
+            // Tidak ada data yang berubah sama sekali
+            $msg = $errors
+                ? 'Tidak ada data yang diubah. Beberapa baris bermasalah: <br>' . implode('<br>', $errors)
+                : 'Tidak ada data yang perlu di-update.';
+            return redirect()->back()->with('warning', $msg);
+        }
+
         $db = \Config\Database::connect();
+        $db->transException(true); // kalau ada error query, lempar exception
         $db->transStart();
 
-        if (!empty($updates)) {
-            $this->coveringStockModel->updateBatch($updates, 'id_covering_stock');
-        }
-        if (!empty($history)) {
-            $this->historyCoveringStockModel->insertBatch($history);
-        }
+        try {
+            // Biar aman kalau data besar, kita chunk per 500 row
+            if (!empty($updates)) {
+                $this->chunkedUpdateBatch($this->coveringStockModel, $updates, 'id_covering_stock', 500);
+            }
 
-        $db->transComplete();
+            if (!empty($history)) {
+                $this->chunkedInsertBatch($this->historyCoveringStockModel, $history, 500);
+            }
+
+            $db->transComplete();
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            log_message('error', 'IMPORT COVERING: Gagal menyimpan ke DB. Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menyimpan data ke database: ' . $e->getMessage());
+        }
 
         if ($db->transStatus() === false) {
-            return redirect()->back()->with('error', 'Gagal menyimpan data.');
+            log_message('error', 'IMPORT COVERING: transStatus false tanpa exception eksplisit.');
+            return redirect()->back()->with('error', 'Gagal menyimpan data (transaksi DB gagal).');
         }
 
-        // Response: kalau ada errors tetap tampilkan sebagai warning (tapi proses sukses untuk yg lain)
+        // ---------- 7. RESPONSE ----------
         if ($errors) {
             $msgType = empty($updates) ? 'error' : 'warning';
             return redirect()->back()->with($msgType, implode('<br>', $errors));
@@ -742,7 +790,8 @@ class CoveringWarehouseController extends BaseController
             ->with('success', 'Data berhasil diimpor.');
     }
 
-    /* Helper yang diperbarui */
+    /* ================== HELPER ================== */
+
     private function normalizeHeader(array $row): array
     {
         return array_map(function ($h) {
@@ -750,54 +799,61 @@ class CoveringWarehouseController extends BaseController
         }, $row);
     }
 
-    private function parseNumber($value)
+    private function parseNumber($value): float
     {
-        if ($value === null || $value === '') return 0;
+        if ($value === null || $value === '') {
+            return 0.0;
+        }
 
         $s = trim((string)$value);
         $s = str_replace(' ', '', $s); // hapus spasi
 
-        // Jika format "1.234,56" -> hapus titik ribuan lalu ganti koma jadi titik
+        // Format "1.234,56" -> "1234.56"
         if (substr_count($s, '.') > 0 && strpos($s, ',') !== false) {
             $s = str_replace('.', '', $s);
             $s = str_replace(',', '.', $s);
         } else {
-            // jika hanya pakai koma sebagai desimal "0,69"
+            // hanya koma sebagai desimal "0,69"
             if (strpos($s, ',') !== false && strpos($s, '.') === false) {
                 $s = str_replace(',', '.', $s);
             }
-            // kalau hanya titik, biarkan (1.5)
         }
 
-        return is_numeric($s) ? (float)$s : 0;
+        return is_numeric($s) ? (float)$s : 0.0;
     }
 
     private function parseDate($raw, array &$errors, string $sheet)
     {
         $raw = trim((string)$raw);
-        // Try dd/mm/yyyy
+
+        if ($raw === '') {
+            $errors[] = "Sheet {$sheet}: Tanggal import kosong (B2).";
+            return null;
+        }
+
+        // dd/mm/yyyy
         $dt = \DateTime::createFromFormat('d/m/Y', $raw);
-        if ($dt) {
+        if ($dt instanceof \DateTime) {
             return $dt->format('Y-m-d');
         }
 
-        // Try yyyy-mm-dd
+        // yyyy-mm-dd
         $dt = \DateTime::createFromFormat('Y-m-d', $raw);
-        if ($dt) {
+        if ($dt instanceof \DateTime) {
             return $dt->format('Y-m-d');
         }
 
-        // Try Excel timestamp
+        // Excel serial
         if (is_numeric($raw)) {
             try {
                 return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($raw)
                     ->format('Y-m-d');
-            } catch (\Exception $e) {
-                // continue to error
+            } catch (\Throwable $e) {
+                // fallback ke error
             }
         }
 
-        $errors[] = "Sheet {$sheet}: Tanggal import tidak valid (B2).";
+        $errors[] = "Sheet {$sheet}: Tanggal import tidak valid (B2). Nilai mentah: {$raw}";
         return null;
     }
 
@@ -809,18 +865,53 @@ class CoveringWarehouseController extends BaseController
             return $s === '' ? null : $s;
         };
 
-        return array_filter([
-            'jenis'        => $normalize($rec['jenis']),
-            'color'        => $normalize($rec['color']),
-            'code'         => $normalize($rec['code']),
-            'jenis_cover'  => $normalize($rec['jenis_cover']),
-            'jenis_benang' => $normalize($rec['jenis_benang']),
-            'jenis_mesin'  => $normalize($rec['jenis_mesin']),
-            'dr'           => $normalize($rec['dr']),
-            // jangan sertakan ttl_kg / ttl_cns
-        ], function ($value) {
+        $where = [
+            'jenis'        => $normalize($rec['jenis'] ?? null),
+            'color'        => $normalize($rec['color'] ?? null),
+            'code'         => $normalize($rec['code'] ?? null),
+            'jenis_cover'  => $normalize($rec['jenis_cover'] ?? null),
+            'jenis_benang' => $normalize($rec['jenis_benang'] ?? null),
+            'jenis_mesin'  => $normalize($rec['jenis_mesin'] ?? null),
+            'dr'           => $normalize($rec['dr'] ?? null),
+        ];
+
+        // Buang key yang null/empty supaya where() tidak pakai kondisi kosong
+        return array_filter($where, function ($value) {
             return !is_null($value) && $value !== '';
         });
+    }
+
+    /**
+     * Update batch dengan chunk untuk menghindari error jika data besar.
+     *
+     * @param \CodeIgniter\Model $model
+     * @param array $rows
+     * @param string $pk
+     * @param int $chunkSize
+     * @return void
+     */
+    private function chunkedUpdateBatch($model, array $rows, string $pk, int $chunkSize = 500): void
+    {
+        $chunks = array_chunk($rows, $chunkSize);
+        foreach ($chunks as $chunk) {
+            $model->updateBatch($chunk, $pk);
+        }
+    }
+
+    /**
+     * Insert batch dengan chunk.
+     *
+     * @param \CodeIgniter\Model $model
+     * @param array $rows
+     * @param int $chunkSize
+     * @return void
+     */
+    private function chunkedInsertBatch($model, array $rows, int $chunkSize = 500): void
+    {
+        $chunks = array_chunk($rows, $chunkSize);
+        foreach ($chunks as $chunk) {
+            $model->insertBatch($chunk);
+        }
     }
 
 

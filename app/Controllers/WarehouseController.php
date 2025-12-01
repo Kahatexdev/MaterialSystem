@@ -2453,14 +2453,14 @@ class WarehouseController extends BaseController
     public function filterReportGlobal()
     {
         $key = $this->request->getGet('key');
-        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        // log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
         if (empty($key)) {
             return $this->response->setJSON(['error' => 'Key is missing']);
         }
 
         $data = $this->masterOrderModel->getFilterReportGlobal($key);
         // Log data yang diterima dari model
-        log_message('debug', 'Query result: ' . print_r($data, true));
+        // log_message('debug', 'Query result: ' . print_r($data, true));
 
         if (empty($data)) {
             return $this->response->setJSON(['error' => 'No data found']);
@@ -2488,7 +2488,7 @@ class WarehouseController extends BaseController
 
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
         // Log data yang diterima dari model
-        log_message('debug', 'Query result: ' . print_r($data, true));
+        // log_message('debug', 'Query result: ' . print_r($data, true));
 
         if (empty($data)) {
             return $this->response->setJSON(['error' => 'No data found']);
