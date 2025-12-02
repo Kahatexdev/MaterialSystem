@@ -382,6 +382,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('retur/getItemTypeForReturSample', 'ReturController::getItemTypeForReturSample');
     $routes->post('retur/saveReturSample', 'ReturController::saveReturSample');
     $routes->get('retur/getDataRepeat', 'ReturController::getDataRepeat');
+    $routes->post('retur/approveRepeat', 'ReturController::approveRepeat');
 
     //Po Plus
     $routes->get('poplus', 'PoTambahanController::index');

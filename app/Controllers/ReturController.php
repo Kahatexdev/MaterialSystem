@@ -16,8 +16,10 @@ use App\Models\ScheduleCelupModel;
 use App\Models\PengeluaranModel;
 use App\Models\ClusterModel;
 use App\Models\StockModel;
-
-
+use App\Models\HistoryStock;
+use App\Models\TotalPemesananModel;
+use App\Models\PemesananModel;
+use App\Models\PemesananSpandexKaretModel;
 
 class ReturController extends BaseController
 {
@@ -38,7 +40,10 @@ class ReturController extends BaseController
     protected $clusterModel;
     protected $stockModel;
     protected $pengeluaranModel;
-
+    protected $historyStock;
+    protected $totalPemesananModel;
+    protected $pemesananModel;
+    protected $pemesananSpandexKaretModel;
 
     public function __construct()
     {
@@ -53,6 +58,10 @@ class ReturController extends BaseController
         $this->clusterModel = new ClusterModel();
         $this->stockModel = new StockModel();
         $this->pengeluaranModel = new PengeluaranModel();
+        $this->historyStock = new HistoryStock();
+        $this->totalPemesananModel = new TotalPemesananModel();
+        $this->pemesananModel = new PemesananModel();
+        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
 
         $this->role = session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -698,5 +707,410 @@ class ReturController extends BaseController
         // ↑ ini data per karung sesuai kebutuhanmu
 
         return $this->response->setJSON($rows);
+    }
+
+    public function approveRepeat()
+    {
+        $data = $this->request->getPost();
+        // dd($data);
+
+        // data fillter
+        $query = http_build_query([
+            'jenis' => $data['jenis'] ?? '',
+            'area' => $data['area'] ?? '',
+            'tgl_retur' => $data['tgl_retur'] ?? '',
+            'no_model' => $data['no_model'] ?? '',
+            'kode_warna' => $data['kode_warna'] ?? ''
+        ]);
+        $url = base_url(session()->get('role') . '/retur' . (!empty($query) ? '?' . $query : ''));
+
+        // data post
+        $areaRetur      = $data['area_retur'];
+        $noModelRetur   = $data['no_model_retur'];
+        $itemTypeRetur  = $data['item_type_retur'];
+        $kodeWarnaRetur = $data['kode_warna_retur'];
+        $colorRetur     = $data['color_retur'];
+        $lotRetur       = $data['lot_retur'];
+        $kategori       = $data['kategori'];
+        $ket            = $data['keterangan'];
+        $allId          = $data['id_retur'];
+        $kgRetur        = $data['kg_retur'];
+        $cnsRetur       = $data['cns_retur'];
+        $noKarungRetur  = $data['no_karung_retur'];
+        $modelRepeat    = $data['model_repeat'];
+        $kgRepeat       = $data['kg_repeat'];
+        $conesRepeat    = $data['cones_repeat'];
+
+        // hitung jumlah id
+        $countId = count($allId);
+
+        // pengumpulan data untuk update supermarket area
+        $collectRepeat = [];   // kumpulan semua repeat + id pengeluaran
+        $collectRetur = [
+            'no_model'   => $noModelRetur,
+            'item_type'  => $itemTypeRetur,
+            'kode_warna' => $kodeWarnaRetur,
+            'warna'      => $colorRetur,
+            'lot'        => $lotRetur
+        ];
+
+        $db = \Config\Database::connect();
+        $db->transBegin(); // pakai transBegin untuk manual control
+
+        try {
+            // acc retur berdasarkan id retur
+            $updateRetur = [
+                'keterangan_gbn'    => 'Approve: ' . $ket,
+                'waktu_acc_retur'   => date('Y-m-d H:i:s'),
+                'admin'             => session()->get('username'),
+            ];
+
+            // kalau array dan lebih dari 1 → update menggunakan whereIn
+            if (is_array($allId) && $countId > 1) {
+                // gabungkan semua id retur
+                $this->returModel
+                    ->whereIn('id_retur', $allId)
+                    ->set($updateRetur)
+                    ->update();
+            } else {
+                // hanya 1 id
+                $this->returModel->update($allId[0], $updateRetur);
+            }
+
+            foreach ($allId as $id) {
+                $r = [
+                    'no_model'      => $noModelRetur,
+                    'item_type'     => $itemTypeRetur,
+                    'kode_warna'    => $kodeWarnaRetur,
+                    'lot_retur'     => $lotRetur,
+                ];
+
+                try {
+                    $idCelup = $this->scheduleCelupModel->getIdCelups($r);
+                } catch (\Throwable $e) {
+                    log_message('error', 'getIdCelups error: ' . $e->getMessage());
+                    $idCelup = null;
+                }
+                // insert id out celup by id retur
+                $dataOutCelup = [
+                    'id_retur'    => $id,
+                    'id_celup'    => $idCelup ?? null,
+                    'no_model'    => $noModelRetur,
+                    'l_m_d'       => '',
+                    'no_karung'   => $noKarungRetur[$id],
+                    'kgs_kirim'   => (float)$kgRetur[$id],
+                    'cones_kirim' => (int)$cnsRetur[$id],
+                    'lot_kirim'   => $lotRetur,
+                    'admin'       => session()->get('username'),
+                    'created_at'  => date('Y-m-d H:i:s')
+                ];
+                // insert ke out celup
+                $this->outCelupModel->insert($dataOutCelup);
+
+                // ambil id out celup untuk pemasukan
+                $idOutCelup = $this->outCelupModel->insertID();
+
+                // insert pemasukan 
+                $dataPemasukan = [
+                    'id_out_celup'  => $idOutCelup,
+                    'tgl_masuk'     => date('Y-m-d'),
+                    'nama_cluster'  => 'barang_Jln',
+                    'out_jalur'     => '1',
+                    'admin'         => session()->get('username'),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ];
+
+                $this->pemasukanModel->insert($dataPemasukan);
+
+                // ambil id stock untuk update pemasukan
+                $idPemasukan = $this->pemasukanModel->insertID();
+
+                // cek sudah ada stock atau belum
+                $existingStock = $this->stockModel
+                    ->where('no_model', $noModelRetur)
+                    ->where('item_type', $itemTypeRetur)
+                    ->where('kode_warna', $kodeWarnaRetur)
+                    ->where('nama_cluster', 'barang_Jln')
+                    ->where('lot_stock', $lotRetur)
+                    ->first();
+
+                // update jika sudah ada
+                if ($existingStock) {
+                    // ambil id stock
+                    $idStok = $existingStock['id_stock'];
+                } else {
+                    // insert jika belum ada
+                    $dataStock = [
+                        'no_model'     => $noModelRetur,
+                        'item_type'    => $itemTypeRetur,
+                        'kode_warna'   => $kodeWarnaRetur,
+                        'warna'        => $colorRetur,
+                        'lot_stock'    => $lotRetur,
+                        'nama_cluster' => 'barang_Jln',
+                        'admin'        => session()->get('username'),
+                        'created_at'   => date('Y-m-d H:i:s')
+                    ];
+                    $this->stockModel->insert($dataStock);
+                    // get id stock
+                    $idStok = $this->stockModel->getInsertID();
+                }
+
+                // update id stock di pemasukan
+                $this->pemasukanModel
+                    ->where('id_pemasukan', $idPemasukan)
+                    ->set('id_stock', $idStok)
+                    ->update();
+            }
+
+            // pindah stock
+            foreach ($modelRepeat as $r => $repeat) {
+                // untuk menentukan pengurangan karung
+                $countModel = count($repeat);
+                $lastIndex  = $countModel - 1;
+
+                foreach ($repeat as $d => $detail) {
+                    // tentukan krgRepeat
+                    if ($countModel > 0) {
+                        // kalau ada data repeat
+                        $krgRepeat = ($d == $lastIndex) ? 1 : 0;
+                    } else {
+                        // kalau tidak ada repeat
+                        $krgRepeat = 1;
+                    }
+
+                    $parts = explode(' | ', $detail);
+
+                    $noModelNew  = $parts[0] ?? '';
+                    $itemTypeNew = $parts[1] ?? '';
+                    $kodeWarnaNew = $parts[2] ?? '';
+                    $warnaNew = $parts[3] ?? '';
+
+                    // cek jenis
+                    $master = $this->masterMaterial
+                        ->select('jenis')
+                        ->where('item_type', $itemTypeNew)
+                        ->first();
+                    $jenis = $master['jenis'];
+
+                    // out celup new
+                    $dataOutCelupNew = [
+                        'no_model'    => $noModelNew,
+                        'l_m_d'       => '',
+                        'no_karung'   => $noKarungRetur[$id],
+                        'kgs_kirim'   => (float)$kgRepeat[$r][$d],
+                        'cones_kirim' => (int)$conesRepeat[$r][$d],
+                        'lot_kirim'   => $lotRetur,
+                        'admin'       => session()->get('username'),
+                        'created_at'  => date('Y-m-d H:i:s')
+                    ];
+
+                    $this->outCelupModel->insert($dataOutCelupNew);
+                    $idOutCelupNew = $this->outCelupModel->getInsertID();
+
+
+                    if ($jenis === "BENANG" || $jenis === "NYLON") {
+                        // cek sudah ada stock new atau belum
+                        $existingStockNew = $this->stockModel
+                            ->where('no_model', $noModelNew)
+                            ->where('item_type', $itemTypeNew)
+                            ->where('kode_warna', $kodeWarnaNew)
+                            ->where('nama_cluster', 'barang_Jln')
+                            ->where('lot_stock', $lotRetur)
+                            ->first();
+
+                        // get id jika sudah ada new
+                        if ($existingStockNew) {
+                            // ambil id stock new
+                            $idStokNew = $existingStockNew['id_stock'];
+                        } else {
+                            if ($kategori === "BB SISA EXPORT") {
+                                // insert jika belum ada new
+                                $dataStockNew = [
+                                    'no_model'      => $noModelNew,
+                                    'item_type'     => $itemTypeNew,
+                                    'kode_warna'    => $kodeWarnaNew,
+                                    'warna'         => $warnaNew,
+                                    'lot_awal'      => $lotRetur,
+                                    'nama_cluster'  => 'barang_Jln',
+                                    'admin'         => session()->get('username'),
+                                    'created_at'    => date('Y-m-d H:i:s')
+                                ];
+                            } else {
+                                // insert jika belum ada new
+                                $dataStockNew = [
+                                    'no_model'      => $noModelNew,
+                                    'item_type'     => $itemTypeNew,
+                                    'kode_warna'    => $kodeWarnaNew,
+                                    'warna'         => $warnaNew,
+                                    'lot_stock'      => $lotRetur,
+                                    'nama_cluster'  => 'barang_Jln',
+                                    'admin'         => session()->get('username'),
+                                    'created_at'    => date('Y-m-d H:i:s')
+                                ];
+                            }
+                            $this->stockModel->insert($dataStockNew);
+                            // get id stock new
+                            $idStokNew = $this->stockModel->getInsertID();
+                        }
+                        // insert pemasukan new
+                        $dataPemasukanNew = [
+                            'id_out_celup'  => $idOutCelupNew,
+                            'tgl_masuk'     => date('Y-m-d'),
+                            'nama_cluster'  => 'barang_Jln',
+                            'out_jalur'     => '1',
+                            'admin'         => session()->get('username'),
+                            'created_at'    => date('Y-m-d H:i:s'),
+                            'id_stock'      => $idStokNew,
+                        ];
+                        $this->pemasukanModel->insert($dataPemasukanNew);
+
+                        // jika sisa export masukan history pindah order
+                        if ($kategori === "BB SISA EXPORT") {
+                            // insert history stock
+                            $this->historyStock->insert([
+                                'id_stock_old'  => $idStok, // ID stok lama
+                                'id_stock_new'  => $idStokNew, // ID stok baru
+                                'id_out_celup'  => $idOutCelup, // ID stok baru
+                                'cluster_old'   => 'barangJln', // Cluster lama
+                                'cluster_new'   => 'barangJln', // Cluster baru
+                                'kgs'           => (float)$kgRepeat[$r][$d], // Total kgs
+                                'cns'           => (int)$conesRepeat[$r][$d], // Total cns
+                                'krg'           => $krgRepeat, // Total krg
+                                'lot'           => $lotRetur, // Lot stok lama
+                                'keterangan'    => "Pindah Order", // Keterangan pemindahan
+                                'admin'         => session()->get('username'), // Admin yang melakukan
+                                'created_at'    => date('Y-m-d H:i:s'), // Waktu pemindahan
+                                'updated_at'    => null, // Kolom updated_at bisa null karena belum ada perubahan
+                            ]);
+                        }
+                    }
+
+                    // pemesanan
+                    // cari id material
+                    $material = $this->materialModel
+                        ->select('material.id_material, master_material.jenis')
+                        ->join('master_order', 'master_order.id_order=material.id_order')
+                        ->join('master_material', 'master_material.item_type=material.item_type')
+                        ->where('master_order.no_model', $noModelNew)
+                        ->where('material.item_type', $itemTypeNew)
+                        ->where('material.kode_warna', $kodeWarnaNew)
+                        ->where('material.color', $warnaNew)
+                        ->first();
+
+                    // insert data total pemesanan
+                    $dataTotalPemesanan = [
+                        'ttl_jl_mc' => 0,
+                        'ttl_kg' => (float)$kgRepeat[$r][$d],
+                        'ttl_cns' => (int)$conesRepeat[$r][$d],
+                    ];
+                    $this->totalPemesananModel->insert($dataTotalPemesanan);
+                    $idTotalPemesanan = $this->totalPemesananModel->getInsertID();
+
+                    // pemesanan
+                    $dataPemesanan = [
+                        'id_material'           => $material['id_material'],
+                        'tgl_list'              => date('Y-m-d'),
+                        'tgl_pesan'             => date('Y-m-d H:i:s'),
+                        'tgl_pakai'             => date('Y-m-d'),
+                        'jl_mc'                 => 0,
+                        'ttl_qty_cones'         => (int)$conesRepeat[$r][$d],
+                        'ttl_berat_cones'       => (float)$kgRepeat[$r][$d],
+                        'lot'                   => $lotRetur,
+                        'id_total_pemesanan'    => $idTotalPemesanan,
+                        'status_kirim'          => 'YA',
+                        'admin'                 => $areaRetur,
+                        'created_at'            => date('Y-m-d H:i:s'), // Waktu pemindahan
+                    ];
+                    $this->pemesananModel->insert($dataPemesanan);
+
+                    if ($jenis == "SPANDEX" || $jenis == "KARET") {
+                        // insert pemesanan spandex karet
+                        $dataPemesananSK = [
+                            'id_total_pemesanan'    => $idTotalPemesanan,
+                            'admin'                 => session()->get('username'),
+                            'created_at'            => date('Y-m-d H:i:s'), // Waktu pemindahan
+                        ];
+                        $this->pemesananSpandexKaretModel->insert($dataPemesananSK);
+                        $idPsk = $this->pemesananSpandexKaretModel->getInsertID();
+                    }
+
+                    $ketGbn = ($kategori === "BB SISA EXPORT") ? "Repeat dari retur" : "";
+                    // insert pengeluaran
+                    $dataPengeluaran = [
+                        'id_total_pemesanan'    => $idTotalPemesanan,
+                        'id_psk'                => $idPsk ?? NULL,
+                        'id_stock'              => $idStokNew ?? 0,
+                        'area_out'              => $areaRetur,
+                        'tgl_out'               => date('Y-m-d'),
+                        'kgs_out'               => (float)$kgRepeat[$r][$d],
+                        'cns_out'               => (int)$conesRepeat[$r][$d],
+                        'krg_out'               => $krgRepeat,
+                        'lot_out'               => $lotRetur,
+                        'nama_cluster'          => 'barang_Jln',
+                        'status'                => 'Pengiriman Area',
+                        'keterangan_gbn'        => $ketGbn,
+                        'admin'                 => session()->get('username'),
+                        'created_at'            => date('Y-m-d H:i:s'), // Waktu pemindahan
+                        'terima_area'           => '1',
+                    ];
+
+                    $this->pengeluaranModel->insert($dataPengeluaran);
+                    $idPengeluaran = $this->pengeluaranModel->getInsertID();
+
+                    // collect data repeat
+                    $collectRepeat[] = [
+                        'id_pengeluaran' => $idPengeluaran,
+                        'no_model'       => $noModelNew,
+                        'item_type'      => $itemTypeNew,
+                        'kode_warna'     => $kodeWarnaNew,
+                        'warna'          => $warnaNew,
+                        'no_karung'      => $noKarungRetur[$id],
+                        'kgs'            => (float)$kgRepeat[$r][$d],
+                        'cns'            => (int)$conesRepeat[$r][$d],
+                        'lot'            => $lotRetur,
+                        'area'           => $areaRetur,
+                    ];
+                }
+            }
+
+            // kirim data untuk update supermarket area
+            $send = [
+                'retur'  => $collectRetur,
+                'repeat' => $collectRepeat,
+            ];
+            log_message('warning', 'Approve retur data: ' . json_encode($send));
+
+            $client = \Config\Services::curlrequest();
+            // Kirim ke API sebagai JSON
+            $response = $client->post(
+                'http://172.23.39.118/CapacityApps/public/api/repeatSupermarket',
+                [
+                    'headers' => ['Content-Type' => 'application/json'],
+                    'json'    => $send,
+                    'timeout' => 5, // biar tidak ngegantung
+                ]
+            );
+            // Ambil result dari response
+            $body = json_decode($response->getBody(), true);
+
+            // Cek API supermarket sukses atau tidak
+            if ($response->getStatusCode() !== 200 || ($body['status'] ?? '') !== 'success') {
+                throw new \Exception("API supermarket gagal");
+            }
+
+            $db->transCommit();
+
+            session()->setFlashdata('success', 'Retur berhasil diapprove & disimpan ke supermarket area');
+            return redirect()->to($url);
+        } catch (\Throwable $e) {
+
+            // rollback semua!
+            $db->transRollback();
+
+            log_message('error', 'Approve retur gagal: ' . $e->getMessage());
+
+            session()->setFlashdata('error', 'Gagal approve retur. Semua data dibatalkan.');
+            return redirect()->to($url);
+        }
     }
 }
