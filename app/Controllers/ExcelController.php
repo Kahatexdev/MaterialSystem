@@ -2319,8 +2319,9 @@ class ExcelController extends BaseController
             $sheet->setCellValue('X' . $row, isset($item['stock_akhir']) ? number_format($item['stock_akhir'], 2, '.', '') : 0); // stock akhir
 
             // Tagihan GBN dan Jatah Area perhitungan
-            $tagihanGbn = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - ($item['datang_solid'] + $item['plus_datang_solid'] + $item['stock_awal']) : 0;
-            $jatahArea = isset($item['kgs']) ? $item['kgs'] + $item['qty_poplus'] - $item['pakai_area'] : 0;
+            $tagihanGbn = isset($item['kgs_stock_awal']) ? ($item['kgs_stock_awal'] + $item['datang_solid'] + $item['plus_datang_solid'] + $item['retur_stock'] - $item['kgs'] - $item['qty_poplus']) : 0;
+
+            $jatahArea = isset($item['pakai_area']) ? (($item['pakai_area'] ?? 0) - ($item['retur_pb_area'] ?? 0) - ($item['kgs'] ?? 0) - ($item['qty_poplus'] ?? 0)) : 0;
 
             // Format Tagihan GBN dan Jatah Area
             $sheet->setCellValue('Y' . $row, number_format($tagihanGbn, 2, '.', '')); // tagihan gbn
@@ -4476,7 +4477,7 @@ class ExcelController extends BaseController
                 return $m['no_mesin'] >= 1 && $m['no_mesin'] <= 43;
             }
         }));
-        // dd($getMesin);
+
         // setelah $tglAwal, $tglAkhir ter-set
         $period = new \DatePeriod(
             new \DateTime($tglAwal),
@@ -4618,8 +4619,7 @@ class ExcelController extends BaseController
         $groupedData = [];
         foreach ($data as $d) {
             $keyTgl = date('d/m/Y', strtotime($d['tanggal_schedule']));
-            // $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
-            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']] = $d;
+            $groupedData[$keyTgl][$d['id_mesin']][$d['lot_urut']][$d['no_model']] = $d;
         }
 
         // Hitung kolom awal per tanggal
@@ -4639,79 +4639,35 @@ class ExcelController extends BaseController
                 for ($lot = 1; $lot <= 3; $lot++) {
                     foreach ($dates as $i => $tgl) {
                         $colStartIndex = 1 + ($i * count($headers));
-                        // $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? [];
 
-                        // if (!empty($dataRow)) {
-                        //     // gabungkan no_model unik
-                        //     $noModels = array_unique(array_map(fn ($r) => $r['no_model'] ?? '', $dataRow));
-                        //     $no_model_str = implode(', ', array_filter($noModels));
-
-                        //     // gabungkan item_type unik (pakai separator jika banyak)
-                        //     $itemTypes = array_unique(array_map(fn ($r) => $r['item_type'] ?? '', $dataRow));
-                        //     $item_type_str = implode(' | ', array_filter($itemTypes));
-
-                        //     // jumlahkan kg_celup
-                        //     $kg_total = 0;
-                        //     foreach ($dataRow as $r) {
-                        //         $kg_total += floatval($r['kg_celup'] ?? 0);
-                        //     }
-                        //     $kg_total = format_number($kg_total, 2);
-
-                        //     // gabungkan kode_warna dan warna unik
-                        //     $kodeWarna = array_unique(array_map(fn ($r) => $r['kode_warna'] ?? '', $dataRow));
-                        //     $kode_warna_str = implode(', ', array_filter($kodeWarna));
-                        //     $warna = array_unique(array_map(fn ($r) => $r['warna'] ?? '', $dataRow));
-                        //     $warna_str = implode(', ', array_filter($warna));
-
-                        //     // ambil start_mc/delivery/ket dari baris pertama (atau kamu bisa ambil min/max sesuai rules)
-                        //     $first = $dataRow[0];
-                        //     $startMc = (!empty($first['start_mc']) && $first['start_mc'] !== '0000-00-00 00:00:00') ? date('d-M', strtotime($first['start_mc'])) : '';
-
-                        //     $deliveryRaw = $first['delivery_awal'] ?? '';
-                        //     $delivery = '';
-                        //     if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
-                        //         $ts = strtotime($deliveryRaw);
-                        //         if ($ts !== false && $ts > 0) $delivery = date('d-M', $ts);
-                        //     }
-
-                        //     $values = [
-                        //         $lot === 1 ? $kapasitas : '',
-                        //         $lot === 1 ? $noMesin : '',
-                        //         $lot,
-                        //         $no_model_str,
-                        //         $item_type_str,
-                        //         $kg_total,
-                        //         $kode_warna_str,
-                        //         $warna_str,
-                        //         $first['lot_celup'] ?? '',
-                        //         $first['actual_celup'] ?? '',
-                        //         $startMc,
-                        //         $delivery,
-                        //         $first['ket_schedule'] ?? ''
-                        //     ];
-                        // } else {
-                        //     // placeholder sama seperti sekarang
-                        //     $values = [
-                        //         $lot === 1 ? $kapasitas : '',
-                        //         $lot === 1 ? $noMesin : '',
-                        //         $lot
-                        //     ];
-                        //     for ($k = 3; $k < count($headers); $k++) {
-                        //         $values[] = '';
-                        //     }
-                        // }
                         $dataRow = $groupedData[$tgl][$idMesin][$lot] ?? null;
 
                         if ($dataRow) {
-                            // dd($dataRow);
-                            // dd($noModel);
-                            //Ubah format tanggal start mc
-                            $startMc = (!empty($dataRow['start_mc']) && $dataRow['start_mc'] !== '0000-00-00 00:00:00')
-                                ? date('d-M', strtotime($dataRow['start_mc'])) : '';
+                            // Gabungkan semua no_model_detail jadi satu cell
+                            $noModelDetails = [];
+                            $kgSum = 0;
+                            $actualCelupParts = [];
 
-                            $deliveryRaw = $dataRow['delivery_awal'] ?? '';
-                            $delivery = ''; // default kosong
+                            foreach ($dataRow as $nm => $dr) {
+                                $noModelDetails[] = $dr['no_model_detail'] ?? $nm;
+                                $kgSum += floatval($dr['kg_celup'] ?? 0);
+                                if (isset($dr['actual_celup']) && $dr['actual_celup'] !== '') {
+                                    $actualCelupParts[] = $dr['actual_celup'];
+                                }
+                            }
 
+                            $noModelDetailCombined = implode(', ', $noModelDetails); // separator bisa diubah
+                            $actualCelupCombined = !empty($actualCelupParts) ? implode(' / ', $actualCelupParts) : ($dataRow[array_key_first($dataRow)]['actual_celup'] ?? '');
+
+                            // Ambil data primer dari entry pertama (agar field lain tetap terisi)
+                            $first = reset($dataRow);
+
+                            // Format start_mc dari first
+                            $startMc = (!empty($first['start_mc']) && $first['start_mc'] !== '0000-00-00 00:00:00')
+                                ? date('d-M', strtotime($first['start_mc'])) : '';
+
+                            $deliveryRaw = $first['delivery_awal'] ?? '';
+                            $delivery = '';
                             if (!empty($deliveryRaw) && $deliveryRaw !== '0000-00-00' && $deliveryRaw !== '0000-00-00 00:00:00') {
                                 $ts = strtotime($deliveryRaw);
                                 if ($ts !== false && $ts > 0) {
@@ -4723,19 +4679,19 @@ class ExcelController extends BaseController
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
                                 $lot,
-                                $dataRow['no_model_detail'] ?? '',
-                                $dataRow['item_type'] ?? '',
-                                format_number($dataRow['kg_celup'] ?? '', 2),
-                                $dataRow['kode_warna'] ?? '',
-                                $dataRow['warna'] ?? '',
-                                $dataRow['lot_celup'] ?? '',
-                                $dataRow['actual_celup'] ?? '',
+                                $noModelDetailCombined,
+                                $first['item_type'] ?? '',
+                                format_number($kgSum, 2),
+                                $first['kode_warna'] ?? '',
+                                $first['warna'] ?? '',
+                                $first['lot_celup'] ?? '',
+                                $actualCelupCombined,
                                 $startMc ?? '',
                                 $delivery,
-                                $dataRow['ket_schedule'] ?? ''
+                                $first['ket_schedule'] ?? ''
                             ];
                         } else {
-                            // Jika tidak ada data, tetap isi dengan placeholder jumlah kolom = count($headers)
+                            // Jika tidak ada data, tetap isi placeholder jumlah kolom = count($headers)
                             $values = [
                                 $lot === 1 ? $kapasitas : '',
                                 $lot === 1 ? $noMesin : '',
@@ -7496,7 +7452,12 @@ class ExcelController extends BaseController
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
         // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
+        // 1) Ambil data
+        if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
+        }
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
@@ -7605,13 +7566,13 @@ class ExcelController extends BaseController
             $sheet->setCellValue('C' . $row, $data['delivery_awal']);
             $sheet->setCellValue('D' . $row, $data['delivery_akhir']);
             $sheet->setCellValue('E' . $row, $data['item_type']);
-            $sheet->setCellValue('F' . $row, $data['kode_warna']);
-            $sheet->setCellValue('G' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, $data['kode_warna_old']);
+            $sheet->setCellValue('G' . $row, $data['warna_old']);
             $sheet->setCellValue('H' . $row, $data['kgs']);
             $sheet->setCellValue('I' . $row, $data['cns']);
             $sheet->setCellValue('J' . $row, $data['lot']);
             $sheet->setCellValue('K' . $row, $data['cluster_old']);
-            $sheet->setCellValue('L' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' KE ' . $data['no_model_new'] . ' KODE ' . $data['kode_warna']);
+            $sheet->setCellValue('L' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' KE ' . $data['no_model_new'] . ' KODE ' . $data['kode_warna_new']);
 
             // style body
             $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];

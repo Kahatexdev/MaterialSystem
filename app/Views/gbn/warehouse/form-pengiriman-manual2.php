@@ -107,11 +107,74 @@
         width: 50px;
     }
 
+    /* ====== FULLSCREEN LOADING OVERLAY FIX ====== */
+    #loadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 9999;
+
+        /* selalu flex, disembunyiin pakai opacity */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(2px);
+
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    #loadingOverlay.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .loading-overlay-content {
+        background: #ffffff;
+        padding: 20px 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        text-align: center;
+        min-width: 260px;
+    }
+
+    .loader-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 4px solid #e0e0e0;
+        border-top-color: #27ae60;
+        border-right-color: #27ae60;
+        animation: spinLoader 0.9s linear infinite;
+        margin: 0 auto;
+    }
+
+    .text-loading {
+        font-size: 14px;
+        color: #333;
+    }
+
+    @keyframes spinLoader {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Lot */
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<div id="loadingOverlay">
+    <div class="loading-overlay-content">
+        <div class="loader-circle"></div>
+        <div class="mt-3 text-loading">
+            Sedang memproses data...<br>
+            Mohon tunggu sebentar
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid py-4">
     <!-- alert swal -->
@@ -325,7 +388,7 @@
 <script>
     $('#jenis').on('change', function() {
         let val = $(this).val()?.toUpperCase(); // ambil value
-        console.log("Value sekarang:", val);
+        // console.log("Value sekarang:", val);
 
         if (val === 'SPANDEX' || val === 'KARET') {
             // tampilkan kolom kekurangan
@@ -363,6 +426,20 @@
             width: '100%'
         });
         updateTotals();
+
+        // === GLOBAL AJAX LOADING OVERLAY (FIX) ===
+        let overlayTimer;
+
+        $(document).ajaxStart(function() {
+            clearTimeout(overlayTimer);
+            $('#loadingOverlay').addClass('show');
+        });
+
+        $(document).ajaxStop(function() {
+            overlayTimer = setTimeout(function() {
+                $('#loadingOverlay').removeClass('show');
+            }, 200);
+        })
 
         // Select/Deselect semua
         $('#checkAll').on('change', function() {

@@ -62,7 +62,7 @@ class HistoryStock extends Model
     public function getHistoryPindahOrder($noModelOld = null, $noModelNew = null, $kodeWarna = null, $limit = null)
     {
         $builder = $this->db->table('history_stock')
-            ->select('s_old.no_model AS no_model_old, s_new.no_model AS no_model_new, s_old.item_type, s_old.kode_warna, s_old.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.cluster_old, history_stock.cluster_new, history_stock.keterangan, history_stock.created_at, s_new.kode_warna')
+            ->select('s_old.no_model AS no_model_old, s_new.no_model AS no_model_new, s_old.item_type, s_old.kode_warna AS kode_warna_old, s_old.warna AS warna_old, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.cluster_old, history_stock.cluster_new, history_stock.keterangan, history_stock.created_at, s_new.kode_warna AS kode_warna_new, s_new.warna AS warna_new')
             ->join('stock s_old', 's_old.id_stock = history_stock.id_stock_old')
             ->join('stock s_new', 's_new.id_stock = history_stock.id_stock_new')
             ->where('keterangan', 'Pindah Order');
