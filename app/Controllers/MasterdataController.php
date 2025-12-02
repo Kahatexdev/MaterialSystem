@@ -2019,11 +2019,13 @@ class MasterdataController extends BaseController
 
                 $sub = '';
                 if (!empty($r['note'])) {
-                    $parts  = array_map('trim', explode(';', $r['note']));
+                    // pecah jadi beberapa li biar rapi
+                    $parts = array_map('trim', explode(';', $r['note']));
                     $subLis = [];
                     foreach ($parts as $p) {
                         if ($p === '') continue;
-                        $subLis[] = '<li>' . htmlspecialchars($p) . '</li>';
+                        // boleh langsung dipakai karena content-nya kita yang bangun (angka + teks + <b>)
+                        $subLis[] = '<li>' . $p . '</li>';
                     }
                     if ($subLis) {
                         $sub = '<ul style="margin:4px 0 0 18px;">' . implode('', $subLis) . '</ul>';
