@@ -290,13 +290,13 @@
                             item.delivery_awal,
                             item.delivery_akhir,
                             item.item_type || '-',
-                            item.kode_warna || '-',
-                            item.warna || '-',
+                            item.kode_warna_old || '-',
+                            item.warna_old || '-',
                             item.kgs,
                             item.cns,
                             item.lot,
                             item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna_new
                         ]).draw(false);
                     });
 
@@ -330,13 +330,13 @@
                             item.delivery_awal,
                             item.delivery_akhir,
                             item.item_type || '-',
-                            item.kode_warna || '-',
-                            item.warna || '-',
+                            item.kode_warna_old || '-',
+                            item.warna_old || '-',
                             item.kgs,
                             item.cns,
                             item.lot,
                             item.cluster_old,
-                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna
+                            item.created_at + ' ' + item.keterangan + ' ke ' + item.no_model_new + ' kode ' + item.kode_warna_new
                         ]).draw(false);
                     });
                 },

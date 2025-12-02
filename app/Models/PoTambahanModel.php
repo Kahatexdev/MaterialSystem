@@ -255,6 +255,7 @@ class PoTambahanModel extends Model
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
             ->groupBy('po_tambahan.status')
+            ->groupBy('po_tambahan.admin')
             // ->where('DATE(po_tambahan.created_at)', $tgl_po)
             ->where('status', 'approved');
         if ($tgl_po_dari) {

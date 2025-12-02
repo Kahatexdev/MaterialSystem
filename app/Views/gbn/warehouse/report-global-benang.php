@@ -314,7 +314,7 @@
 
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
-                            const jatahArea = kgs - pakaiArea;
+                            const jatahArea = pakaiArea - returPbArea - kgs - poTambahan;
 
                             // fungsi bantu untuk format
                             const fmt = v => v !== 0 ? v.toFixed(2) : '0';

@@ -99,27 +99,27 @@ class WarehouseController extends BaseController
         $updateOrder = $this->masterOrderModel->getNullMc();
 
         foreach ($updateOrder as $od) {
-            $reqStartMc = api_url('capacity') . 'reqstartmc/' . $od['no_model'];
+            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
 
-            //     try {
-            //         // Fetch data dari API
-            //         $json = file_get_contents($reqStartMc);
-            //         // Decode JSON response
-            //         $startMc = json_decode($json, true);
-            //         if (empty($startMc)) {
-            //             log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-            //         } else {
-            //             $this->masterOrderModel->update(
-            //                 $od['id_order'],
-            //                 ['start_mc' => $startMc['start_mc']]
-            //             );
-            //         }
-            //     } catch (\Exception $e) {
+            try {
+                // Fetch data dari API
+                $json = file_get_contents($reqStartMc);
+                // Decode JSON response
+                $startMc = json_decode($json, true);
+                if (empty($startMc)) {
+                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+                } else {
+                    $this->masterOrderModel->update(
+                        $od['id_order'],
+                        ['start_mc' => $startMc['start_mc']]
+                    );
+                }
+            } catch (\Exception $e) {
 
-            //         // Log error
-            //         log_message('error', 'Error fetching API data: ' . $e->getMessage());
-            //     }
-            // }
+                // Log error
+                log_message('error', 'Error fetching API data: ' . $e->getMessage());
+            }
+        }
 
             $kategori = $this->kategoriModel->findAll();
 
@@ -2396,14 +2396,14 @@ class WarehouseController extends BaseController
     public function filterReportGlobal()
     {
         $key = $this->request->getGet('key');
-        log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
+        // log_message('debug', 'Received key: ' . $key);  // Log key yang diterima
         if (empty($key)) {
             return $this->response->setJSON(['error' => 'Key is missing']);
         }
 
         $data = $this->masterOrderModel->getFilterReportGlobal($key);
         // Log data yang diterima dari model
-        log_message('debug', 'Query result: ' . print_r($data, true));
+        // log_message('debug', 'Query result: ' . print_r($data, true));
 
         if (empty($data)) {
             return $this->response->setJSON(['error' => 'No data found']);
@@ -2431,7 +2431,7 @@ class WarehouseController extends BaseController
 
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
         // Log data yang diterima dari model
-        log_message('debug', 'Query result: ' . print_r($data, true));
+        // log_message('debug', 'Query result: ' . print_r($data, true));
 
         if (empty($data)) {
             return $this->response->setJSON(['error' => 'No data found']);
@@ -4753,14 +4753,8 @@ class WarehouseController extends BaseController
 
         $clusterTujuan = trim((string) $this->request->getGet('cluster_tujuan'));
         $detail        = $this->request->getGet('detail');
-        dd($detail);
-        // Validasi dasar
-        if ($clusterTujuan === '' || empty($detail) || !is_array($detail)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Cluster tujuan dan detail tidak boleh kosong.'
-            ])->setStatusCode(400);
-        }
+        log_message('debug', 'DATA CEK = '.$detail);
+        var_dump($detail);
 
         $db = \Config\Database::connect();
         $db->transStart();
