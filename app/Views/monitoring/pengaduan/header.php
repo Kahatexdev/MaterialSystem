@@ -32,6 +32,7 @@
             </div>
         </div>
     </nav>
+
     <?= $this->renderSection('content'); ?>
 
     <?php $this->endSection(); ?>

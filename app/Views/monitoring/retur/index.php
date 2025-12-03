@@ -229,7 +229,7 @@
                 info.style.display = 'none';
 
                 $.ajax({
-                    url: "http://172.23.44.14/CapacityApps/public/api/filterRetur/" + area,
+                    url: CapacityUrl + "filterRetur/" + area,
                     type: "GET",
                     data: {
                         model: model

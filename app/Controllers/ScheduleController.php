@@ -452,7 +452,7 @@ class ScheduleController extends BaseController
             $total_qty_po = $sisa_jatah;
         }
         // URL API untuk mengambil data start mesin
-        $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $no_model;
+        $reqStartMc = api_url('capacity') . 'reqstartmc/' . $no_model;
 
         try {
             // Fetch data dari API
@@ -1151,7 +1151,7 @@ class ScheduleController extends BaseController
         $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
         if ($listPdk) {
             $client = \Config\Services::curlrequest([
-                'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+                'baseURI' => api_url('capacity') . '',
                 'timeout' => 5
             ]);
 
@@ -1519,7 +1519,7 @@ class ScheduleController extends BaseController
         $model = $this->request->getGet('model');
         $search = $this->request->getGet('search');
         if (!empty($model)) {
-            $masterApi = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
+            $masterApi = api_url('capacity') . 'getStartMc/' . $model;
             $masterResponse = file_get_contents($masterApi);
             $master = json_decode($masterResponse, true);
         } else {

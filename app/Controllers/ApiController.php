@@ -101,6 +101,7 @@ class ApiController extends ResourceController
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
+        service('renderer')->setVar('capacityUrl', api_url('capacity'));
     }
 
     public function index()
@@ -1621,7 +1622,7 @@ class ApiController extends ResourceController
     {
         $username = urlencode(session()->get('username'));
         $role     = session()->get('role');
-        $url      = 'http://172.23.44.14/CapacityApps/public/api/pengaduan/' . $username . '/' . $role;
+        $url      = api_url('capacity') . 'pengaduan/' . $username . '/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -1861,7 +1862,7 @@ class ApiController extends ResourceController
 
         // Ambil data dari API lokal
         $client = service('curlrequest');
-        $response = $client->get("http://172.23.44.14/CapacityApps/public/api/ExportPengaduan/{$idPengaduan}");
+        $response = $client->get(api_url('capacity') . "ExportPengaduan/{$idPengaduan}");
 
         $pengaduan = json_decode($response->getBody(), true);
 

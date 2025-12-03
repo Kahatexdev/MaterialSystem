@@ -121,74 +121,17 @@ class WarehouseController extends BaseController
             }
         }
 
-        $kategori = $this->kategoriModel->findAll();
+            $kategori = $this->kategoriModel->findAll();
 
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'kategori' => $kategori,
-        ];
-        return view($this->role . '/warehouse/index', $data);
+            $data = [
+                'active' => $this->active,
+                'title' => 'Material System',
+                'role' => $this->role,
+                'kategori' => $kategori,
+            ];
+            return view($this->role . '/warehouse/index', $data);
+        }
     }
-    // public function pemasukan()
-    // {
-    //     $id = $this->request->getPost('barcode');
-
-    //     // $id = base64_decode($id);
-    //     // dd($id);
-    //     $cluster = $this->clusterModel->getDataCluster();
-
-    //     // Ambil data dari session (jika ada)
-    //     $existingData = session()->get('dataOut') ?? [];
-
-    //     if (!empty($id)) {
-    //         // Cek apakah barcode sudah ada di data yang tersimpan
-    //         foreach ($existingData as $item) {
-    //             if ($item['id_out_celup'] == $id) {
-    //                 session()->setFlashdata('error', 'Barcode sudah ada di tabel!' . $id);
-    //                 return redirect()->to(base_url($this->role . '/pemasukan'));
-    //             }
-    //         }
-
-    //         // Ambil data dari database berdasarkan barcode yang dimasukkan
-    //         $outCelup = $this->outCelupModel->getDataOut($id);
-    //         if (empty($outCelup)) {
-    //             $dataRetur = $this->returModel->getDataRetur($id);
-
-    //             if (empty($dataRetur)) {
-    //                 session()->setFlashdata('error', 'Data tidak ditemukan!');
-    //                 return redirect()->to(base_url($this->role . '/pemasukan'));
-    //             }
-
-    //         }
-
-    //         session()->setFlashdata('error', 'Barcode tidak ditemukan di database!' . $id);
-    //             return redirect()->to(base_url($this->role . '/pemasukan'));
-    //         } elseif (!empty($outCelup)) {
-    //             // Tambahkan data baru ke dalam array
-    //             $existingData = array_merge($existingData, $outCelup);
-    //         }
-
-    //         // Simpan kembali ke session
-    //         session()->set('dataOut', $existingData);
-
-    //         // Redirect agar form tidak resubmit saat refresh
-    //         return redirect()->to(base_url($this->role . '/pemasukan'));
-    //     }
-
-    //     $data = [
-    //         'active' => $this->active,
-    //         'title' => 'Material System',
-    //         'role' => $this->role,
-    //         'dataOut' => $existingData, // Tampilkan data dari session
-    //         'cluster' => $cluster,
-    //         'error' => session()->getFlashdata('error'),
-    //     ];
-
-    //     return view($this->role . '/warehouse/form-pemasukan', $data);
-
-    // }
 
 
     public function pemasukan()
@@ -1933,7 +1876,7 @@ class WarehouseController extends BaseController
 
             // getStartMc
             if (!isset($startMc[$model])) {
-                $url = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . urlencode($model);
+                $url = api_url('capacity') . 'getStartMc/' . urlencode($model);
                 $resp = @file_get_contents($url);
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
@@ -3240,7 +3183,7 @@ class WarehouseController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'baseURI' => api_url('capacity') . '',
             'timeout' => 5
         ]);
 

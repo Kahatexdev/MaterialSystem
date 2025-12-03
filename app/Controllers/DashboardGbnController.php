@@ -4,39 +4,14 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\MaterialModel;
-use App\Models\MasterMaterialModel;
-use App\Models\MasterOrderModel;
-use App\Models\ScheduleCelupModel;
-use App\Models\PemasukanModel;
-use App\Models\ClusterModel;
-use App\Models\StockModel;
-use App\Models\PemesananModel;
+
 
 class DashboardGbnController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $materialModel;
-    protected $masterMaterialModel;
-    protected $masterOrderModel;
-    protected $scheduleCelupModel;
-    protected $pemasukanModel;
-    protected $clusterModel;
-    protected $stockModel;
-    protected $pemesananModel;
+
 
     public function __construct()
     {
-        $this->materialModel = new MaterialModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
-        $this->pemasukanModel = new PemasukanModel();
-        $this->clusterModel = new ClusterModel();
-        $this->stockModel = new StockModel();
-        $this->pemesananModel = new PemesananModel();
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');

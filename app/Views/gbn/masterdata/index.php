@@ -8,7 +8,8 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
-                    html: '<?= session()->getFlashdata('success') ?>',
+                    html: `<?= session()->getFlashdata('success') ?>`,
+                    width: 600,
                 });
             });
         </script>
@@ -19,7 +20,8 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Warning!',
-                    html: '<?= session()->getFlashdata('warning') ?>',
+                    html: `<?= session()->getFlashdata('warning') ?>`,   // <── pakai html
+                    width: 600,
                 });
             });
         </script>
@@ -31,7 +33,8 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error!',
-                    html: '<?= session()->getFlashdata('error') ?>',
+                    html: `<?= session()->getFlashdata('error') ?>`,
+                    width: 600,
                 });
             });
         </script>
