@@ -2073,7 +2073,7 @@ class PemesananController extends BaseController
             return $v;
         }, $dataRaw);
 
-        log_message('debug', 'ini trim data : ' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        // log_message('debug', 'ini trim data : ' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         if(!empty($data['id_stok'])){
             $stock = $this->pemasukanModel->getDataByCluster($data);
