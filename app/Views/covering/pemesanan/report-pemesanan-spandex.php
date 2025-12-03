@@ -148,9 +148,9 @@
                                 <i class="fas fa-redo-alt"></i>
                             </button>
                         </div>
-                        <button class="btn btn-info d-none" id="btnExport">
+                        <!-- <button class="btn btn-info d-none" id="btnExport">
                             <i class="fas fa-file-excel me-2"></i>Ekspor
-                        </button>
+                        </button> -->
                     </div>
                 </div>
             </div>
@@ -224,7 +224,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Oops...',
-                    text: 'Apa yang mau dicari cuy?',
+                    text: 'Pilih tanggal terlebih dahulu',
                 });
                 return;
             }
