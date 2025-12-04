@@ -3352,7 +3352,7 @@ class PemesananController extends BaseController
 
         $client = \Config\Services::curlrequest();
 
-        $resp   = $client->get('http://172.23.39.117/api/getFilterArea', [
+        $resp   = $client->get('http://172.23.44.14/api/getFilterArea', [
             'http_errors' => false,
             'timeout'     => 5,
             'query'       => ['no_model' => $noModel],

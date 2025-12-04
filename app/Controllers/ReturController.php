@@ -1083,7 +1083,7 @@ class ReturController extends BaseController
             $client = \Config\Services::curlrequest();
             // Kirim ke API sebagai JSON
             $response = $client->post(
-                'http://172.23.39.117/CapacityApps/public/api/repeatSupermarket',
+                'http://172.23.44.14/CapacityApps/public/api/repeatSupermarket',
                 [
                     'headers' => ['Content-Type' => 'application/json'],
                     'json'    => $send,
