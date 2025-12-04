@@ -58,6 +58,17 @@ class WarehouseController extends BaseController
     protected $otherBonModel;
     protected $kategoriModel;
 
+    protected function roundSafe($value, int $precision = 2): float
+    {
+        // Biar aman dari null / string dll
+        if ($value === null || $value === '') {
+            $value = 0;
+        }
+
+        return round((float) $value, $precision);
+    }
+
+
     public function __construct()
     {
         $this->masterOrderModel = new MasterOrderModel();
@@ -99,7 +110,7 @@ class WarehouseController extends BaseController
         $updateOrder = $this->masterOrderModel->getNullMc();
 
         foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+            $reqStartMc = 'http://172.23.39.117/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
 
             try {
                 // Fetch data dari API
@@ -121,16 +132,15 @@ class WarehouseController extends BaseController
             }
         }
 
-            $kategori = $this->kategoriModel->findAll();
+        $kategori = $this->kategoriModel->findAll();
 
-            $data = [
-                'active' => $this->active,
-                'title' => 'Material System',
-                'role' => $this->role,
-                'kategori' => $kategori,
-            ];
-            return view($this->role . '/warehouse/index', $data);
-        }
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'kategori' => $kategori,
+        ];
+        return view($this->role . '/warehouse/index', $data);
     }
 
 

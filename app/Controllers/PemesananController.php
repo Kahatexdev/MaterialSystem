@@ -1825,8 +1825,10 @@ class PemesananController extends BaseController
         // === Ambil QTY Capacity BATCH ===
         // cache 5 menit biar cepet kalo user bolak-balik
         $cacheKeyQty = safeCacheKey('qty_bulk', [$area, $noModel, implode(',', $styleSizes)]);
+        /** @var \CodeIgniter\Cache\CacheInterface $cache */
+        $cache = cache();
         // Ambil + cache 10 detik
-        $qtyMap = cache()->remember($cacheKeyQty, 10, function () use ($noModel, $area, $styleSizes) {
+        $qtyMap = $cache()->remember($cacheKeyQty, 10, function () use ($noModel, $area, $styleSizes) {
             $client = service('curlrequest');
             $query  = http_build_query([
                 'no_model'    => $noModel,
@@ -3350,7 +3352,7 @@ class PemesananController extends BaseController
 
         $client = \Config\Services::curlrequest();
 
-        $resp   = $client->get('http://172.23.44.14/api/getFilterArea', [
+        $resp   = $client->get('http://172.23.39.117/api/getFilterArea', [
             'http_errors' => false,
             'timeout'     => 5,
             'query'       => ['no_model' => $noModel],
