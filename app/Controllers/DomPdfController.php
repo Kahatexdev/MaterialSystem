@@ -79,7 +79,7 @@ class DomPdfController extends BaseController
             'img' => $img,
             'barcodeImages' => $barcodeImages,
             'operatorShort' => $operatorShort,
-            'lotClass' => $operatorShort,
+            'lotClass' => $lotClass,
         ]);
 
         $dompdf->loadHtml($html);
