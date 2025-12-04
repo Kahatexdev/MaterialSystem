@@ -364,8 +364,18 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3"><label class="form-label">Jenis Barang</label><input type="text" class="form-control" name="jenis" required></div>
-                                <div class="mb-3"><label class="form-label">Jenis Mesin</label><input type="text" class="form-control" name="jenis_mesin"></div>
-                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="text" class="form-control" name="dr"></div>
+                                <div class="mb-3">
+                                    <label class="form-label">Jenis Mesin</label>
+                                    <!-- <input type="text" class="form-control" name="jenis_mesin"> -->
+                                    <select name="jenis_mesin" class="form-control">
+                                        <option value="">Pilih Mesin</option>
+                                        <option value="ILSIN">ILSIN</option>
+                                        <option value="FADIS">FADIS</option>
+                                        <option value="AIKI">AIKI</option>
+                                        <option value="DOUBLE COVER">DOUBLE COVER</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="number" class="form-control" name="dr"></div>
                                 <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover" required>
                                         <option value="">Pilih...</option>
                                         <option value="SINGLE">SINGLE</option>

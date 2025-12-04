@@ -1593,6 +1593,7 @@ class ScheduleController extends BaseController
                 ->orLike('schedule_celup.kode_warna', $search)
                 ->groupEnd();
         }
+        $builder->groupBy('schedule_celup.id_celup');
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
 
@@ -1665,10 +1666,9 @@ class ScheduleController extends BaseController
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
             ->join('open_po', 'open_po.no_model = schedule_celup.no_model 
                     AND open_po.item_type = schedule_celup.item_type 
-                    AND open_po.kode_warna = schedule_celup.kode_warna')
+                    AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
             ->where('schedule_celup.id_celup !=', null)
-            ->where('schedule_celup.id_mesin !=', null)
-            ->groupBy('schedule_celup.id_celup');
+            ->where('schedule_celup.id_mesin !=', null);
 
         if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
@@ -1684,6 +1684,7 @@ class ScheduleController extends BaseController
                 ->orLike('schedule_celup.kode_warna', $search)
                 ->groupEnd();
         }
+        $builder->groupBy('schedule_celup.id_celup');
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
 
