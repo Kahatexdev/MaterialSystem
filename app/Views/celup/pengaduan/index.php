@@ -122,15 +122,14 @@
             data: $(this).serialize(),
             success: function(res) {
                 if (res.status === 'success') {
-                    $(document).ready(function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            html: '<?= session()->getFlashdata('success') ?>',
-                        });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        html: res.message ?? 'Pengaduan berhasil dikirim.',
                     });
-                    loadPengaduan(); // reload list
-                    $('#modalCreatePengaduan').modal('hide'); // close modal
+
+                    loadPengaduan();                 // reload list
+                    $('#modalCreatePengaduan').modal('hide'); // ini akan otomatis trigger reset form
                 } else {
                     alert('Gagal mengirim: ' + res.message);
                 }
@@ -141,6 +140,7 @@
             }
         });
     });
+
 
     $(document).on('submit', '.formReply', function(e) {
         e.preventDefault();
@@ -172,5 +172,12 @@
             $('#listPengaduan').html($(html).find('#listPengaduan').html());
         });
     }
+    // Reset form tiap kali modal ditutup (baik karena submit sukses atau klik tombol close)
+    $('#modalCreatePengaduan').on('hidden.bs.modal', function () {
+        const form = document.getElementById('formCreate');
+        if (form) {
+            form.reset();
+        }
+    });
 </script>
 <?= $this->endSection() ?>

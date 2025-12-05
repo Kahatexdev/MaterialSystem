@@ -107,7 +107,7 @@
                 <form action="<?= base_url($role . '/saveMasterMaterial') ?>" method="post" id="addForm">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="kode_warna" class="form-label">Item Type</label>
+                            <label for="kode_warna" class="form-label">Kode Warna</label>
                             <input type="text" class="form-control" name="kode_warna" id="kode_warna" required>
                         </div>
                         <div class="mb-3">
