@@ -655,17 +655,22 @@ class MasterOrderModel extends Model
             AND ob.no_surat_jalan LIKE '%LRX%'
         ) AS plus_datang_lurex,
 
-        -- retur pb gudang benang
         (
-            SELECT SUM(COALESCE(r.kgs_retur, 0))
-            FROM retur r
-            JOIN kategori_retur kr ON r.kategori = kr.nama_kategori
-            WHERE r.no_model = master_order.no_model
-            AND r.kode_warna = material.kode_warna
-            AND r.item_type = material.item_type
-            AND r.area_retur = 'GUDANG BENANG'
+            SELECT SUM(COALESCE(hs.kgs, 0))
+            FROM history_stock hs
+            LEFT JOIN stock s2 ON s2.id_stock = hs.id_stock_old
+            LEFT JOIN kategori_retur kr ON kr.nama_kategori = TRIM(
+                SUBSTRING(
+                    hs.keterangan,
+                    LOCATE('(', hs.keterangan) + 1,
+                    LOCATE(')', hs.keterangan) - LOCATE('(', hs.keterangan) - 1
+                )
+            )
+            WHERE s2.no_model   = master_order.no_model
+            AND s2.kode_warna = material.kode_warna
+            AND s2.item_type  = material.item_type
+            AND hs.keterangan LIKE '%Retur Celup%'
             AND kr.tipe_kategori = 'PENGEMBALIAN'
-            AND r.keterangan_gbn LIKE '%Approve%'
         ) AS retur_pb_gbn,
 
         -- retur pb area

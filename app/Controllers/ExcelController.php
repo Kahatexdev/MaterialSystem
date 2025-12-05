@@ -4876,7 +4876,7 @@ class ExcelController extends BaseController
         $sheet->getColumnDimension('A')->setWidth(10);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getRowDimension(1)->setRowHeight(30);
-        
+
         $drawing = new Drawing();
         $drawing->setName('Logo');
         $drawing->setDescription('Logo');
@@ -6632,7 +6632,7 @@ class ExcelController extends BaseController
         $style['borders'] = $borders;
         return $style;
     }
-    
+
     public function exportPoBooking()
     {
         $noModel = $this->request->getGet('no_model');
@@ -7371,11 +7371,10 @@ class ExcelController extends BaseController
 
     public function exportHistoryPindahOrder()
     {
-        $noModelOld   = $this->request->getGet('model_old')     ?? '';
-        $noModelNew   = $this->request->getGet('model_new')     ?? '';
+        $noModelOld   = $this->request->getGet('model_old') ?? '';
+        $noModelNew   = $this->request->getGet('model_new') ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
-        // 1) Ambil data
         // 1) Ambil data
         if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
             $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
