@@ -155,8 +155,8 @@ class MasterOrderModel extends Model
         // Cek apakah ada input key untuk pencarian
         if (!empty($key)) {
             $this->groupStart()
-                ->like('master_order.buyer', $key)
-                ->orLike('master_order.foll_up', $key)
+                ->where('master_order.buyer', $key)
+                ->orWhere('master_order.foll_up', $key)
                 ->groupEnd();
         }
 
