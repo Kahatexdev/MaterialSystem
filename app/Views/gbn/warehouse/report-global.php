@@ -132,6 +132,8 @@
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
+            <span class="text-danger">Note:</span>
+            <span class="text-danger text-xs">Stock akhir = Stock Awal + Datang Solid + (+)Datang Solid + Retur Pb Area - Pakai Area - Pakai lain lain - Pindah Order - Dipinjam - Retur PB GBN</span>
             <div class="table-responsive">
                 <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
                     <thead>
@@ -262,10 +264,10 @@
                             const gantiRetur = Number(item.ganti_retur) || 0;
                             const datangLurex = Number(item.datang_lurex) || 0;
                             const plusDatangLurex = Number(item.plus_datang_lurex) || 0;
-                            const returPbGbn = Number(item.retur_pb_gbn) || 0;
+                            // const returPbGbn = Number(item.retur_pb_gbn) || 0;
                             const returPbArea = Number(item.retur_pb_area) || 0;
                             const pakaiArea = Number(item.pakai_area) || 0;
-                            const stockAkhir = Number(item.stock_akhir) || 0;
+                            // const stockAkhir = Number(item.stock_akhir) || 0;
                             const kgsOtherOut = Number(item.kgs_other_out) || 0;
                             const loss = Number(item.loss) || 0;
                             const returStock = Number(item.retur_stock) || 0;
@@ -277,6 +279,7 @@
                             // perhitungan
                             const tagihanGbn = kgs - (datangSolid + plusDatangSolid + kgsStockAwal);
                             const jatahArea = kgs - pakaiArea;
+                            const stockAkhir = kgsStockAwal + datangSolid + plusDatangSolid + returPbArea - pakaiArea - kgsOtherOut - pindahOrder - dipinjam - returCelup;
                             // const jatah_area = $id['kgs_pakai_area'] - $id['retur_area'] - $id['retur_stock_area'] - $id['retur_titip_area'] - $id['kg_psn'] - $id['kg_psn_tambahan'];
 
                             // fungsi bantu untuk format
