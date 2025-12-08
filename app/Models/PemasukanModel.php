@@ -315,6 +315,7 @@ class PemasukanModel extends Model
             ->where("COALESCE(out_celup.no_model, retur.no_model, other_bon.no_model, stock.no_model) = ", $data['no_model'])
             ->where("COALESCE(retur.item_type, other_bon.item_type, stock.item_type) = ", $data['item_type'])
             ->where("COALESCE(retur.kode_warna, other_bon.kode_warna, stock.kode_warna) = ", $data['kode_warna'])
+            ->where("COALESCE(retur.lot_retur, out_celup.lot_kirim) = ", $data['lot_final'])
             // ->orWhere('stock.kgs_in_out >', 0)
             // ->orWhere('stock.kgs_stock_awal >', 0)
             ->groupBy('out_celup.id_out_celup')
