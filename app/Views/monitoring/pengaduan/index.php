@@ -473,7 +473,7 @@
         e.preventDefault();
         showLoading(true);
         $.ajax({
-            url: 'http://172.23.44.14/CapacityApps/public/api/pengaduan/create',
+            url: CapacityUrl + 'pengaduan/create',
             method: 'POST',
             dataType: 'json',
             data: $(this).serialize(),
@@ -519,7 +519,7 @@
         const $form = $(this);
         showLoading(true);
         $.ajax({
-            url: 'http://172.23.44.14/CapacityApps/public/api/pengaduan/reply/' + id,
+            url: CapacityUrl + 'pengaduan/reply/' + id,
             method: 'POST',
             data: $form.serialize(),
             success: function(res) {

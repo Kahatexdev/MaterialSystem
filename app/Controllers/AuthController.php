@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
-use App\Models\UserModel;
 
 class AuthController extends BaseController
 {
@@ -19,8 +18,7 @@ class AuthController extends BaseController
     {
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
-        $UserModel = new Usermodel;
-        $userData = $UserModel->login($username, $password);
+        $userData = $this->userModel->login($username, $password);
         if (!$userData) {
             return redirect()->to(base_url('/login'))->withInput()->with('error', 'Invalid username or password');
         }

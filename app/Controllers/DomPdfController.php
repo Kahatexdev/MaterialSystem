@@ -5,8 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Libraries\DompdfService;
-use App\Models\BonCelupModel;
-use App\Models\OutCelupModel;
+
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Dompdf\Options;
 
@@ -15,14 +14,9 @@ class DomPdfController extends BaseController
     protected $role;
     protected $active;
     protected $filters;
-    protected $bonCelupModel;
-    protected $outCelupModel;
 
     public function __construct()
     {
-        $this->bonCelupModel = new BonCelupModel();
-        $this->outCelupModel = new OutCelupModel();
-
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -72,8 +66,8 @@ class DomPdfController extends BaseController
             $row['operator_packing'] = $operatorShort;
             $row['no_model'] = $noModel;
             $lot = $row['lot_kirim'];
-            $lotClass = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $lotClass = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
         unset($row); // break the reference
 
@@ -85,7 +79,7 @@ class DomPdfController extends BaseController
             'img' => $img,
             'barcodeImages' => $barcodeImages,
             'operatorShort' => $operatorShort,
-            'lotClass' => $operatorShort,
+            'lotClass' => $lotClass,
         ]);
 
         $dompdf->loadHtml($html);
@@ -115,7 +109,7 @@ class DomPdfController extends BaseController
             $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
             $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
             $lot = $row['lot_kirim'];
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
 
         // Ambil data barcode sesuai $id
@@ -154,7 +148,7 @@ class DomPdfController extends BaseController
             $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
             $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
             $lot = $row['lot_kirim'];
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
 
         // Ambil data barcode sesuai $id

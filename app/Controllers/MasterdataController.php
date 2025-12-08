@@ -8,47 +8,20 @@ use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\MasterOrderModel;
-use App\Models\MaterialModel;
-use App\Models\MasterMaterialModel;
-use App\Models\OpenPoModel;
 use App\Models\EstimasiStokModel;
 use App\Models\MasterMaterialTypeModel;
-use App\Models\StockModel;
-use App\Models\TrackingPoCovering;
-use App\Models\PoTambahanModel;
-use App\Models\ScheduleCelupModel;
 
 class MasterdataController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $request;
-    protected $masterOrderModel;
-    protected $materialModel;
-    protected $masterMaterialModel;
-    protected $estimasiStokModel;
-    protected $openPoModel;
-    protected $stockModel;
-    protected $trackingPoCoveringModel;
-    protected $poTambahanModel;
-    protected $scheduleCelupModel;
-    protected $masterMaterialTypeModel;
 
+    protected $masterMaterialTypeModel;
+    protected $estimasiStokModel;
     public function __construct()
     {
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->materialModel = new MaterialModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->estimasiStokModel = new EstimasiStokModel();
-        $this->openPoModel = new OpenPoModel();
-        $this->stockModel = new StockModel();
-        $this->trackingPoCoveringModel = new TrackingPoCovering();
-        $this->poTambahanModel = new PoTambahanModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
-        $this->masterMaterialTypeModel = new MasterMaterialTypeModel();
 
+
+        $this->masterMaterialTypeModel = new MasterMaterialTypeModel();
+        $this->estimasiStokModel = new EstimasiStokModel();
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
@@ -148,9 +121,9 @@ class MasterdataController extends BaseController
         }
 
         // Inisialisasi model-model
-        $masterOrderModel    = new MasterOrderModel();
-        $materialModel       = new MaterialModel();
-        $masterMaterialModel = new MasterMaterialModel();
+        // $this->masterOrderModel    = new MasterOrderModel();
+        // $this->materialModel       = new MaterialModel();
+        // $this->masterMaterialModel = new MasterMaterialModel();
         $jarum = $this->request->getPost('jarum');
         // Ambil username admin dari session
         $admin = session()->get('username');
@@ -179,7 +152,7 @@ class MasterdataController extends BaseController
             }
 
             // Cek apakah master order sudah ada di database
-            $orderExists = $masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up);
+            $orderExists = $this->masterOrderModel->checkDatabase($no_order, $no_model, $buyer, $lco_date, $foll_up);
             // dd($orderExists);
             // Jika master order belum ada, lakukan validasi dengan mencari baris material yang memiliki style_size valid
             if (!$orderExists) {
@@ -229,7 +202,7 @@ class MasterdataController extends BaseController
                     'updated_at'     => NULL,
                 ];
                 // dd ($masterData);
-                $masterOrderModel->insert($masterData);
+                $this->masterOrderModel->insert($masterData);
             }
             // dd($orderExists);
             // else {
@@ -237,7 +210,7 @@ class MasterdataController extends BaseController
             // }
 
             // Dapatkan id_order untuk digunakan pada tabel material
-            $orderData = $masterOrderModel->findIdOrder($no_order, $no_model);
+            $orderData = $this->masterOrderModel->findIdOrder($no_order, $no_model);
             if (!$orderData) {
                 return redirect()->back()->with('error', 'Gagal menemukan ID Order untuk ' . $no_order);
             }
@@ -283,7 +256,7 @@ class MasterdataController extends BaseController
                 $item_type = htmlspecialchars($item_type, ENT_QUOTES, 'UTF-8');
 
                 // Cek apakah item type ada di database
-                $checkItemType = $masterMaterialModel->checkItemType($item_type);
+                $checkItemType = $this->masterMaterialModel->checkItemType($item_type);
                 if (!$checkItemType) {
                     continue;
                 }
@@ -327,7 +300,7 @@ class MasterdataController extends BaseController
             // 2. Cek duplikat material untuk order ini
             $duplicateRows = [];
             foreach ($validDataMaterial as $idx => $mat) {
-                $exists = $materialModel
+                $exists = $this->materialModel
                     ->where('id_order', $mat['id_order'])
                     ->where('style_size', $mat['style_size'])
                     ->where('item_type', $mat['item_type'])
@@ -347,7 +320,7 @@ class MasterdataController extends BaseController
             }
 
             // 3. Jika lolos validasi, insert batch
-            $materialModel->insertBatch($validDataMaterial);
+            $this->materialModel->insertBatch($validDataMaterial);
 
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
@@ -361,7 +334,7 @@ class MasterdataController extends BaseController
         $style_size_encoded = str_replace(' ', '%20', $style_size);
         $param = $no_model . '/' . $style_size_encoded;
 
-        $url = 'http://172.23.44.14/CapacityApps/public/api/orderMaterial/' . $param;
+        $url = api_url('capacity') . 'orderMaterial/' . $param;
 
         try {
             $json = @file_get_contents($url);
@@ -390,9 +363,9 @@ class MasterdataController extends BaseController
     //     }
 
     //     // Inisialisasi model-model yang dibutuhkan
-    //     $masterOrderModel    = new MasterOrderModel();
-    //     $materialModel       = new MaterialModel();
-    //     $masterMaterialModel = new MasterMaterialModel();
+    //     $this->masterOrderModel    = new MasterOrderModel();
+    //     $this->materialModel       = new MaterialModel();
+    //     $this->masterMaterialModel = new MasterMaterialModel();
 
     //     // Ambil username admin dari session
     //     $admin = session()->get('username');
@@ -412,7 +385,7 @@ class MasterdataController extends BaseController
     //         }
 
     //         // Cari master order berdasarkan no_model
-    //         $masterOrder = $masterOrderModel->where('no_model', $no_model)->first();
+    //         $masterOrder = $this->masterOrderModel->where('no_model', $no_model)->first();
     //         if (!$masterOrder) {
     //             return redirect()->back()->with('error', 'Master order dengan No Model ' . $no_model . ' tidak ditemukan.');
     //         }
@@ -443,11 +416,11 @@ class MasterdataController extends BaseController
     //             'admin'     => $admin,
     //             'updated_at' => date('Y-m-d H:i:s'),
     //         ];
-    //         $masterOrderModel->update($id_order, $masterDataUpdate);
+    //         $this->masterOrderModel->update($id_order, $masterDataUpdate);
     //         // --- End update master_order ---
 
     //         // Ambil data material lama (yang sudah ada di DB) untuk master order ini
-    //         $existingMaterials = $materialModel->where('id_order', $id_order)->findAll();
+    //         $existingMaterials = $this->materialModel->where('id_order', $id_order)->findAll();
     //         $existingKeys = [];
     //         foreach ($existingMaterials as $material) {
     //             // Normalisasi data untuk composite key
@@ -514,7 +487,7 @@ class MasterdataController extends BaseController
     //                 return redirect()->back()->with('error', 'Item Type tidak boleh kosong pada baris ' . $rowIndex);
     //             }
     //             $item_type = strtoupper(trim($raw_item_type));
-    //             if (!$masterMaterialModel->checkItemType($item_type)) {
+    //             if (!$this->masterMaterialModel->checkItemType($item_type)) {
     //                 return redirect()->back()->with('error', $item_type . ' tidak ada di database pada baris ' . $rowIndex);
     //             }
 
@@ -554,11 +527,11 @@ class MasterdataController extends BaseController
 
     //             // Jika composite key sudah ada, update data material lama
     //             if (isset($existingKeys[$key])) {
-    //                 $materialModel->update($existingKeys[$key]['id_material'], $materialData);
+    //                 $this->materialModel->update($existingKeys[$key]['id_material'], $materialData);
     //             } else {
     //                 // Jika belum ada, tambahkan created_at untuk data baru dan insert
     //                 $materialData['created_at'] = date('Y-m-d H:i:s');
-    //                 $materialModel->insert($materialData);
+    //                 $this->materialModel->insert($materialData);
     //             }
     //         }
 
@@ -579,7 +552,7 @@ class MasterdataController extends BaseController
     //         //             'composition' => null,
     //         //             'updated_at'  => date('Y-m-d H:i:s'),
     //         //         ];
-    //         //         $materialModel->update($material['id_material'], $updateData);
+    //         //         $this->materialModel->update($material['id_material'], $updateData);
     //         //     }
     //         // }
 
@@ -682,9 +655,9 @@ class MasterdataController extends BaseController
     //     }
 
     //     // ===== 1) Model =====
-    //     $masterOrderModel    = new MasterOrderModel();
-    //     $materialModel       = new MaterialModel();
-    //     $masterMaterialModel = new MasterMaterialModel();
+    //     $this->masterOrderModel    = new MasterOrderModel();
+    //     $this->materialModel       = new MaterialModel();
+    //     $this->masterMaterialModel = new MasterMaterialModel();
 
     //     // ===== 2) Konstanta & Util =====
     //     // Jika TRUE → material yang tidak ada lagi di file revisi akan di-soft delete (nonaktif)
@@ -762,7 +735,7 @@ class MasterdataController extends BaseController
     //             return redirect()->back()->with('error', 'No Model tidak ditemukan (coba cek cell B9).');
     //         }
 
-    //         $masterOrder = $masterOrderModel->where('no_model', $no_model)->first();
+    //         $masterOrder = $this->masterOrderModel->where('no_model', $no_model)->first();
     //         if (!$masterOrder) {
     //             return redirect()->back()->with('error', 'Master order No Model ' . $no_model . ' tidak ditemukan.');
     //         }
@@ -797,7 +770,7 @@ class MasterdataController extends BaseController
     //     // Composite key: style_size|item_type|kode_warna|color (semua di-normalize uppercase)
     //     // ===== 5) Siapkan peta existing materials & index =====
     //     // Ambil kolom lengkap agar bisa dibandingkan
-    //     $existingRows = $materialModel
+    //     $existingRows = $this->materialModel
     //         ->select('id_material, material_nr, style_size, item_type, kode_warna, color, composition, gw, qty_pcs, loss, kgs')
     //         ->where('id_order', $id_order)
     //         ->findAll();
@@ -886,7 +859,7 @@ class MasterdataController extends BaseController
     //     $stats = ['insert' => 0, 'update' => 0, 'skip' => 0, 'disabled' => 0];
 
     //     // Cache untuk menghindari hit DB/API berulang
-    //     $validItemTypes = $masterMaterialModel->select('item_type')
+    //     $validItemTypes = $this->masterMaterialModel->select('item_type')
     //         ->groupBy('item_type')->findColumn('item_type');
     //     $validItemTypesNorm = array_fill_keys(array_map($norm, (array)$validItemTypes), true);
 
@@ -903,7 +876,7 @@ class MasterdataController extends BaseController
     //     $db->transStart();
     //     try {
     //         // 7a) update master_order
-    //         $masterOrderModel->update($id_order, $masterDataUpdate);
+    //         $this->masterOrderModel->update($id_order, $masterDataUpdate);
 
     //         $highestRow = $sheet->getHighestRow();
     //         // $dataStartRow = 79;
@@ -1104,12 +1077,12 @@ class MasterdataController extends BaseController
 
     //             // flush per batch
     //             if (count($toUpdate) >= $BATCH_SIZE) {
-    //                 $materialModel->updateBatch($toUpdate, 'id_material');
+    //                 $this->materialModel->updateBatch($toUpdate, 'id_material');
     //                 $stats['update'] += count($toUpdate);
     //                 $toUpdate = [];
     //             }
     //             if (count($toInsert) >= $BATCH_SIZE) {
-    //                 $materialModel->insertBatch($toInsert);
+    //                 $this->materialModel->insertBatch($toInsert);
     //                 $stats['insert'] += count($toInsert);
     //                 $toInsert = [];
     //             }
@@ -1117,13 +1090,13 @@ class MasterdataController extends BaseController
 
     //         // sisa batch
     //         if ($toUpdate) {
-    //             $materialModel->updateBatch($toUpdate, 'id_material');
+    //             $this->materialModel->updateBatch($toUpdate, 'id_material');
     //             $stats['update'] += count($toUpdate);
     //             // add swall itemtype was update
 
     //         }
     //         if ($toInsert) {
-    //             $materialModel->insertBatch($toInsert);
+    //             $this->materialModel->insertBatch($toInsert);
     //             $stats['insert'] += count($toInsert);
     //         }
 
@@ -1150,7 +1123,7 @@ class MasterdataController extends BaseController
     //                         'admin'       => $admin,
     //                         // 'is_active' => 0, // kalau ada
     //                     ], $chunk);
-    //                     $materialModel->updateBatch($rows, 'id_material');
+    //                     $this->materialModel->updateBatch($rows, 'id_material');
     //                     $stats['disabled'] += count($rows);
     //                 }
     //             }
@@ -1277,7 +1250,7 @@ class MasterdataController extends BaseController
     //     // Setelah selesai pairing SEMUA, eksekusi batch update "keterangan":
     //     if (!empty($noteUpdates)) {
     //         foreach (array_chunk($noteUpdates, $BATCH_SIZE) as $chunk) {
-    //             $materialModel->updateBatch($chunk, 'id_material');
+    //             $this->materialModel->updateBatch($chunk, 'id_material');
     //         }
     //     }
     //     // ===== 8) Hasil (versi <ul><li>) =====
@@ -1386,9 +1359,9 @@ class MasterdataController extends BaseController
         }
 
         // ===== 1) Model =====
-        $masterOrderModel    = new MasterOrderModel();
-        $materialModel       = new MaterialModel();
-        $masterMaterialModel = new MasterMaterialModel();
+        // $this->masterOrderModel    = new MasterOrderModel();
+        // $this->materialModel       = new MaterialModel();
+        // $this->masterMaterialModel = new MasterMaterialModel();
 
         // ===== 2) Konstanta & Util =====
         $SOFT_DELETE_REMOVED = true;
@@ -1501,7 +1474,7 @@ class MasterdataController extends BaseController
                 return redirect()->back()->with('error', 'No Model tidak ditemukan (coba cek cell B9).');
             }
 
-            $masterOrder = $masterOrderModel->where('no_model', $no_model)->first();
+            $masterOrder = $this->masterOrderModel->where('no_model', $no_model)->first();
             if (!$masterOrder) {
                 return redirect()->back()->with('error', 'Master order No Model ' . $no_model . ' tidak ditemukan.');
             }
@@ -1533,7 +1506,7 @@ class MasterdataController extends BaseController
         }
 
         // ===== 5) Siapkan peta existing materials =====
-        $existingRows = $materialModel
+        $existingRows = $this->materialModel
             ->select('id_material, material_nr, style_size, item_type, kode_warna, color, composition, gw, qty_pcs, loss, kgs')
             ->where('id_order', $id_order)
             ->findAll();
@@ -1597,7 +1570,7 @@ class MasterdataController extends BaseController
         $stats = ['insert' => 0, 'update' => 0, 'skip' => 0, 'disabled' => 0];
 
         // Cache master item_type
-        $validItemTypes = $masterMaterialModel->select('item_type')
+        $validItemTypes = $this->masterMaterialModel->select('item_type')
             ->groupBy('item_type')
             ->findColumn('item_type');
         $validItemTypesNorm = array_fill_keys(array_map($norm, (array)$validItemTypes), true);
@@ -1624,7 +1597,7 @@ class MasterdataController extends BaseController
         $db->transStart();
         try {
             // 7a) update master_order
-            $masterOrderModel->update($id_order, $masterDataUpdate);
+            $this->masterOrderModel->update($id_order, $masterDataUpdate);
 
             $highestRow = $sheet->getHighestRow();
 
@@ -1808,14 +1781,14 @@ class MasterdataController extends BaseController
 
                 // flush per batch UPDATE
                 if (count($toUpdate) >= $BATCH_SIZE) {
-                    $materialModel->updateBatch($toUpdate, 'id_material');
+                    $this->materialModel->updateBatch($toUpdate, 'id_material');
                     $stats['update'] += count($toUpdate);
                     $toUpdate = [];
                 }
 
                 // flush per batch INSERT
                 if (count($toInsert) >= $BATCH_SIZE) {
-                    $materialModel->insertBatch($toInsert);
+                    $this->materialModel->insertBatch($toInsert);
                     $stats['insert'] += count($toInsert);
 
                     foreach ($toInsert as $insRow) {
@@ -1827,13 +1800,13 @@ class MasterdataController extends BaseController
 
             // sisa batch UPDATE
             if (!empty($toUpdate)) {
-                $materialModel->updateBatch($toUpdate, 'id_material');
+                $this->materialModel->updateBatch($toUpdate, 'id_material');
                 $stats['update'] += count($toUpdate);
             }
 
             // sisa batch INSERT
             if (!empty($toInsert)) {
-                $materialModel->insertBatch($toInsert);
+                $this->materialModel->insertBatch($toInsert);
                 $stats['insert'] += count($toInsert);
                 foreach ($toInsert as $insRow) {
                     $allInsertedRows[] = $insRow;
@@ -1867,7 +1840,7 @@ class MasterdataController extends BaseController
                                 // 'is_active' => 0,
                             ];
                         }
-                        $materialModel->updateBatch($rows, 'id_material');
+                        $this->materialModel->updateBatch($rows, 'id_material');
                         $stats['disabled'] += count($rows);
                     }
                 }
@@ -1982,7 +1955,7 @@ class MasterdataController extends BaseController
 
         if (!empty($noteUpdates)) {
             foreach (array_chunk($noteUpdates, $BATCH_SIZE) as $chunk) {
-                $materialModel->updateBatch($chunk, 'id_material');
+                $this->materialModel->updateBatch($chunk, 'id_material');
             }
         }
 

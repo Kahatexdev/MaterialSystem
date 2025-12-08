@@ -9,79 +9,14 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use App\Models\ScheduleCelupModel;
-use App\Models\OutCelupModel;
-use App\Models\PemasukanModel;
-use App\Models\StockModel;
-use App\Models\MasterOrderModel;
-use App\Models\MaterialModel;
-use App\Models\ClusterModel;
-use App\Models\MasterWarnaBenangModel;
-use App\Models\MasterMaterialModel;
-use App\Models\OtherBonModel;
-use App\Models\PemesananModel;
-use App\Models\TotalPemesananModel;
-use App\Models\PengeluaranModel;
-use App\Models\PoTambahanModel;
-use App\Models\TotalPoTambahanModel;
-use App\Models\ReturModel;
-
-
 
 
 class GodController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $stockModel;
-    protected $scheduleCelupModel;
-    protected $outCelupModel;
-    protected $pemasukanModel;
-    protected $masterOrderModel;
-    protected $materialModel;
-    protected $clusterModel;
-    protected $masterWarnaBenangModel;
-    protected $request;
-    protected $masterMaterialModel;
-    protected $otherBonModel;
-    protected $pemesananModel;
-    protected $totalPemesananModel;
-    protected $pengeluaranModel;
-    protected $poTambahanModel;
-    protected $totalPoTambahanModel;
-    protected $returModel;
 
 
-    public function __construct()
-    {
 
-        $this->stockModel = new StockModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
-        $this->outCelupModel = new OutCelupModel();
-        $this->pemasukanModel = new PemasukanModel();
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->materialModel = new MaterialModel();
-        $this->clusterModel = new ClusterModel();
-        $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->otherBonModel = new OtherBonModel();
-        $this->pemesananModel = new PemesananModel();
-        $this->totalPemesananModel = new TotalPemesananModel();
-        $this->pengeluaranModel = new PengeluaranModel();
-        $this->poTambahanModel = new PoTambahanModel();
-        $this->totalPoTambahanModel = new TotalPoTambahanModel();
-        $this->returModel = new ReturModel();
-        $this->request = \Config\Services::request();
-
-        $this->role = session()->get('role');
-
-        $this->active = '/index.php/' . session()->get('role');
-        if ($this->filters   = ['role' => ['gbn']] != session()->get('role')) {
-            return redirect()->to(base_url('/login'));
-        }
-        $this->isLogedin();
-    }
+    public function __construct() {}
 
     protected function isLogedin()
     {
@@ -1670,7 +1605,7 @@ class GodController extends BaseController
     public function formPoTambahan()
     {
         // API untuk ambil daftar area unik
-        $apiArea = 'http://172.23.44.14/CapacityApps/public/api/getDataArea';
+        $apiArea = api_url('capacity') . 'getDataArea';
         $response = @file_get_contents($apiArea);
 
         if ($response === false) {
@@ -1699,7 +1634,7 @@ class GodController extends BaseController
             return $this->response->setJSON([]);
         }
 
-        $apiNoModel = 'http://172.23.44.14/CapacityApps/public/api/getNoModel?area=' . urlencode($area);
+        $apiNoModel = api_url('capacity') . 'getNoModel?area=' . urlencode($area);
         $response = @file_get_contents($apiNoModel);
 
         if ($response === false) {
@@ -1761,7 +1696,7 @@ class GodController extends BaseController
         $styleSize = array_unique($styleSize);
         // log_message('debug', 'STYLE SIZE LIST: ' . print_r($styleSize, true));
 
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getSisaPerSize/' . $area . '/' . $noModel
+        $apiUrl = api_url('capacity') . 'getSisaPerSize/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
 
         $response = @file_get_contents($apiUrl);
@@ -1783,7 +1718,7 @@ class GodController extends BaseController
 
         // Ambil BS MESIN per style_size
         $bsMesinList = [];
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsMesin/' . $area . '/' . $noModel
+        $apiUrl = api_url('capacity') . 'getBsMesin/' . $area . '/' . $noModel
             . '?styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
         // Mengambil data dari API eksternal
         $response = @file_get_contents($apiUrl);
@@ -1803,7 +1738,7 @@ class GodController extends BaseController
 
         // Ambil BS SETTING per style_size
         $bsSettingList = [];
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getBsSetting'
+        $apiUrl = api_url('capacity') . 'getBsSetting'
             . '?area=' . urlencode($area)
             . '&no_model=' . urlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('urlencode', $styleSize));
@@ -1834,7 +1769,7 @@ class GodController extends BaseController
             }
         }
 
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBruto'
+        $apiUrl = api_url('capacity') . 'getDataBruto'
             . '?area=' . rawurlencode($area)
             . '&no_model=' . rawurlencode($noModel)
             . '&styles[]=' . implode('&styles[]=', array_map('rawurlencode', $styleSize));

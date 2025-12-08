@@ -170,7 +170,7 @@
                         <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                             <i class="fa-solid fa-shop text-dark"></i>
                         </div>
-                        <span class="nav-link-text ms-1">Warehouse</span>
+                        <span class="nav-link-text ms-1">Warehouse <span class="badge bg-danger"><?= esc($pengeluaranReq ?? 0) ?></span></span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -288,6 +288,9 @@
     <script src="<?= base_url('assets/js/core/bootstrap.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/plugins/perfect-scrollbar.min.js') ?>"></script>
     <script src="<?= base_url('assets/js/plugins/smooth-scrollbar.min.js') ?>"></script>
+    <script>
+        const CapacityUrl = "<?= $capacityUrl ?>";
+    </script>
     <script>
         var ctx = document.getElementById("chart-bars").getContext("2d");
 

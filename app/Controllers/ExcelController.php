@@ -7,31 +7,6 @@ use CodeIgniter\HTTP\ResponseInterface;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\MasterOrderModel;
-use App\Models\MaterialModel;
-use App\Models\MasterMaterialModel;
-use App\Models\OpenPoModel;
-use App\Models\BonCelupModel;
-use App\Models\OutCelupModel;
-use App\Models\PemasukanModel;
-use App\Models\ScheduleCelupModel;
-use App\Models\StockModel;
-use App\Models\PemesananModel;
-use App\Models\PengeluaranModel;
-use App\Models\HistoryStockCoveringModel;
-use App\Models\TotalPemesananModel;
-use App\Models\ReturModel;
-use App\Models\MesinCelupModel;
-use App\Models\CoveringStockModel;
-use App\Models\PoTambahanModel;
-use App\Models\TotalPoTambahanModel;
-use App\Models\HistoryStock;
-use App\Models\MasterBuyerModel;
-use App\Models\PemesananSpandexKaretModel;
-use App\Models\WarehouseBBModel;
-use App\Models\MasterWarnaBenangModel;
-use App\Models\HistoryStockBBModel;
-use App\Models\OtherOutModel;
 
 use PhpOffice\PhpSpreadsheet\Style\{Border, Alignment, Fill};
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -47,66 +22,10 @@ use DateTime;
 
 class ExcelController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $request;
-    protected $masterOrderModel;
-    protected $materialModel;
-    protected $masterMaterialModel;
-    protected $openPoModel;
-    protected $bonCelupModel;
-    protected $outCelupModel;
-    protected $pemasukanModel;
-    protected $scheduleCelupModel;
-    protected $stockModel;
-    protected $pemesananModel;
-    protected $pengeluaranModel;
-    protected $historyCoveringStockModel;
-    protected $totalPemesananModel;
-    protected $returModel;
-    protected $mesinCelupModel;
-    protected $coveringStockModel;
-    protected $poPlusModel;
-    protected $totalPoTambahanModel;
-    protected $historyStock;
-    protected $pemesananSpandexKaretModel;
-    protected $warehouseBBModel;
-    protected $masterWarnaBenangModel;
-    protected $masterBuyerModel;
-    protected $historyStockBBModel;
-    protected $otherOutModel;
-    protected $poTambahanModel;
+
 
     public function __construct()
     {
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->materialModel = new MaterialModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->openPoModel = new OpenPoModel();
-        $this->bonCelupModel = new BonCelupModel();
-        $this->outCelupModel = new OutCelupModel();
-        $this->pemasukanModel = new PemasukanModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
-        $this->stockModel = new StockModel();
-        $this->pemesananModel = new PemesananModel();
-        $this->pengeluaranModel = new PengeluaranModel();
-        $this->historyCoveringStockModel = new HistoryStockCoveringModel();
-        $this->totalPemesananModel = new TotalPemesananModel();
-        $this->returModel = new ReturModel();
-        $this->mesinCelupModel = new MesinCelupModel();
-        $this->coveringStockModel = new CoveringStockModel();
-        $this->poPlusModel = new PoTambahanModel();
-        $this->totalPoTambahanModel = new TotalPoTambahanModel();
-        $this->historyStock = new HistoryStock();
-        $this->pemesananSpandexKaretModel = new PemesananSpandexKaretModel();
-        $this->warehouseBBModel = new WarehouseBBModel();
-        $this->masterWarnaBenangModel = new MasterWarnaBenangModel();
-        $this->masterBuyerModel = new MasterBuyerModel();
-        $this->historyStockBBModel = new HistoryStockBBModel();
-        $this->otherOutModel = new OtherOutModel();
-        $this->poTambahanModel = new PoTambahanModel();
-
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         if ($this->filters   = ['role' => ['monitoring']] != session()->get('role')) {
@@ -133,7 +52,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = api_url('capacity') . 'getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -402,7 +321,7 @@ class ExcelController extends BaseController
             $loss = $items['loss'];
             $gwpcs = ($gw * $comp) / 100;
             $styleSize = urlencode($styleSize);
-            $apiUrl  = 'http://172.23.44.14/CapacityApps/public/api/getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
+            $apiUrl  = api_url('capacity') . 'getDataPerinisial/' . $area . '/' . $model . '/' . $styleSize;
 
             $response = file_get_contents($apiUrl);
 
@@ -609,7 +528,7 @@ class ExcelController extends BaseController
     }
     public function excelPPHDays($area, $tanggal)
     {
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getPPhPerhari/' . $area . '/' . $tanggal;
+        $apiUrl = api_url('capacity') . 'getPPhPerhari/' . $area . '/' . $tanggal;
 
         $response = file_get_contents($apiUrl);
         if ($response === false) {
@@ -934,7 +853,7 @@ class ExcelController extends BaseController
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
             // Ambil data dari API ge172.23.44.14
-            $getStartMcUrl = 'http://172.23.44.14/CapacityApps/public/api/getStartMc/' . $model;
+            $getStartMcUrl = api_url('capacity') . 'getStartMc/' . $model;
 
             $getStartMcResponse = @file_get_contents($getStartMcUrl);
             if ($getStartMcResponse === false) {
@@ -2244,7 +2163,7 @@ class ExcelController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? '';
         $data = $this->masterOrderModel->getFilterReportGlobal($key, $jenis);
-        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = api_url('capacity') . 'getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
@@ -4738,7 +4657,7 @@ class ExcelController extends BaseController
     public function exportReportGlobalBenang()
     {
         $key = $this->request->getGet('key');
-        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = api_url('capacity') . 'getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
 
         // $data = $this->stockModel->getFilterReportGlobalBenang($key);
@@ -4957,9 +4876,16 @@ class ExcelController extends BaseController
         $sheet->getColumnDimension('A')->setWidth(10);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getRowDimension(1)->setRowHeight(30);
+
         $drawing = new Drawing();
-        $drawing->setName('Logo')->setDescription('Logo')->setPath('assets/img/logo-kahatex.png')
-            ->setCoordinates('A1')->setHeight(50)->setOffsetX(40)->setOffsetY(5)->setWorksheet($sheet);
+        $drawing->setName('Logo');
+        $drawing->setDescription('Logo');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png');
+        $drawing->setCoordinates('A1');
+        $drawing->setHeight(50);
+        $drawing->setOffsetX(40);
+        $drawing->setOffsetY(5);
+        $drawing->setWorksheet($sheet);
 
         // Judul Perusahaan
         $sheet->mergeCells('A3:B3')->setCellValue('A3', 'PT. KAHATEX');
@@ -6377,7 +6303,7 @@ class ExcelController extends BaseController
     {
         $data = $this->masterOrderModel->getFilterReportGlobal($key);
 
-        $getDeliv = 'http://172.23.44.14/CapacityApps/public/api/getDeliv/' . $key;
+        $getDeliv = api_url('capacity') . 'getDeliv/' . $key;
         $response = file_get_contents($getDeliv);
         $delivery = json_decode($response, true);
         $totalDel  = count($delivery);
@@ -6701,16 +6627,18 @@ class ExcelController extends BaseController
         exit;
     }
 
+    private function applyBorders(array $style, array $borders): array
+    {
+        $style['borders'] = $borders;
+        return $style;
+    }
+
     public function exportPoBooking()
     {
         $noModel = $this->request->getGet('no_model');
         $data = $this->openPoModel->getPoBookingByNoModel($noModel);
         // dd($noModel);
-        function applyBorders($style, $borders)
-        {
-            $style['borders'] = $borders;
-            return $style;
-        }
+
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -6746,15 +6674,15 @@ class ExcelController extends BaseController
 
         // ===== Drawing logo =====
         $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(20)
-            ->setOffsetY(10)
-            ->setHeight(1.25 * 37.7952755906)
-            ->setWidth(1.25 * 37.7952755906);
+        $drawing->setName('Logo');
+        $drawing->setDescription('PT. KAHATEX Logo');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png'); // penting: path absolute
+        $drawing->setCoordinates('B1');
+        $drawing->setWorksheet($sheet);
+        $drawing->setOffsetX(20);
+        $drawing->setOffsetY(10);
+        $drawing->setHeight(1.25 * 37.7952755906);
+        $drawing->setWidth(1.25 * 37.7952755906);
 
         // Define outline style for full document
         $outlineStyle = ['borders' => ['outline' => ['borderStyle' => Border::BORDER_DOUBLE]]];
@@ -6783,7 +6711,7 @@ class ExcelController extends BaseController
         foreach ($headers as $h) {
             $sheet->mergeCells($h['range']);
             $sheet->setCellValue(explode(':', $h['range'])[0], $h['value']);
-            $sheet->getStyle($h['range'])->applyFromArray(applyBorders($h['style'], $h['borders']));
+            $sheet->getStyle($h['range'])->applyFromArray($this->applyBorders($h['style'], $h['borders']));
         }
 
         // ===== Column widths =====n
@@ -6882,7 +6810,7 @@ class ExcelController extends BaseController
             $sheet->mergeCells($f['range']);
             $sheet->setCellValue(explode(':', $f['range'])[0], $f['value']);
             $borders = $f['borders'] ?? ['outline' => ['borderStyle' => Border::BORDER_THIN]];
-            $sheet->getStyle($f['range'])->applyFromArray(applyBorders($f['style'], $borders));
+            $sheet->getStyle($f['range'])->applyFromArray($this->applyBorders($f['style'], $borders));
         }
 
         // Terapkan gaya
@@ -7007,11 +6935,7 @@ class ExcelController extends BaseController
     {
         $data = $this->openPoModel->getPoManualByNoModel($noModel);
         // dd($data);
-        function applyBorders($style, $borders)
-        {
-            $style['borders'] = $borders;
-            return $style;
-        }
+
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -7047,15 +6971,15 @@ class ExcelController extends BaseController
 
         // ===== Drawing logo =====
         $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(20)
-            ->setOffsetY(10)
-            ->setHeight(1.25 * 37.7952755906)
-            ->setWidth(1.25 * 37.7952755906);
+        $drawing->setName('Logo');
+        $drawing->setDescription('PT. KAHATEX Logo');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png'); // penting: path absolute
+        $drawing->setCoordinates('B1');
+        $drawing->setWorksheet($sheet);
+        $drawing->setOffsetX(20);
+        $drawing->setOffsetY(10);
+        $drawing->setHeight(1.25 * 37.7952755906);
+        $drawing->setWidth(1.25 * 37.7952755906);
 
         // Define outline style for full document
         $outlineStyle = ['borders' => ['outline' => ['borderStyle' => Border::BORDER_DOUBLE]]];
@@ -7084,7 +7008,7 @@ class ExcelController extends BaseController
         foreach ($headers as $h) {
             $sheet->mergeCells($h['range']);
             $sheet->setCellValue(explode(':', $h['range'])[0], $h['value']);
-            $sheet->getStyle($h['range'])->applyFromArray(applyBorders($h['style'], $h['borders']));
+            $sheet->getStyle($h['range'])->applyFromArray($this->applyBorders($h['style'], $h['borders']));
         }
 
         // ===== Column widths =====n
@@ -7183,7 +7107,7 @@ class ExcelController extends BaseController
             $sheet->mergeCells($f['range']);
             $sheet->setCellValue(explode(':', $f['range'])[0], $f['value']);
             $borders = $f['borders'] ?? ['outline' => ['borderStyle' => Border::BORDER_THIN]];
-            $sheet->getStyle($f['range'])->applyFromArray(applyBorders($f['style'], $borders));
+            $sheet->getStyle($f['range'])->applyFromArray($this->applyBorders($f['style'], $borders));
         }
 
         // Terapkan gaya
@@ -7447,11 +7371,10 @@ class ExcelController extends BaseController
 
     public function exportHistoryPindahOrder()
     {
-        $noModelOld   = $this->request->getGet('model_old')     ?? '';
-        $noModelNew   = $this->request->getGet('model_new')     ?? '';
+        $noModelOld   = $this->request->getGet('model_old') ?? '';
+        $noModelNew   = $this->request->getGet('model_new') ?? '';
         $kodeWarna = $this->request->getGet('kode_warna') ?? '';
 
-        // 1) Ambil data
         // 1) Ambil data
         if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
             $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
@@ -7461,7 +7384,7 @@ class ExcelController extends BaseController
 
         // 2) Siapkan HTTP client
         $client = \Config\Services::curlrequest([
-            'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+            'baseURI' => api_url('capacity') . '',
             'timeout' => 5
         ]);
 
@@ -7609,7 +7532,7 @@ class ExcelController extends BaseController
         $area = $this->request->getGet('area') ?? '';
 
         // 1) Ambil data
-        $dataPoPlus = $this->poPlusModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
+        $dataPoPlus = $this->poTambahanModel->getDataPoPlus($tglPoDari, $tglPoSampai, $noModel, $area, $kodeWarna);
         // dd($dataPoPlus);
         // Buat spreadsheet
         $spreadsheet = new Spreadsheet();
@@ -7762,7 +7685,7 @@ class ExcelController extends BaseController
         $noModel   = $result[0]['no_model'] ?? '';
         $kodeBuyer = $result[0]['buyer'] ?? '';
 
-        $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $apiUrl = api_url('capacity') . 'getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = '';
         $response   = @file_get_contents($apiUrl);
@@ -7800,7 +7723,7 @@ class ExcelController extends BaseController
         }
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = api_url('capacity').'getDataBuyer?no_model=' . urlencode($noModel);
 
         if ($tujuan == 'CELUP') {
             $penerima = 'Retno';
@@ -9123,15 +9046,15 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getFont()->setSize(11);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $drawing->setName('Logo');
+        $drawing->setDescription('PT. KAHATEX Logo');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png');
+        $drawing->setWorksheet($sheet);
+        $drawing->setCoordinates('B1');
+        $drawing->setOffsetX(150);
+        $drawing->setOffsetY(7);
+        $drawing->setHeight(40);
+        $drawing->setWidth(40);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -9621,15 +9544,15 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getFont()->setSize(11);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $drawing = new Drawing();
-        $drawing->setName('Logo')
-            ->setDescription('PT. KAHATEX Logo')
-            ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-            ->setWorksheet($sheet)
-            ->setCoordinates('B1')
-            ->setOffsetX(150)
-            ->setOffsetY(7)
-            ->setHeight(40)
-            ->setWidth(40);
+        $drawing->setName('Logo');
+        $drawing->setDescription('PT. KAHATEX Logo');
+        $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png');
+        $drawing->setWorksheet($sheet);
+        $drawing->setCoordinates('B1');
+        $drawing->setOffsetX(150);
+        $drawing->setOffsetY(7);
+        $drawing->setHeight(40);
+        $drawing->setWidth(40);
 
         $sheet->setCellValue('D1', 'FORMULIR');
         $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);
@@ -9953,7 +9876,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = api_url('capacity') . 'getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -10538,7 +10461,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = api_url('capacity').'getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -11116,7 +11039,7 @@ class ExcelController extends BaseController
         // $noModel =  $result[0]['no_model'] ?? '';
 
         // Ambil buyer dari API
-        // $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        // $buyerApiUrl = api_url('capacity').'getDataBuyer?no_model=' . urlencode($noModel);
         // $buyerName = json_decode(file_get_contents($buyerApiUrl), true);
 
         if ($tujuan == 'CELUP') {
@@ -11685,7 +11608,7 @@ class ExcelController extends BaseController
 
         // // 2) Siapkan HTTP client
         // $client = \Config\Services::curlrequest([
-        //     'baseURI' => 'http://172.23.44.14/CapacityApps/public/api/',
+        //     'baseURI' => api_url('capacity').'',
         //     'timeout' => 5
         // ]);
 
@@ -13983,7 +13906,7 @@ class ExcelController extends BaseController
             }
 
             // API URL dari config
-            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($res['no_model']);
+            $apiUrl = api_url('capacity') . 'getDataBuyer?no_model=' . urlencode($res['no_model']);
 
             // Pakai stream context untuk timeout dan error handling
             $context = stream_context_create(['http' => ['timeout' => 3]]); // 3 detik timeout
@@ -14616,7 +14539,7 @@ class ExcelController extends BaseController
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($p['no_model'])
+                $urlQty = api_url('capacity') . 'getQtyOrder?no_model=' . urlencode($p['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 
@@ -14683,7 +14606,7 @@ class ExcelController extends BaseController
             $ttlQty = 0;
 
             foreach ($getStyle as $row) {
-                $urlQty = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrder?no_model=' . urlencode($r['no_model'])
+                $urlQty = api_url('capacity') . 'getQtyOrder?no_model=' . urlencode($r['no_model'])
                     . '&style_size=' . urlencode($row['style_size'])
                     . '&area=' . urlencode($area);
 
@@ -15387,15 +15310,15 @@ class ExcelController extends BaseController
             $sheet->getStyle('A1')->getFont()->setSize(11);
             $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $drawing = new Drawing();
-            $drawing->setName('Logo')
-                ->setDescription('PT. KAHATEX Logo')
-                ->setPath(FCPATH . 'assets/img/logo-kahatex.png')
-                ->setWorksheet($sheet)
-                ->setCoordinates('B1')
-                ->setOffsetX(150)
-                ->setOffsetY(7)
-                ->setHeight(40)
-                ->setWidth(40);
+            $drawing->setName('Logo');
+            $drawing->setDescription('PT. KAHATEX Logo');
+            $drawing->setPath(FCPATH . 'assets/img/logo-kahatex.png');
+            $drawing->setWorksheet($sheet);
+            $drawing->setCoordinates('B1');
+            $drawing->setOffsetX(150);
+            $drawing->setOffsetY(7);
+            $drawing->setHeight(40);
+            $drawing->setWidth(40);
 
             $sheet->setCellValue('D1', 'FORMULIR');
             $sheet->getStyle('D1')->getFont()->setBold(true)->setSize(16);

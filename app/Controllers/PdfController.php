@@ -111,7 +111,7 @@ class PdfController extends BaseController
         // dd($result);
         $noModel =  $result[0]['no_model'] ?? '';
 
-        $buyerApiUrl = 'http://172.23.44.14/CapacityApps/public/api/getDataBuyer?no_model=' . urlencode($noModel);
+        $buyerApiUrl = api_url('capacity') . 'getDataBuyer?no_model=' . urlencode($noModel);
 
         $buyerName = fetchApiData($buyerApiUrl);
         // dd($buyerName);
@@ -249,31 +249,20 @@ class PdfController extends BaseController
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
 
-        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
-        {
-            // Simpan posisi awal
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
-            $pdf->MultiCell($w, $h, $txt, $border, $align);
-
-            // Kembalikan ke kanan cell agar sejajar
-            $pdf->SetXY($x + $w, $y);
-        }
+        
 
         // Tabel Header Baris Pertama
         $pdf->SetFont('Arial', '', 6);
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -287,8 +276,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
 
         $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
         // $pdf->SetY($startYAfterHeader);
@@ -748,13 +737,13 @@ class PdfController extends BaseController
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -768,8 +757,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
         $pdf->SetY(53);
     }
 
@@ -2502,12 +2491,13 @@ class PdfController extends BaseController
     public function exportStockPdf()
     {
         $jenisCover = $this->request->getPost('jenis_cover');
+        $jenisMesin = $this->request->getPost('jenis_mesin');
         $jenisBenang = $this->request->getPost('jenis_benang');
-        if (empty($jenisBenang) || empty($jenisCover)) {
+        if (empty($jenisBenang) || empty($jenisCover) || empty($jenisMesin)) {
             return redirect()->back()->with('error', 'Jenis Benang dan Jenis Cover tidak boleh kosong.');
         }
 
-        $data = $this->coveringStockModel->getStockCover($jenisBenang, $jenisCover);
+        $data = $this->coveringStockModel->getStockCover($jenisMesin,$jenisBenang, $jenisCover);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -3035,6 +3025,16 @@ class PdfController extends BaseController
             ->setBody($pdf->Output('stock.pdf', 'I'));
     }
 
+    private function multiCellFit(FPDF $pdf, float $w, float $h, string $txt, int $border = 1, string $align = 'C'): void
+    {
+        $x = $pdf->GetX();
+        $y = $pdf->GetY();
+
+        $pdf->MultiCell($w, $h, $txt, $border, $align);
+
+        $pdf->SetXY($x + $w, $y);
+    }
+
     public function exportPemesananSandexKaretCovering()
     {
         $tglPakai = $this->request->getGet('tgl_pakai');
@@ -3100,25 +3100,14 @@ class PdfController extends BaseController
         $pdf->Cell(85, 4, 'TGL:', 0, 1, 'L'); // Tinggi cell diatur menjadi 8 agar teks berada di tengah
 
         //Simpan posisi awal Season & MaterialType
-        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
-        {
-            // Simpan posisi awal
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
-            $pdf->MultiCell($w, $h, $txt, $border, $align);
-
-            // Kembalikan ke kanan cell agar sejajar
-            $pdf->SetXY($x + $w, $y);
-        }
+        
 
         // Header Tabel Pertama
         $pdf->SetFont('Arial', '', 5);
         $pdf->Cell(20, 6,  'JENIS', 1, 0, 'C');
         $pdf->Cell(15, 6,  'COLOUR', 1, 0, 'C');
         $pdf->Cell(15, 6,  'CODE', 1, 0, 'C');
-        MultiCellFit($pdf, 10, 3, "JLN\nMC KK", 1, 'C');
+        $this->multiCellFit($pdf, 10, 3, "JLN\nMC KK", 1, 'C');
         $pdf->Cell(10, 6,  'CONES', 1, 0, 'C');
         $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
         $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
@@ -3130,7 +3119,7 @@ class PdfController extends BaseController
         $pdf->Cell(20, 6,  'JENIS', 1, 0, 'C');
         $pdf->Cell(15, 6,  'COLOUR', 1, 0, 'C');
         $pdf->Cell(15, 6,  'CODE', 1, 0, 'C');
-        MultiCellFit($pdf, 10, 3, "JLN\nMC KK");
+        $this->multiCellFit($pdf, 10, 3, "JLN\nMC KK");
         $pdf->Cell(10, 6,  'CONES', 1, 0, 'C');
         $pdf->Cell(10, 6,  'KG', 1, 0, 'C');
         $pdf->Cell(10, 6,  'KG', 1, 1, 'C');
@@ -3439,31 +3428,20 @@ class PdfController extends BaseController
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
 
-        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
-        {
-            // Simpan posisi awal
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
-            $pdf->MultiCell($w, $h, $txt, $border, $align);
-
-            // Kembalikan ke kanan cell agar sejajar
-            $pdf->SetXY($x + $w, $y);
-        }
+        
 
         // Tabel Header Baris Pertama
         $pdf->SetFont('Arial', '', 6);
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -3477,8 +3455,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
 
         $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
         // $pdf->SetY($startYAfterHeader);
@@ -3912,13 +3890,13 @@ class PdfController extends BaseController
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -3932,8 +3910,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
         $pdf->SetY(53);
     }
 
@@ -4107,31 +4085,20 @@ class PdfController extends BaseController
             $pdf->Cell(234, 5, ': No delivery date available', 0, 1, 'L');
         }
 
-        function MultiCellFit($pdf, $w, $h, $txt, $border = 1, $align = 'C')
-        {
-            // Simpan posisi awal
-            $x = $pdf->GetX();
-            $y = $pdf->GetY();
-
-            // Simulasikan MultiCell tetapi tetap pakai tinggi tetap (12)
-            $pdf->MultiCell($w, $h, $txt, $border, $align);
-
-            // Kembalikan ke kanan cell agar sejajar
-            $pdf->SetXY($x + $w, $y);
-        }
+        
 
         // Tabel Header Baris Pertama
         $pdf->SetFont('Arial', '', 6);
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -4145,8 +4112,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
 
         $startYAfterHeader = $pdf->GetY();  // posisi Y tepat setelah header
         // $pdf->SetY($startYAfterHeader);
@@ -4584,13 +4551,13 @@ class PdfController extends BaseController
         // Merge cells untuk kolom No, Bentuk Celup, Warna, Kode Warna, Buyer, Nomor Order, Delivery, Untuk Produksi, Contoh Warna, Keterangan Celup
         $pdf->Cell(6, 12, 'No', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(37, 6, 'Benang', 1, 0, 'C'); // Merge 2 kolom ke samping untuk baris pertama
-        MultiCellFit($pdf, 12, 6, "Bentuk\nCelup");
+        $this->multiCellFit($pdf, 12, 6, "Bentuk\nCelup");
         $pdf->Cell(20, 12, 'Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Kode Warna', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Buyer', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(20, 12, 'Nomor Order', 1, 0, 'C'); // Merge 2 baris
         $pdf->Cell(16, 12, 'Delivery', 1, 0, 'C'); // Merge 2 baris
-        MultiCellFit($pdf, 15, 3, "Qty\nPesanan");
+        $this->multiCellFit($pdf, 15, 3, "Qty\nPesanan");
         $pdf->Cell(52, 6, 'Permintaan Kelos', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Untuk Produksi', 1, 0, 'C');
         $pdf->Cell(22, 12, 'Contoh Warna', 1, 0, 'C');
@@ -4604,8 +4571,8 @@ class PdfController extends BaseController
         $pdf->Cell(15, -6, 'Kg', 1, 0, 'C'); // Merge 4 kolom untuk Permintaan Kelos
         $pdf->Cell(13, -6, 'Kg', 1, 0, 'C');
         $pdf->Cell(13, -6, 'Yard', 1, 0, 'C');
-        MultiCellFit($pdf, 13, -3, "Cones\nTotal");
-        MultiCellFit($pdf, 13, -3, "Jenis\nCones");
+        $this->multiCellFit($pdf, 13, -3, "Cones\nTotal");
+        $this->multiCellFit($pdf, 13, -3, "Jenis\nCones");
         $pdf->SetY(53);
     }
 

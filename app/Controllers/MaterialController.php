@@ -4,31 +4,15 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\MaterialModel;
-use App\Models\MasterMaterialModel;
-use App\Models\MasterOrderModel;
-use App\Models\OpenPoModel;
-use App\Models\ScheduleCelupModel;
+
 use PhpParser\Node\Stmt\Else_;
 
 class MaterialController extends BaseController
 {
-    protected $role;
-    protected $active;
-    protected $filters;
-    protected $materialModel;
-    protected $masterOrderModel;
-    protected $masterMaterialModel;
-    protected $openPoModel;
-    protected $scheduleCelupModel;
 
     public function __construct()
     {
-        $this->materialModel = new MaterialModel();
-        $this->masterMaterialModel = new MasterMaterialModel();
-        $this->masterOrderModel = new MasterOrderModel();
-        $this->openPoModel = new OpenPoModel();
-        $this->scheduleCelupModel = new ScheduleCelupModel();
+
 
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
@@ -491,7 +475,7 @@ class MaterialController extends BaseController
             $material = $this->materialModel->getMaterialForPPH($noModel);
 
             //
-            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrderPerArea?model=' . urlencode($noModel);
+            $apiUrl = api_url('capacity') . 'getQtyOrderPerArea?model=' . urlencode($noModel);
             // $order = $this->ApsPerstyleModel->getQtyArea($noModel) ?: [];
 
             $orders = @file_get_contents($apiUrl);
