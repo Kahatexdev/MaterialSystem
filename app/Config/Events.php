@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Models\PengeluaranModel;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\HotReloader\HotReloader;
@@ -57,7 +58,7 @@ Events::on('pre_system', static function (): void {
     Events::on('post_controller_constructor', function () {
         $renderer = Services::renderer();
         $role = session()->get('role');
-        $url = 'http://172.23.44.14/CapacityApps/public/api/getNotif/' . $role;
+        $url = 'http://172.23.39.117/CapacityApps/public/api/getNotif/' . $role;
 
         try {
             $json = @file_get_contents($url);
@@ -80,6 +81,14 @@ Events::on('pre_system', static function (): void {
         } catch (\Throwable $th) {
 
             // $renderer->setVar('returReq', 0);
+        }
+        try {
+            $pengeluaranModel = new PengeluaranModel();
+            $pengeluaranCount = $pengeluaranModel->countRequest();
+            $renderer->setVar('pengeluaranReq', $pengeluaranCount);
+        } catch (\Throwable $th) {
+            log_message('error', 'Error hitung pengeluaranReq: ' . $th->getMessage());
+            $renderer->setVar('pengeluaranReq', 0);
         }
     });
 });
