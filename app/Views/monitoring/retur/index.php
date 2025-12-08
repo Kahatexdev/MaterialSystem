@@ -259,7 +259,7 @@
             $('#modalPengajuanRetur').find('input[name="area"]').val(area);
 
             $.ajax({
-                // url: "http://172.23.39.117/MaterialSystem/public/api/cekBahanBaku/" + model,
+                // url: "http://172.23.44.14/MaterialSystem/public/api/cekBahanBaku/" + model,
                 url: baseUrl + role + "/retur/cekBahanBaku",
                 type: "GET",
                 data: {
@@ -283,7 +283,7 @@
         // function listRetur(model, area) {
         //     const rowbawah = document.getElementById('rowbawah')
         //     $.ajax({
-        //         // url: "http://172.23.39.117/MaterialSystem/public/api/listRetur",
+        //         // url: "http://172.23.44.14/MaterialSystem/public/api/listRetur",
         //         url: baseUrl + role + "/retur/listRetur",
         //         type: "GET",
         //         data: {
@@ -306,7 +306,7 @@
 
         // function fetchListRetur(data, model, area) {
         //     const tableBody = document.getElementById('bodyData2');
-        //     const baseUrl = "http://172.23.39.117/CapacityApps/public/user/retur/";
+        //     const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur/";
         //     tableBody.innerHTML = `
         //         <div class="d-flex align-items-center justify-content-between">
         //             <h3 class="model-title mb-0">List Retur ${area}</h3>
@@ -406,7 +406,7 @@
         function fetchData(data, model, area) {
             const aggregateKeys = ["qty", "sisa", "bruto", "bs_setting", "bs_mesin"];
             const today = new Date();
-            const baseUrl = "http://172.23.39.117/CapacityApps/public/user/retur";
+            const baseUrl = "http://172.23.44.14/CapacityApps/public/user/retur";
             const headerContainer = document.getElementById('HeaderRow');
 
             headerContainer.innerHTML = `
@@ -478,7 +478,7 @@
                 option.appendChild(opt);
             }
             $.ajax({
-                // url: "http://172.23.39.117/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
+                // url: "http://172.23.44.14/MaterialSystem/public/api/getPengirimanArea?noModel=" + model,
                 url: baseUrl + role + "/retur/getPengirimanArea",
                 type: "GET",
                 data: {

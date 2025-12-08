@@ -852,7 +852,7 @@ class ExcelController extends BaseController
         $row = 4;
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
-            // Ambil data dari API ge172.23.39.117
+            // Ambil data dari API ge172.23.44.14
             $getStartMcUrl = api_url('capacity') . 'getStartMc/' . $model;
 
             $getStartMcResponse = @file_get_contents($getStartMcUrl);
@@ -5846,7 +5846,7 @@ class ExcelController extends BaseController
         $sheet->setCellValue('O4', 'KG');
         $sheet->setCellValue('P4', 'LOT');
 
-        // Po Tambahan Gbn: 172.23.39.117Sub-header
+        // Po Tambahan Gbn: 172.23.44.14Sub-header
         $sheet->mergeCells('R3:U3');
         $sheet->setCellValue('R3', 'PO TAMBAHAN GBN');
         $sheet->setCellValue('R4', 'TGL TERIMA PO(+) GBN');
@@ -15908,7 +15908,7 @@ class ExcelController extends BaseController
         $totalAllDelivery = [];
 
         if ($noModel) {
-            $apiUrl = 'http://172.23.39.117/CapacityApps/public/api/getQtyOrderPerArea?model=' . urlencode($noModel);
+            $apiUrl = 'http://172.23.44.14/CapacityApps/public/api/getQtyOrderPerArea?model=' . urlencode($noModel);
 
             $orders = @file_get_contents($apiUrl);
 
