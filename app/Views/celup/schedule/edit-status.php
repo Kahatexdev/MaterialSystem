@@ -121,7 +121,7 @@
                                     <!-- Qty PO -->
                                     <div class="form-group" id="qtyPOGroup">
                                         <label for="qty_po">Qty PO</label>
-                                        <input type="number" class="form-control" name="qty_po" id="qty_po" value="<?= number_format($data['qty_po'], 2, '.') ?>" disabled>
+                                        <input type="number" class="form-control" name="qty_po" id="qty_po" value="<?= $data['qty_po'] !== null ? number_format((float)$data['qty_po'], 2, '.', '') : '' ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -135,7 +135,7 @@
                                     <!-- Qty Celup -->
                                     <div class="form-group" id="qtyCelupGroup">
                                         <label for="qty_celup">Qty Celup</label>
-                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= number_format($data['qty_celup'], 2, '.') ?>">
+                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= $data['qty_celup'] !== null ? number_format((float)$data['qty_celup'], 2, '.', '') : '' ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">

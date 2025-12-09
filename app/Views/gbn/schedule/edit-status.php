@@ -121,7 +121,7 @@
                                     <!-- Qty PO -->
                                     <div class="form-group" id="qtyPOGroup">
                                         <label for="qty_po">Qty PO</label>
-                                        <input type="number" class="form-control" name="qty_po" id="qty_po" value="<?= number_format($data['qty_po'], 2, '.') ?>" disabled>
+                                        <input type="number" class="form-control" name="qty_po" id="qty_po" value="<?= $data['qty_po'] !== null ? number_format((float)$data['qty_po'], 2, '.', '') : '' ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -135,7 +135,7 @@
                                     <!-- Qty Celup -->
                                     <div class="form-group" id="qtyCelupGroup">
                                         <label for="qty_celup">Qty Celup</label>
-                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= number_format($data['qty_celup'], 2, '.') ?>">
+                                        <input type="number" class="form-control" name="qty_celup" id="qty_celup" value="<?= $data['qty_celup'] !== null ? number_format((float)$data['qty_celup'], 2, '.', '') : '' ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -149,7 +149,7 @@
                                     <!-- Lot Celup -->
                                     <div class="form-group" id="lotCelupGroup">
                                         <label for="qty_celup">Lot Celup</label>
-                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>">
+                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>" disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -285,7 +285,36 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tglCelup = document.getElementById('tgl_celup');
+        const tglAcc = document.getElementById('tgl_acc');
+        const tglReject = document.getElementById('tgl_reject');
 
+        function toggleReadonly() {
+            const isCelupEmpty = !tglCelup.value || tglCelup.value === "";
+
+            if (isCelupEmpty) {
+                tglAcc.setAttribute('readonly', true);
+                tglReject.setAttribute('readonly', true);
+
+                // Biar terlihat jelas ke user
+                tglAcc.classList.add('bg-light');
+                tglReject.classList.add('bg-light');
+            } else {
+                tglAcc.removeAttribute('readonly');
+                tglReject.removeAttribute('readonly');
+
+                tglAcc.classList.remove('bg-light');
+                tglReject.classList.remove('bg-light');
+            }
+        }
+
+        // Initial check saat halaman pertama kali dibuka
+        toggleReadonly();
+
+        // Update otomatis kalau tgl_celup berubah
+        tglCelup.addEventListener('change', toggleReadonly);
+    });
 </script>
 
 <?php $this->endSection(); ?>
