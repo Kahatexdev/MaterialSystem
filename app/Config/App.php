@@ -18,7 +18,7 @@ class App extends BaseConfig
      */
 
     // public string $baseURL = 'http://localhost:8080';
-    public string $baseURL = 'http://172.23.39.117/MaterialSystem/public/';
+    public string $baseURL = 'http://172.23.44.14/MaterialSystem/public/';
     // public string $baseURL = 'http://localhost:8080/';
     public $capacityUrl;
 
@@ -26,7 +26,7 @@ class App extends BaseConfig
     {
         parent::__construct();
 
-        $this->capacityUrl = getenv('CAPACITY_API_URL') ?: 'http://172.23.39.117/CapacityApps/public/api/';
+        $this->capacityUrl = getenv('CAPACITY_API_URL') ?: 'http://172.23.44.14/CapacityApps/public/api/';
     }
 
     /**
