@@ -1259,7 +1259,7 @@ class CelupController extends BaseController
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $data['items'][$h]['lot_celup'] ?? null,
+                        'lot_kirim' => $data['items'][$h]['lot_celup'][$i] ?? null,
                         'ganti_retur' => $gantiRetur,
                         'operator_packing' => $operatorPerTab,
                         'shift' => $shiftPerTab,
