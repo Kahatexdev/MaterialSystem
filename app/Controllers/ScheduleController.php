@@ -737,150 +737,227 @@ class ScheduleController extends BaseController
             return $this->response->setJSON(['error' => 'No data found']);
         }
     }
+
     public function updateSchedule()
     {
-        // Ambil semua data dari form menggunakan POST
         $scheduleData = $this->request->getPost();
-        // dd($scheduleData);
+
+        // Validasi minimal
+        if (empty($scheduleData['po']) || !is_array($scheduleData['po'])) {
+            return redirect()->back()->with('error', 'Data schedule tidak valid.');
+        }
+
         // Ambil id_mesin berdasarkan no_mesin yang dikirimkan
-        $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
-        $poList = $scheduleData['po']; // Array po[]
+        $idMesinRow = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin'] ?? null);
+        if (!$idMesinRow || empty($idMesinRow['id_mesin'])) {
+            return redirect()->back()->with('error', 'ID mesin tidak ditemukan.');
+        }
+        $idMesin = $idMesinRow['id_mesin'];
 
-        // dd ($scheduleData, $id_mesin, $poList);
+        $poList        = $scheduleData['po']; // array no_model/PO
+        $postedPoPlus  = $scheduleData['po_plus'] ?? []; // bisa keyed by id_celup / index
+        $dataBatch     = [];
+        $updateMessage = null;
 
-        $dataBatch = []; // Untuk menyimpan batch data
-        $updateMessage = null; // Menyimpan status pesan update atau insert
-
-        $i = 0; // Counter untuk sinkronisasi indeks scheduleData
+        $i = 0;
         foreach ($poList as $key => $po) {
-            // Dapatkan id_celup dari data (bisa null jika baris baru)
             $id_celup = $scheduleData['id_celup'][$i] ?? null;
-            $postedPoPlus = $scheduleData['po_plus'] ?? [];
 
-            // Jika id_celup sudah ada, coba ambil data schedule dari database
+            /**
+             * 1. Tentukan no_model
+             *    - Kalau id_celup ada dan schedule lama punya no_model → pakai itu
+             *    - Kalau tidak ada → coba cari di master_order, kalau masih gagal → pakai value po[]
+             */
             if (!empty($id_celup)) {
                 $existingSchedule = $this->scheduleCelupModel->find($id_celup);
                 if ($existingSchedule && !empty($existingSchedule['no_model'])) {
-                    // Jika no_model sudah ada di schedule, gunakan itu
                     $no_model = $existingSchedule['no_model'];
                 } else {
-                    // Jika tidak ada, ambil dari masterOrderModel
                     $findNoModel = $this->masterOrderModel->getNoModel($po);
                     if (empty($findNoModel)) {
-                        // Misalnya, log error atau tetapkan nilai default
                         log_message('error', "No model not found for PO: {$po}");
-                        $no_model = $scheduleData['po'][$i];
+                        $no_model = $scheduleData['po'][$i]; // fallback: isi apa adanya
                     } else {
                         $no_model = $findNoModel['no_model'];
                     }
                 }
             } else {
-                // Jika id_celup null, ambil no_model dari masterOrderModel
+                // Baris baru
                 $findNoModel = $this->masterOrderModel->getNoModel($po);
                 if (empty($findNoModel)) {
-                    // Misalnya, log error atau tetapkan nilai default
-                    log_message('error', "No model not found for PO: {$po}");
+                    log_message('error', "No model not found for PO (new row): {$po}");
                     $no_model = $scheduleData['po'][$i];
                 } else {
                     $no_model = $findNoModel['no_model'];
                 }
             }
 
+            /**
+             * 2. Mapping po_plus
+             *    View lama:
+             *      - baris existing  : name="po_plus[<?= $id_celup ?>]"
+             *      - baris baru      : name="po_plus[]"
+             *    → Di sini dicoba ambil by id_celup dulu, kalau tidak ada baru by index $i
+             */
             $poPlusValue = '0';
             if (!empty($id_celup) && isset($postedPoPlus[$id_celup])) {
-                $poPlusValue = (string)$postedPoPlus[$id_celup];
+                $poPlusValue = (string) $postedPoPlus[$id_celup];
             } elseif (isset($postedPoPlus[$i])) {
-                $poPlusValue = (string)$postedPoPlus[$i];
-            } elseif (is_array($postedPoPlus) && array_values($postedPoPlus) != $postedPoPlus && count($postedPoPlus) == 1) {
-                $poPlusValue = (string)reset($postedPoPlus);
+                $poPlusValue = (string) $postedPoPlus[$i];
             }
 
-            // Ambil nilai lainnya dengan menggunakan indeks counter $i
-            $last_status    = $scheduleData['last_status'][$i] ?? 'scheduled';
-            $start_mc       = $scheduleData['tgl_start_mc'][$i] ?? null;
-            $delivery_awal  = $scheduleData['delivery_awal'][$i] ?? null;
-            $delivery_akhir = $scheduleData['delivery_akhir'][$i] ?? null;
+            $last_status    = $scheduleData['last_status'][$i]      ?? 'scheduled';
+            $start_mc       = $scheduleData['tgl_start_mc'][$i]     ?? null;
+            $delivery_awal  = $scheduleData['delivery_awal'][$i]    ?? null;
+            $delivery_akhir = $scheduleData['delivery_akhir'][$i]   ?? null;
+            $qty_celup      = $scheduleData['qty_celup'][$i]        ?? null;
+            $item_type      = $scheduleData['item_type'][$i]        ?? null;
+            $ket_schedule   = $scheduleData['ket_schedule'][$i]     ?? null;
+            $kode_warna     = $scheduleData['kode_warna']           ?? null;
+            $warna          = $scheduleData['warna']                ?? null;
+            $lot_urut       = $scheduleData['lot_urut']             ?? null;
+            $tgl_schedule   = $scheduleData['tanggal_schedule']     ?? null;
 
+            $now      = date('Y-m-d H:i:s');
+            $username = session()->get('username');
+
+            // NOTE: created_at TIDAK di-set di sini; nanti hanya saat INSERT
             $dataBatch[] = [
-                'id_celup'         => $id_celup, // Bisa null untuk baris baru
-                'id_mesin'         => $id_mesin['id_mesin'],
-                'no_model'         => $no_model, // Gunakan no_model yang sudah didapat
-                'item_type'        => $scheduleData['item_type'][$i] ?? null,
-                // Pastikan indeks digunakan jika data berupa array per baris
-                'kode_warna'       => $scheduleData['kode_warna'] ?? null,
-                'warna'            => $scheduleData['warna'] ?? null,
+                'id_celup'         => $id_celup,
+                'id_mesin'         => $idMesin,
+                'no_model'         => $no_model,
+                'item_type'        => $item_type,
+                'kode_warna'       => $kode_warna,
+                'warna'            => $warna,
                 'start_mc'         => $start_mc,
-                'kg_celup'         => $scheduleData['qty_celup'][$i] ?? null,
+                'kg_celup'         => $qty_celup,
                 'po_plus'          => $poPlusValue,
-                'lot_urut'         => $scheduleData['lot_urut'] ?? null,
-                'tanggal_schedule' => $scheduleData['tanggal_schedule'] ?? null,
-                'ket_schedule'     => $scheduleData['ket_schedule'][$i] ?? null,
+                'lot_urut'         => $lot_urut,
+                'tanggal_schedule' => $tgl_schedule,
+                'ket_schedule'     => $ket_schedule,
                 'last_status'      => $last_status,
-                'user_cek_status'  => session()->get('username'),
-                'admin'  => session()->get('username'),
-                'created_at'       => date('Y-m-d H:i:s'),
-                'updated_at'       => date('Y-m-d H:i:s'),
+                'user_cek_status'  => $username,
+                'admin'            => $username,
+                'updated_at'       => $now,
             ];
 
-            $i++; // Naikkan counter agar indeks scheduleData selalu berurutan
+            $i++;
         }
-        // dd($dataBatch); // Hapus dd() untuk melanjutkan proses update/insert
 
-        // Proses update atau insert
+        // === PROSES UPDATE / INSERT + UPDATE OPEN_PO JIKA SAMPLE ===
         foreach ($dataBatch as $data) {
+            // ----------- UPDATE -----------
             if (!empty($data['id_celup'])) {
-                // Jika id_celup ada, periksa apakah data sudah ada di database
-                $existingSchedule = $this->scheduleCelupModel->find($data['id_celup']);
+                $id_celup        = $data['id_celup'];
+                $existingSchedule = $this->scheduleCelupModel->find($id_celup);
+
                 if ($existingSchedule) {
-                    // Periksa apakah ada perubahan data (kecuali created_at & user_cek_status)
+                    // --- CEK: INI SAMPLE ATAU BUKAN? ---
+                    $createdDate = date('Y-m-d', strtotime($existingSchedule['created_at']));
+
+                    $sampleRows = $this->scheduleCelupModel->getScheduleWithOpenPo(
+                        $existingSchedule['no_model'],
+                        $existingSchedule['item_type'],
+                        $existingSchedule['kode_warna'],
+                        $existingSchedule['warna'],
+                        $existingSchedule['last_status'],
+                        $createdDate
+                    );
+
+                    $isSample  = !empty($sampleRows);
+                    $sampleRow = $isSample ? $sampleRows[0] : null;
+
+                    // --- CEK ADA PERUBAHAN DI schedule_celup ---
+                    $fieldsToCheck = [
+                        'no_model',
+                        'item_type',
+                        'kode_warna',
+                        'warna',
+                        'start_mc',
+                        'kg_celup',
+                        'po_plus',
+                        'lot_urut',
+                        'tanggal_schedule',
+                        'ket_schedule',
+                        'last_status',
+                        'id_mesin',
+                    ];
+
                     $hasChanges = false;
-                    foreach ($data as $key => $value) {
-                        if ($key !== 'created_at' && $key !== 'user_cek_status' && isset($existingSchedule[$key]) && $existingSchedule[$key] != $value) {
+                    foreach ($fieldsToCheck as $field) {
+                        $oldVal = $existingSchedule[$field] ?? null;
+                        $newVal = $data[$field]           ?? null;
+                        if ($oldVal != $newVal) {
                             $hasChanges = true;
                             break;
                         }
                     }
-                    // Update hanya jika ada perubahan
+
                     if ($hasChanges) {
-                        $updateSuccess = $this->scheduleCelupModel->update($data['id_celup'], $data);
+                        // Jangan kirim id_celup ke update() sebagai field
+                        $updateData = $data;
+                        unset($updateData['id_celup']); // PK di parameter 1
+
+                        $updateSuccess = $this->scheduleCelupModel->update($id_celup, $updateData);
+
                         if ($updateSuccess) {
                             $updateMessage = 'Jadwal berhasil diupdate!';
+
+                            // 2) KALAU SAMPLE ⇒ UPDATE open_po JUGA
+                            if ($isSample && $sampleRow && !empty($sampleRow['po_id'])) {
+                                $openPoUpdate = [];
+
+                                if ($sampleRow['po_no_model']   !== $data['no_model'])   $openPoUpdate['no_model']   = $data['no_model'];
+                                if ($sampleRow['po_item_type']  !== $data['item_type'])  $openPoUpdate['item_type']  = $data['item_type'];
+                                if ($sampleRow['po_kode_warna'] !== $data['kode_warna']) $openPoUpdate['kode_warna'] = $data['kode_warna'];
+                                if ($sampleRow['po_color']      !== $data['warna'])      $openPoUpdate['color']      = $data['warna'];
+                                if ($sampleRow['kg_po']         !=  $data['kg_celup'])   $openPoUpdate['kg_po']      = $data['kg_celup'];
+
+                                if (!empty($openPoUpdate)) {
+                                    $openPoUpdate['updated_at'] = date('Y-m-d H:i:s');
+                                    $this->openPoModel->update($sampleRow['po_id'], $openPoUpdate);
+                                }
+                            }
                         } else {
                             $updateMessage = 'Gagal mengupdate jadwal!';
                         }
                     }
                 } else {
-                    // Jika id_celup ada tetapi data tidak ditemukan (misalnya, data telah dihapus), insert data baru
-                    $insertSuccess = $this->scheduleCelupModel->insert($data);
-                    if ($insertSuccess) {
-                        $updateMessage = 'Jadwal berhasil disimpan!';
-                    } else {
-                        $updateMessage = 'Gagal menyimpan jadwal!';
-                    }
+                    // id_celup ada, tapi record schedule hilang → treat sebagai insert baru
+                    $insertData = $data;
+                    unset($insertData['id_celup']);
+                    $insertData['created_at'] = date('Y-m-d H:i:s');
+
+                    $insertSuccess = $this->scheduleCelupModel->insert($insertData);
+                    $updateMessage = $insertSuccess
+                        ? 'Jadwal baru berhasil disimpan!'
+                        : 'Gagal menyimpan jadwal baru!';
                 }
+
+            // ----------- INSERT BARU -----------
             } else {
-                // Jika id_celup null, berarti data baru, lakukan insert
-                $insertSuccess = $this->scheduleCelupModel->insert($data);
-                if ($insertSuccess) {
-                    $updateMessage = 'Jadwal berhasil disimpan!';
-                } else {
-                    $updateMessage = 'Gagal menyimpan jadwal!';
-                }
+                $insertData = $data;
+                unset($insertData['id_celup']);
+                $insertData['created_at'] = date('Y-m-d H:i:s');
+
+                $insertSuccess = $this->scheduleCelupModel->insert($insertData);
+                $updateMessage = $insertSuccess
+                    ? 'Jadwal baru berhasil disimpan!'
+                    : 'Gagal menyimpan jadwal baru!';
             }
         }
 
-        // Setelah proses selesai, Anda bisa mengembalikan response atau redirect sesuai kebutuhan
-        // Contoh:
-        $start_date = $this->request->getPost('start_date');
-        $end_date = $this->request->getPost('end_date');
+        $start_date = $scheduleData['start_date'] ?? null;
+        $end_date   = $scheduleData['end_date']   ?? null;
+
         if ($updateMessage) {
-            return redirect()->to(session()->get('role') . '/schedule?start_date=' . $start_date . '&end_date=' . $end_date)->with('success', $updateMessage);
-        } else {
-            return redirect()->back()->with('info', 'Tidak ada perubahan yang disimpan.');
+            return redirect()
+                ->to(session()->get('role') . '/schedule?start_date=' . $start_date . '&end_date=' . $end_date)
+                ->with('success', $updateMessage);
         }
+
+        return redirect()->back()->with('info', 'Tidak ada perubahan yang disimpan.');
     }
-
-
 
     public function acrylic()
     {
@@ -1479,6 +1556,7 @@ class ScheduleController extends BaseController
                 'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
                 'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
                 'user_cek_status' => session()->get('username'),
+                'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
         }

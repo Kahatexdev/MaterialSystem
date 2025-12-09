@@ -1764,4 +1764,79 @@ class ScheduleCelupModel extends Model
         return $this->db->query($sql, $params)->getResultArray();
     }
 
+    public function getScheduleWithOpenPo(
+        string $noModel,
+        string $itemType,
+        string $kodeWarna,
+        string $color,
+        string $status = 'scheduled',
+        string $created
+    ): array {
+        $db = \Config\Database::connect(); // atau $this->db kalau di dalam Model CI4
+
+        // Subquery untuk open_po (bikin kolom created_date = DATE(created_at))
+        $subQuery = $db->table('open_po')
+            ->select("
+                id_po,
+                no_model,
+                item_type,
+                kode_warna,
+                color,
+                kg_po,
+                admin,
+                created_at,
+                DATE(created_at) AS created_date
+            ")
+            ->getCompiledSelect();
+
+        // Query utama
+        $builder = $db->table('schedule_celup sc');
+
+        $builder->select("
+            sc.id_celup,
+            sc.id_mesin,
+            sc.no_model,
+            sc.item_type,
+            sc.kode_warna,
+            sc.warna,
+            sc.kg_celup,
+            sc.lot_urut,
+            sc.lot_celup,
+            sc.last_status,
+            sc.tanggal_schedule,
+            sc.admin                    AS sc_admin,
+            DATE(sc.created_at)         AS sc_created_date,
+
+            po.id_po               AS po_id,
+            po.no_model                 AS po_no_model,
+            po.item_type                AS po_item_type,
+            po.kode_warna               AS po_kode_warna,
+            po.color                    AS po_color,
+            po.kg_po,
+            po.admin                    AS po_admin,
+            po.created_date             AS po_created_date
+        ");
+
+        // JOIN ke subquery open_po
+        $builder->join("({$subQuery}) AS po", "
+                po.no_model      = sc.no_model
+            AND po.item_type     = sc.item_type
+            AND po.kode_warna    = sc.kode_warna
+            AND po.color         = sc.warna
+            AND po.kg_po         = sc.kg_celup
+            AND po.created_date  = DATE(sc.created_at)
+            AND po.admin         = sc.admin
+        ");
+
+        // Filter utama
+        $builder->where('sc.no_model', $noModel);
+        $builder->where('sc.item_type', $itemType);
+        $builder->where('sc.kode_warna', $kodeWarna);
+        $builder->where('sc.warna', $color);
+        $builder->where('sc.last_status', $status);
+        $builder->where('DATE(sc.created_at)', $created);
+
+        return $builder->get()->getResultArray();
+    }
+
 }
