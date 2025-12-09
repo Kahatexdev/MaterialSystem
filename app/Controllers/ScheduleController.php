@@ -678,7 +678,7 @@ class ScheduleController extends BaseController
                 } else {
                     // Tangani kondisi saat id_po tidak memiliki key yang diharapkan.
                     // Misalnya, log error atau set nilai default
-                    log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
+                    // log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
                 }
             }
 
@@ -1760,42 +1760,84 @@ class ScheduleController extends BaseController
                 ->setJSON(['success' => false, 'message' => 'id_celup kosong']);
         }
 
-        $rows = (array) ($this->scheduleCelupModel->getPindahMesin($idCelup) ?? []);
-        // \var_dump($rows);
-        // Jika tidak ada data
-        if (!$rows) {
-            return $this->response->setJSON(['success' => true, 'options' => []]);
+        // ambil 1 baris schedule_celup
+        $rows = $this->scheduleCelupModel->find($idCelup);
+
+        // kalau tidak ketemu
+        if (empty($rows)) {
+            // log_message('debug', 'getPindahMesin: data schedule_celup tidak ditemukan. id_celup='.$idCelup);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'options' => [],
+            ]);
         }
 
-        return $this->response->setJSON(['success' => true, 'options' => $rows]);
+        // LOG dengan json_encode biar tidak Array to string conversion
+        // log_message('debug', 'getPindahMesin - data rows: ' . json_encode($rows));
+
+        // Ambil slot mesin yg available berdasarkan item_type, kode_warna, last_status
+        $mc = $this->scheduleCelupModel->getMesinSlots(
+            $rows['tanggal_schedule'],
+            $rows['item_type'],
+            $rows['kode_warna'],
+            $rows['last_status']
+        );
+        // var_dump($mc);
+        // Bisa kirim dua data: data schedule + slot mesinnya
+        return $this->response->setJSON([
+            'success' => true,
+            'schedule' => $rows,
+            'slots'    => $mc,
+        ]);
     }
 
     public function updateMesinSchedule()
     {
-        $id_celup = (int) ($this->request->getPost('id_celup') ?? 0);
-        $id_mesin = (int) ($this->request->getPost('id_mesin') ?? 0);
-        $lot_urut = $this->request->getPost('lotUrut') ?? '';
+        $idCelup     = (int) $this->request->getPost('id_celup');
+        $targetSlot  = (string) $this->request->getPost('target_slot');
 
-        if ($id_celup <= 0 || $id_mesin <= 0) {
-            return $this->response->setStatusCode(400)
-                ->setJSON(['success' => false, 'message' => 'data kosong']);
+        if ($idCelup <= 0 || $targetSlot === '') {
+            return redirect()->back()->with('error', 'Data tidak lengkap untuk update mesin.');
         }
 
-        $data = [
-            'id_mesin' => $id_mesin,
-            'lot_urut' => $lot_urut,
-            'updated_at' => date('Y-m-d H:i:s'),
-            'admin' => session()->get('username'),
-        ];
-
-        $updated = $this->scheduleCelupModel->update($id_celup, $data);
-        if ($updated) {
-            return $this->response->setJSON(['success' => true, 'message' => 'Mesin berhasil diupdate']);
-        } else {
-            return $this->response->setStatusCode(500)
-                ->setJSON(['success' => false, 'message' => 'Gagal mengupdate mesin']);
+        // Pecah "id_mesin|lot_urut"
+        $parts = explode('|', $targetSlot);
+        if (count($parts) !== 2) {
+            return redirect()->back()->with('error', 'Format slot mesin tidak valid.');
         }
 
-        return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada perubahan data']);
+        $idMesin = (int) $parts[0];
+        $lotUrut = (int) $parts[1];
+
+        if ($idMesin <= 0 || $lotUrut <= 0) {
+            return redirect()->back()->with('error', 'ID mesin atau lot urut tidak valid.');
+        }
+
+        try {
+            // Pastikan schedule ada
+            $row = $this->scheduleCelupModel->find($idCelup);
+            if (!$row) {
+                return redirect()->back()->with('error', 'Data schedule tidak ditemukan.');
+            }
+
+            // Lakukan update
+            $this->scheduleCelupModel->update($idCelup, [
+                'id_mesin'   => $idMesin,
+                'lot_urut'   => $lotUrut,
+                'updated_at' => date('Y-m-d H:i:s'),
+                // kalau mau reset field lain, tambahkan di sini
+            ]);
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Mesin schedule berhasil di-update'
+            ]);
+
+        } catch (\Throwable $th) {
+            log_message('error', 'Gagal updateMesinSchedule: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat update mesin schedule.');
+        }
     }
+
 }

@@ -1707,4 +1707,61 @@ class ScheduleCelupModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function getMesinSlots(
+        string $tanggal,        // format: 'Y-m-d'
+        string $itemType,
+        string $kodeWarna,
+        string $lastStatus = 'scheduled'
+    ): array {
+        $sql = "
+            SELECT
+                m.id_mesin,
+                m.no_mesin,
+                m.max_caps,
+                m.jml_lot,
+                slots.lot_urut,
+                sc.id_celup,
+                sc.no_model,
+                sc.item_type,
+                sc.kode_warna,
+                sc.warna,
+                sc.kg_celup,
+                sc.tanggal_schedule,
+                sc.last_status,
+                CASE 
+                    WHEN sc.id_celup IS NULL THEN 'kosong'
+                    ELSE 'terisi'
+                END AS status_slot
+            FROM mesin_celup m
+            -- Generate slot lot_urut = 1 s/d jml_lot (sementara hardcode max 2)
+            JOIN (
+                SELECT 1 AS lot_urut
+                UNION ALL
+                SELECT 2 AS lot_urut
+            ) AS slots
+                ON slots.lot_urut <= m.jml_lot
+            -- Join ke schedule_celup per mesin + per lot_urut + filter tgl + item + warna + status
+            LEFT JOIN schedule_celup sc
+                ON sc.id_mesin = m.id_mesin
+            AND sc.lot_urut = slots.lot_urut
+            AND sc.tanggal_schedule = ?
+            AND sc.last_status      = ?
+            AND sc.item_type        = ?
+            AND sc.kode_warna       = ?
+            ORDER BY 
+                m.no_mesin,
+                slots.lot_urut
+        ";
+
+        $params = [
+            $tanggal,
+            $lastStatus,
+            $itemType,
+            $kodeWarna,
+        ];
+
+        return $this->db->query($sql, $params)->getResultArray();
+    }
+
 }

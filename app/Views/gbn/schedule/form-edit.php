@@ -487,6 +487,7 @@
 
 
 <!-- Modal Edit MESIN -->
+<!-- Modal Edit MESIN -->
 <div class="modal fade" id="editModalMesin" tabindex="-1" aria-labelledby="editModalMesinLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -500,35 +501,27 @@
                     <input type="hidden" name="id_celup" id="idCelupMesin">
 
                     <div class="form-group mb-3">
-                        <label for="mesinSchedule" class="form-label">Mesin Schedule Tersedia</label>
+                        <label for="targetSlot" class="form-label">Mesin & Slot Tersedia</label>
                         <!-- value: id_mesin|lot_urut -->
-                        <select name="id_mesin" id="mesinSchedule" class="form-select" required>
-                            <option value="" selected disabled>— Pilih Mesin —</option>
+                        <select name="target_slot" id="targetSlot" class="form-select" required>
+                            <option value="" selected disabled>— Memuat… —</option>
                             <!-- opsi diisi via JS -->
                         </select>
-                        <small class="text-muted d-block mt-1">Format: Mesin X</small>
+                        <small class="text-muted d-block mt-1">
+                            Format: Mesin X • Lot Y — status (existing / max)
+                        </small>
                     </div>
-
-                    <div class="form-group mb-3">
-                        <label for="lotUrut" class="form-label">Lot Urut</label>
-                        <!-- value: id_mesin|lot_urut -->
-                        <select name="lotUrut" id="lotUrut" class="form-select" required>
-                            <option value="" selected disabled>— Lot Urut —</option>
-                            <option value="1">— 1 —</option>
-                            <option value="2">— 2 —</option>
-                        </select>
-                    </div>
-
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-info">Simpan</button>
+                    <button type="submit" class="btn btn-info" id="btnSaveMesin">Simpan</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -616,88 +609,162 @@
 
         // Event delegation untuk tombol Edit Mesin(modal edit)
         // Klik tombol Edit MESIN
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const btn = e.target.closest('.editMesin');
             if (!btn) return;
 
-            // Ambil id_celup dari data-id-celup
-            const idCelup = btn.dataset.idCelup; // <-- pastikan HTML pakai data-id-celup
+            const idCelup = btn.dataset.idCelup; // pastikan tombol punya data-id-celup="..."
             if (!idCelup) {
                 console.error('id_celup tidak ditemukan di data-id-celup');
                 return;
             }
 
-            const modalEl = document.getElementById('editModalMesin');
-            const modal = new bootstrap.Modal(modalEl);
-            const select = document.getElementById('mesinSchedule');
+            const modalEl     = document.getElementById('editModalMesin');
+            const modal       = new bootstrap.Modal(modalEl);
+            const slotSelect  = document.getElementById('targetSlot');
+            const btnSave     = document.getElementById('btnSaveMesin');
 
-            // reset awal
+            // Reset awal
             document.getElementById('idCelupMesin').value = idCelup;
-            select.innerHTML = '<option value="" selected disabled>— Memuat... —</option>';
-
-            // ---- optional: jika pakai CSRF CodeIgniter 4 ----
-            // const csrfName = '<?= csrf_token() ?>';
-            // const csrfHash = '<?= csrf_hash() ?>';
+            slotSelect.innerHTML = '<option value="" selected disabled>— Memuat… —</option>';
+            btnSave.disabled = true;
 
             $.ajax({
-                    url: '<?= base_url(session("role") . "/schedule/getPindahMesin") ?>',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        id_celup: idCelup,
-                        // [csrfName]: csrfHash   // uncomment bila CSRF aktif
-                    }
-                })
-                .done(function(res) {
-                    // Siapkan opsi default
-                    select.innerHTML = '<option value="" selected disabled>— Pilih Mesin —</option>';
+                url: '<?= base_url(session("role") . "/schedule/getPindahMesin") ?>',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id_celup: idCelup
+                    // [csrfName]: csrfHash
+                }
+            })
+            .done(function (res) {
+                slotSelect.innerHTML = '<option value="" selected disabled>— Pilih Mesin & Slot —</option>';
 
-                    if (res && res.success && Array.isArray(res.options) && res.options.length > 0) {
-                        res.options.forEach(op => {
-                            const opt = document.createElement('option');
-                            // pastikan field ada
-                            const val = op.id_mesin || '';
-                            const noMesin = op.no_mesin ?? '-';
-                            const text = op.text ?? '';
-                            // Hilangkan duplikasi "Mesin X •" kalau text sudah mengandungnya
-                            // dan tetap aman jika formatnya beda
-                            let label = text;
-                            const prefixRe = new RegExp(`^\\s*Mesin\\s+${String(noMesin).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*•\\s*`, 'i');
-                            if (!prefixRe.test(text)) {
-                                // text belum punya "Mesin X •"
-                                label = `Mesin ${noMesin} ${text.replace(/^Mesin\s+\d+\s*•\s*/i, '')}`;
-                            }
-
-                            opt.value = val; // "idMesin"
-                            opt.textContent = label.trim();
-                            select.appendChild(opt);
-                        });
-                    } else {
-                        const opt = document.createElement('option');
-                        opt.value = '';
-                        opt.disabled = true;
-                        opt.textContent = 'Tidak ada mesin tersedia';
-                        select.appendChild(opt);
-                    }
-
+                if (!res || !res.success) {
+                    console.error('Response tidak valid:', res);
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.disabled = true;
+                    opt.textContent = 'Gagal memuat slot';
+                    slotSelect.appendChild(opt);
+                    btnSave.disabled = true;
                     modal.show();
-                })
-                .fail(function(xhr) {
-                    alert('Gagal memuat daftar mesin');
-                    console.error(xhr.responseText || xhr.statusText || xhr.status);
-                });
-        });
+                    return;
+                }
 
+                const schedule = res.schedule || {};
+                const slotsRaw = Array.isArray(res.slots) ? res.slots : [];
+
+                if (slotsRaw.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.disabled = true;
+                    opt.textContent = 'Tidak ada slot tersedia';
+                    slotSelect.appendChild(opt);
+                    btnSave.disabled = true;
+                    modal.show();
+                    return;
+                }
+
+                const currentKg = parseFloat(schedule.kg_celup || 0) || 0;
+                const currentId = String(schedule.id_celup || '');
+
+                let adaSlotValid = false;
+
+                slotsRaw.forEach(slot => {
+                    const idMesin    = slot.id_mesin;
+                    const lotUrut    = slot.lot_urut;
+                    const noMesin    = slot.no_mesin ?? '-';
+                    const maxCapsNum = parseFloat(slot.max_caps || 0) || 0;
+                    const existingKg = parseFloat(slot.kg_celup || 0) || 0;
+                    const slotIdCelup = String(slot.id_celup || '');
+                    const statusSlot  = slot.status_slot || 'unknown';
+
+                    if (!idMesin || !lotUrut) return;
+                    if (maxCapsNum <= 0) return; // jaga-jaga data aneh
+
+                    // Hitung total jika order ini pindah ke slot ini
+                    let totalIfMove;
+                    if (slotIdCelup === currentId) {
+                        // slot ini adalah slot sekarang → jangan double count
+                        totalIfMove = existingKg;
+                    } else {
+                        totalIfMove = existingKg + currentKg;
+                    }
+
+                    // MESKIPUN status_slot = 'terisi', kalau totalIfMove <= maxCapsNum → slot masih valid
+                    if (totalIfMove > maxCapsNum) {
+                        return; // slot ini overload, skip
+                    }
+
+                    adaSlotValid = true;
+
+                    // Tentukan teks status
+                    let statusText = statusSlot;
+                    if (slotIdCelup === currentId) {
+                        statusText = 'Kapasitas Sekarang';
+                    } else if (statusSlot === 'terisi') {
+                        statusText = 'Terisi Sch Lain';
+                    } else if (statusSlot === 'kosong') {
+                        statusText = 'Kosong';
+                    }
+
+                    const opt = document.createElement('option');
+                    opt.value = idMesin + '|' + lotUrut; // <-- pola id_mesin|lot_urut
+
+                    // Contoh label:
+                    // "Mesin 5 • Lot 2 — terisi sch lain (4.5 / 7.2 kg)"
+                    opt.textContent = `Mesin ${noMesin} • Lot ${lotUrut} — ${statusText} (${existingKg} / ${maxCapsNum} kg)`;
+
+                    // Preselect slot sekarang
+                    if (
+                        String(schedule.id_mesin || '') === String(idMesin) &&
+                        String(schedule.lot_urut || '') === String(lotUrut)
+                    ) {
+                        opt.selected = true;
+                    }
+
+                    slotSelect.appendChild(opt);
+                });
+
+                if (!adaSlotValid) {
+                    slotSelect.innerHTML = '';
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.disabled = true;
+                    opt.selected = true;
+                    opt.textContent = 'Tidak ada slot yang cukup kapasitas';
+                    slotSelect.appendChild(opt);
+                    btnSave.disabled = true;
+                } else {
+                    btnSave.disabled = false;
+                }
+
+                modal.show();
+            })
+            .fail(function (xhr) {
+                alert('Gagal memuat daftar slot mesin');
+                console.error(xhr.responseText || xhr.statusText || xhr.status);
+                slotSelect.innerHTML = '';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.disabled = true;
+                opt.selected = true;
+                opt.textContent = 'Error memuat data';
+                slotSelect.appendChild(opt);
+                btnSave.disabled = true;
+                modal.show();
+            });
+        });
 
         // Ajax submit untuk modal edit menggunakan jQuery
         $('#formEditMesin').on('submit', async function(e) {
             e.preventDefault();
             const form = this;
 
-            // Konfirmasi
-            const {
-                isConfirmed
-            } = await Swal.fire({
+            // Konfirmasi dulu
+            const { isConfirmed } = await Swal.fire({
                 title: 'Simpan perubahan?',
                 text: 'Mesin schedule akan diperbarui.',
                 icon: 'question',
@@ -706,59 +773,63 @@
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
             });
+
             if (!isConfirmed) return;
 
-            // Loading
-            const loading = Swal.fire({
+            // Tampilkan loading
+            Swal.fire({
                 title: 'Memproses...',
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                didOpen: () => Swal.showLoading()
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
 
             $.ajax({
-                    url: form.action,
-                    type: 'POST',
-                    data: $(form).serialize(),
-                    dataType: 'json'
-                })
-                .done(res => {
-                    if (res.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: 'Mesin schedule berhasil diupdate',
-                            confirmButtonText: 'Ke halaman schedule'
-                        }).then(() => {
-                            window.location.href = '<?= base_url(session('role') . '/schedule') ?>';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Gagal',
-                            text: res.message || 'Gagal update mesin'
-                        });
-                    }
-                })
-                .fail(xhr => {
-                    let msg = 'Terjadi kesalahan server';
-                    try {
-                        const j = JSON.parse(xhr.responseText);
-                        if (j && j.message) msg = j.message;
-                    } catch (_) {}
+                url: form.action,
+                type: 'POST',
+                data: $(form).serialize(),
+                dataType: 'json'
+            })
+            .done(res => {
+                // TUTUP loading dulu
+                Swal.close();
+
+                if (res.success) {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        html: `<small>${msg}</small>`
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: 'Mesin schedule berhasil diupdate',
+                    timer: 2000,
+                    showConfirmButton: false
+                    }).then(() => window.location.reload());
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Gagal',
+                        text: res.message || 'Gagal update mesin'
                     });
-                    console.error(xhr.responseText);
-                })
-                .always(() => {
-                    loading.then(() => Swal.close()); // tutup loading kalau masih terbuka
+                }
+            })
+            .fail(xhr => {
+                // Tutup loading
+                Swal.close();
+
+                let msg = 'Terjadi kesalahan server';
+                try {
+                    const j = JSON.parse(xhr.responseText);
+                    if (j && j.message) msg = j.message;
+                } catch (_) {}
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: `<small>${msg}</small>`
                 });
+                console.error(xhr.responseText || xhr.statusText || xhr.status);
+            });
         });
-
-
 
         // Event handler untuk input kode warna
         // Fungsi utilitas untuk fetching data dengan URL building
