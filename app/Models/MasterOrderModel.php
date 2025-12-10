@@ -846,6 +846,7 @@ class MasterOrderModel extends Model
             WHERE oc.no_model = master_order.no_model
             AND sc.kode_warna = material.kode_warna
             AND sc.item_type = material.item_type
+            AND hs.keterangan LIKE '%Retur Celup%'
         ) AS retur_celup,
     ")
             ->join('material', 'material.id_order = master_order.id_order', 'left')

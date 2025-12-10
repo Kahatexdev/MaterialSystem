@@ -716,7 +716,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     $routes->get('schedule/reqschedule', 'ScheduleController::reqschedule');
     $routes->post('schedule/reqschedule', 'ScheduleController::reqschedule');
-    $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->post('getDataSchedule', 'ScheduleController::getDataSchedule');
+    // $routes->get('schedule/reqschedule/show/(:num)', 'ScheduleController::showschedule/$1');
+    $routes->get('schedule/reqschedule/show/(:num)', 'CelupController::editStatus/$1');
     $routes->get('schedule/reportSchBenang', 'ScheduleController::reportSchBenang');
     $routes->get('schedule/filterSchBenang', 'ScheduleController::filterSchBenang');
     $routes->get('schedule/exportScheduleBenang', 'ExcelController::exportScheduleBenang');

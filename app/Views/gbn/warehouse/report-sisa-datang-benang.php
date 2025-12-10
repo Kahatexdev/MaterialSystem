@@ -247,6 +247,18 @@
 
 <script>
     $(document).ready(function() {
+        // === INIT DATATABLE ===
+        let dataTable = $('#dataTable').DataTable({
+            paging: true,
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            searching: false,
+            ordering: false,
+            info: true,
+            responsive: true
+        });
+
+        // ==== LOADING HANDLER ====
         function showLoading() {
             $('#loadingOverlay').addClass('active');
             $('#btnSearch').prop('disabled', true);
@@ -271,7 +283,9 @@
             $('#progressText').text(percent + '%');
         }
 
+        // ==== LOAD DATA ====
         function loadData() {
+
             const delivery_awal = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
@@ -294,107 +308,119 @@
                     kode_warna: kode_warna
                 },
                 dataType: "json",
+
                 beforeSend: function() {
                     showLoading();
                     updateProgress(0);
                 },
+
                 xhr: function() {
                     let xhr = new window.XMLHttpRequest();
-
-                    // progress download data dari server
                     xhr.addEventListener("progress", function(evt) {
                         if (evt.lengthComputable) {
-                            let percentComplete = Math.round((evt.loaded / evt.total) * 100);
-                            updateProgress(percentComplete);
+                            updateProgress(Math.round((evt.loaded / evt.total) * 100));
                         }
                     }, false);
-
                     return xhr;
                 },
+
+
                 success: function(response) {
-                    let html = '';
-                    if (response.length > 0) {
-                        $.each(response, function(index, item) {
-                            // console.log(item);
-                            const kgsAwal = parseFloat(item.kgs_stock_awal) || 0;
-                            const kgsDatang = parseFloat(item.kgs_datang) || 0;
-                            const kgsTambahanDatang = parseFloat(item.kgs_datang_plus) || 0;
-                            const gantiRetur = parseFloat(item.kgs_retur) || 0;
-                            const kgPo = parseFloat(item.kg_po) || 0;
-                            const kgPoPlus = parseFloat(item.kg_po_plus) || 0;
-                            const qtyRetur = parseFloat(item.qty_retur) || 0;
+
+                    const data = Array.isArray(response)
+                        ? response
+                        : (Array.isArray(response?.data) ? response.data : []);
+
+                    dataTable.clear();
+
+                    if (data.length > 0) {
+                        $.each(data, function(index, item) {
+
+                            const kgsAwal     = parseFloat(item.kgs_stock_awal)  || 0;
+                            const kgsDatang   = parseFloat(item.kgs_datang)      || 0;
+                            const kgsPlus     = parseFloat(item.kgs_datang_plus) || 0;
+                            const gantiRetur  = parseFloat(item.kgs_retur)       || 0;
+                            const kgPo        = parseFloat(item.kg_po)           || 0;
+                            const kgPoPlus    = parseFloat(item.kg_po_plus)      || 0;
+                            const qtyRetur    = parseFloat(item.qty_retur)       || 0;
+
                             let sisa = 0;
                             if (gantiRetur > 0) {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
+                                sisa = (kgsAwal + kgsDatang + kgsPlus + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
                             } else {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang) - (kgPo - kgPoPlus);
+                                sisa = (kgsAwal + kgsDatang + kgsPlus) - (kgPo - kgPoPlus);
                             }
 
-                            html += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.lco_date || ''}</td>
-                                    <td>${item.foll_up || ''}</td>
-                                    <td>${item.no_model || ''}</td>
-                                    <td>${item.no_order || ''}</td>
-                                    <td>${item.area || ''}</td>
-                                    <td>${item.buyer || ''}</td>
-                                    <td>${item.start_mc || ''}</td>
-                                    <td>${item.delivery_awal || ''}</td>
-                                    <td>${item.delivery_akhir || ''}</td>
-                                    <td>${item.unit || ''}</td>
-                                    <td>${item.item_type || ''}</td>
-                                    <td>${item.kode_warna || ''}</td>
-                                    <td>${item.color || ''}</td>
-                                    <td>${(parseFloat(item.kgs_awal) || 0).toFixed(2)}</td>
-                                    <td>${item.lot_awal || ''}</td>
-                                    <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
-                                    <td>${item.tgl_terima_po_plus || ''}</td>
-                                    <td>${item.tgl_po_plus_area || ''}</td>
-                                    <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${item.kg_po_plus || 0}</td>
-                                    <td>${(parseFloat(item.kgs_datang) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_datang_plus) || 0).toFixed(2)}</td>
-                                    <td>${(parseFloat(item.kgs_ganti_retur) || 0).toFixed(2)}</td>
-                                    <td>${item.qty_retur || 0}</td>
-                                    <td>${sisa.toFixed(2)}</td>
-                                </tr>
-                            `;
+                            dataTable.row.add([
+                                index + 1,
+                                item.lco_date || '',
+                                item.foll_up || '',
+                                item.no_model || '',
+                                item.no_order || '',
+                                item.area || '',
+                                item.buyer || '',
+                                item.start_mc || '',
+                                item.delivery_awal || '',
+                                item.delivery_akhir || '',
+                                item.unit || '',
+                                item.item_type || '',
+                                item.kode_warna || '',
+                                item.color || '',
+                                (parseFloat(item.kgs_awal) || 0).toFixed(2),
+                                item.lot_awal || '',
+                                kgPo.toFixed(2),
+                                item.tgl_terima_po_plus || '',
+                                item.tgl_po_plus_area || '',
+                                item.delivery_po_plus || '',
+                                kgPoPlus.toFixed(2),
+                                kgsDatang.toFixed(2),
+                                kgsPlus.toFixed(2),
+                                gantiRetur.toFixed(2),
+                                qtyRetur.toFixed(2),
+                                sisa.toFixed(2),
+                            ]);
                         });
-                        $('#dataTable tbody').html(html);
-                        $('#btnExport').removeClass('d-none');
-                    } else {
-                        let colCount = $('#dataTable thead th').length;
-                        $('#dataTable tbody').html(`
-                            <tr>
-                                <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
-                                    ⚠ Tidak ada data ditemukan
-                                </td>
-                            </tr>
-                        `);
 
+                        $('#btnExport').removeClass('d-none');
+
+                    } else {
+                        // 🔧 GUNAKAN JUMLAH KOLOM DARI DATATABLE, BUKAN DARI THEAD
+                        const colCount = dataTable.columns().count();
+
+                        let emptyRow = new Array(colCount).fill('');
+                        emptyRow[0] = '<span class="text-danger font-weight-bold">⚠ Tidak ada data ditemukan</span>';
+
+                        dataTable.row.add(emptyRow);
                         $('#btnExport').addClass('d-none');
                     }
 
+                    dataTable.draw();
                 },
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: 'Terjadi kesalahan saat mengambil data.',
+                    });
                 },
                 complete: function() {
-                    updateProgress(100); // pastikan full
-                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
+                    updateProgress(100);
+                    setTimeout(() => hideLoading(), 400);
                 }
+
             });
         }
 
-        $('#btnSearch').click(function() {
-            loadData();
-        });
+
+        // === EVENTS ===
+        $('#btnSearch').click(loadData);
 
         $('#btnExport').click(function() {
             const delivery = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+
             const url = "<?= base_url($role . '/warehouse/exportReportSisaDatangBenang') ?>" +
                 "?delivery=" + encodeURIComponent(delivery) +
                 "&no_model=" + encodeURIComponent(no_model) +
@@ -403,22 +429,26 @@
             window.location.href = url;
         });
 
-        dataTable.clear().draw();
-    });
 
-    // Fitur Reset
-    $('#btnReset').click(function() {
-        // Kosongkan input
-        $('input[type="text"]').val('');
+        // === RESET BERADA DI DALAM READY ===
+        $('#btnReset').click(function() {
 
-        // Kosongkan delivery
-        $('#delivery').val('');
+            $('input[type="text"]').val('');
+            $('#delivery').val('');
+            $('#dataTable tbody').html('');
 
-        // Kosongkan tabel hasil pencarian
-        $('#dataTable tbody').html('');
+            dataTable.clear().destroy();
 
-        // Sembunyikan tombol Export Excel
-        $('#btnExport').addClass('d-none');
+            dataTable = $('#dataTable').DataTable({
+                paging: true,
+                searching: false,
+                ordering: false,
+                info: true,
+                responsive: true
+            });
+
+            $('#btnExport').addClass('d-none');
+        });
     });
 </script>
 <script>
