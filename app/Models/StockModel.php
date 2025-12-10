@@ -235,31 +235,38 @@ class StockModel extends Model
     public function listCluster(string $noModel, string $itemType, string $kodeWarna, string $warna): array
     {
         return $this->select("
-            nama_cluster,
-            no_model,
-            item_type,
-            kode_warna,
-            MAX(id_stock) AS id_stock,
-            SUM(COALESCE(kgs_stock_awal,0) + COALESCE(kgs_in_out,0)) AS total_kgs,
-            SUM(COALESCE(cns_stock_awal,0) + COALESCE(cns_in_out,0)) AS total_cns,
-            SUM(COALESCE(krg_stock_awal,0) + COALESCE(krg_in_out,0)) AS total_krg,
-            COALESCE(NULLIF(lot_awal, ''), NULLIF(lot_stock, '')) AS lot_final
-        ")
+                nama_cluster,
+                no_model,
+                item_type,
+                kode_warna,
+                MAX(id_stock) AS id_stock,
+                SUM(COALESCE(kgs_stock_awal,0) + COALESCE(kgs_in_out,0)) AS total_kgs,
+                SUM(COALESCE(cns_stock_awal,0) + COALESCE(cns_in_out,0)) AS total_cns,
+                SUM(COALESCE(krg_stock_awal,0) + COALESCE(krg_in_out,0)) AS total_krg,
+                CASE 
+                    WHEN lot_awal IS NOT NULL AND lot_awal <> '' THEN lot_awal
+                    ELSE lot_stock
+                END AS lot_final
+            ")
             ->where([
                 'no_model'   => $noModel,
                 'item_type'  => $itemType,
                 'kode_warna' => $kodeWarna,
                 'warna'      => $warna,
             ])
-            ->groupBy(['nama_cluster', 'no_model', 'item_type', 'kode_warna', 'warna'])
-            ->having('total_kgs >', 0, false)
+            ->groupBy([
+                'nama_cluster', 
+                'no_model', 
+                'item_type', 
+                'kode_warna', 
+                'warna',
+                'lot_final'
+            ])
+            ->having('total_kgs >', 0)
             ->orderBy('nama_cluster', 'ASC')
             ->get()
             ->getResultArray();
     }
-
-
-
 
     // public function getDataByIdStok($idStok)
     // {

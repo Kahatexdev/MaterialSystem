@@ -66,8 +66,8 @@ class DomPdfController extends BaseController
             $row['operator_packing'] = $operatorShort;
             $row['no_model'] = $noModel;
             $lot = $row['lot_kirim'];
-            $lotClass = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $lotClass = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
         unset($row); // break the reference
 
@@ -79,7 +79,7 @@ class DomPdfController extends BaseController
             'img' => $img,
             'barcodeImages' => $barcodeImages,
             'operatorShort' => $operatorShort,
-            'lotClass' => $operatorShort,
+            'lotClass' => $lotClass,
         ]);
 
         $dompdf->loadHtml($html);
@@ -109,7 +109,7 @@ class DomPdfController extends BaseController
             $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
             $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
             $lot = $row['lot_kirim'];
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
 
         // Ambil data barcode sesuai $id
@@ -148,7 +148,7 @@ class DomPdfController extends BaseController
             $bin = $generator->getBarcode($id, $generator::TYPE_CODE_128);
             $barcodeImages[$i] = 'data:image/png;base64,' . base64_encode($bin);
             $lot = $row['lot_kirim'];
-            $row['lotClass'] = (strlen($lot) > 10) ? 'lot-small' : 'lot-normal';
+            $row['lotClass'] = (strlen($lot) >= 10) ? 'lot-small' : 'lot-normal';
         }
 
         // Ambil data barcode sesuai $id

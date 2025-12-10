@@ -176,6 +176,7 @@
                             <th class="text-center text-uppercase">Harga</th>
                             <th class="text-center text-uppercase">Nama Cluster</th>
                             <th class="text-center text-uppercase">Po Tambahan</th>
+                            <th class="text-center text-uppercase">Ganti Retur</th>
                             <th class="text-center text-uppercase">Keterangan</th>
                             <th class="text-center text-uppercase">Waktu Input</th>
                             <th class="text-center text-uppercase">Admin</th>
@@ -309,6 +310,7 @@
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
                             let poPlus = (item.po_plus === "1") ? "Ya" : "";
+                            let gantiRetur = (item.ganti_retur === "1") ? "Ya" : "";
                             dataTable.row.add([
                                 index + 1,
                                 item.foll_up,
@@ -332,6 +334,7 @@
                                 item.harga,
                                 item.nama_cluster,
                                 poPlus,
+                                gantiRetur,
                                 item.keterangan,
                                 item.created_at,
                                 item.admin,

@@ -359,31 +359,19 @@
                                 <!-- Display Total dari Checkbox -->
                                 <div class="row mt-3">
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
+                                        <label for="Total Kgs">Total Kgs</label>
+                                        <input type="text" class="form-control" id="inputKgsRetur" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
+                                        <label for="Total Cns">Total Cns</label>
+                                        <input type="text" class="form-control" id="inputCnsRetur" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
+                                        <label for="Total Krg">Total Krg</label>
+                                        <input type="text" class="form-control" id="inputKrgRetur" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
                                     </div>
                                 </div>
 
-                                <!-- Input Total -->
-                                <div class="row mt-4">
-                                    <div class="col-md-4">
-                                        <label for="inputKgs" class="form-label">Total Kgs</label>
-                                        <input type="number" step="0.01" class="form-control" id="inputKgsRetur" name="input_kgs_retur" placeholder="Masukkan Kgs" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="inputCns" class="form-label">Total Cns</label>
-                                        <input type="number" class="form-control" id="inputCnsRetur" name="input_cns_retur" placeholder="Masukkan Cns" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="inputKrg" class="form-label">Total Krg</label>
-                                        <input type="number" class="form-control" id="inputKrgRetur" name="input_krg_retur" placeholder="Masukkan Krg" required>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -1258,7 +1246,7 @@
                     <div class="col-md-12">
                         <div class="card result-card h-100">
                         <div class="form-check">
-                            <input class="form-check-input row-check" type="radio" name="pilih_item" value="${d.id_out_celup}" id="radio${d.id_out_celup}" data-lot="${lot}">
+                            <input class="form-check-input row-check" type="checkbox" name="pilih_item" value="${d.id_out_celup}" id="radio${d.id_out_celup}" data-lot="${lot}" data-kgs="${parseFloat(d.kgs_kirim || 0)}" data-cns="${parseInt(d.cones_kirim || 0)}"data-krg="1">
                             <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
                             ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
                             </label>
@@ -1294,66 +1282,41 @@
                 totalCns = 0,
                 totalKrg = 0;
 
-            const selected = $('#returCelupContainer .row-check:checked').val();
-            const item = selectedData.find(d => d.id_out_celup == selected);
+            // Loop semua checkbox yang dicentang
+            $('#returCelupContainer .row-check:checked').each(function() {
+                const id = $(this).val();
+                const item = selectedData.find(d => d.id_out_celup == id);
 
-            if (item) {
-                totalKgs = parseFloat(item.kgs_kirim || 0);
-                totalCns = parseInt(item.cones_kirim || 0);
-                totalKrg = 1;
-            }
+                if (item) {
+                    totalKgs += parseFloat(item.kgs_kirim || 0);
+                    totalCns += parseInt(item.cones_kirim || 0);
+
+                    // setiap checkbox = 1 karung
+                    totalKrg += 1;
+                }
+            });
 
             $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
             $('input[name="ttl_cns"]').val(totalCns);
             $('input[name="ttl_krg"]').val(totalKrg);
         }
-
-        // Validasi Input Manual
-        $('#inputKgsRetur, #inputCnsRetur, #inputKrgRetur').on('input', function() {
-            const maxKgs = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
-            const maxCns = parseInt($('input[name="ttl_cns"]').val()) || 0;
-            const maxKrg = parseInt($('input[name="ttl_krg"]').val()) || 0;
-
-            const inputKgs = parseFloat($('#inputKgsRetur').val()) || 0;
-            const inputCns = parseInt($('#inputCnsRetur').val()) || 0;
-            const inputKrg = parseInt($('#inputKrgRetur').val()) || 0;
-            const kgsKarung = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
-
-            if (inputKgs > maxKgs) {
-                alert(`Total Kgs tidak boleh melebihi ${maxKgs}`);
-                $('#inputKgsRetur').val(maxKgs);
-            }
-            if (inputCns > maxCns) {
-                alert(`Total Cns tidak boleh melebihi ${maxCns}`);
-                $('#inputCnsRetur').val(maxCns);
-            }
-            if (inputKrg > maxKrg) {
-                alert(`Total Krg tidak boleh melebihi ${maxKrg}`);
-                $('#inputKrgRetur').val(maxKrg);
-            }
-
-            // Jika user isi karung 1 tapi kgs belum sama dengan total kgs karung
-            if (inputKrg === 1 && inputKgs < kgsKarung) {
-                alert(`Tidak bisa input 1 karung jika Total Kgs = ${inputKgs}, masih kurang dari total Kgs karung ${kgsKarung}.`);
-                $('#inputKrgRetur').val(0);
-            }
-
-            // Jika Kgs sudah sama persis, karung otomatis 1
-            if (inputKgs === kgsKarung) {
-                $('#inputKrgRetur').val(1);
-            }
-
-            // Jika Kgs lebih kecil, karung otomatis 0
-            if (inputKgs < kgsKarung) {
-                $('#inputKrgRetur').val(0);
-            }
-        });
     });
     // Simpan data dari modal Pengeluaran Selain Order
     $('#formReturCelup').on('submit', function(e) {
         e.preventDefault(); // penting agar tidak reload halaman
 
-        const idOutCelup = $('input[name="pilih_item"]:checked').val();
+        // Ambil semua checkbox terpilih dalam bentuk array
+        // ambil semua item terpilih -> buat array objek per item
+        const items = $('input[name="pilih_item"]:checked').map(function() {
+            return {
+                id_out_celup: $(this).val(),
+                lot: $(this).data('lot'),
+                kgs: parseFloat($(this).data('kgs')) || 0,
+                cns: parseInt($(this).data('cns')) || 0,
+                krg: parseInt($(this).data('krg')) || 0
+            };
+        }).get();
+
         // const tglOut = $('#tglOut').val();
         const keteranganReturCelup = $('#keteranganReturCelup').val();
         const kgsReturCelup = $('#inputKgsRetur').val();
@@ -1364,21 +1327,22 @@
         const idStock = $('#id_stock').val(); // atau sesuaikan jika beda
         const kategori = $('#kategori_retur').val();
 
-        if (!idOutCelup) {
-            return alert('Silakan pilih karung terlebih dahulu.');
+        if (items.length === 0) {
+            return alert('Silakan pilih minimal satu karung terlebih dahulu.');
         }
+
         console.log('keterangan:', keteranganReturCelup, 'kgsReturCelup:', kgsReturCelup, 'cnsReturCelup:', cnsReturCelup, 'krgReturCelup:', krgReturCelup);
         $.ajax({
             url: '<?= base_url(session()->get("role") . "/warehouse/saveReturCelup") ?>',
             method: 'POST',
             data: {
-                id_out_celup: idOutCelup,
+                items: JSON.stringify(items),
                 // tgl_out: tglOut,
                 keterangan: keteranganReturCelup,
-                kgs: kgsReturCelup,
-                cns: cnsReturCelup,
-                krg: krgReturCelup,
-                lot: lot,
+                // kgs: kgsReturCelup,
+                // cns: cnsReturCelup,
+                // krg: krgReturCelup,
+                // lot: lot,
                 nama_cluster: namaCluster,
                 id_stock: idStock,
                 kategori: kategori

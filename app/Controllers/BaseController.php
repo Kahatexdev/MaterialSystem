@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controllers;
-
+use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;
 use CodeIgniter\HTTP\IncomingRequest;
@@ -50,6 +50,7 @@ use App\Models\HistoryStockBBModel;
  */
 abstract class BaseController extends Controller
 {
+    use ResponseTrait;
     protected $role;
     protected $active;
     protected $filters;
@@ -83,6 +84,11 @@ abstract class BaseController extends Controller
     protected $historyStock;
     protected $otherOutModel;
     protected $masterBuyerModel;
+
+    /**
+     * @var BaseConnection
+     */
+    protected $db;
     /**
      * Instance of the main Request object.
      *
@@ -114,6 +120,8 @@ abstract class BaseController extends Controller
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
         service('renderer')->setVar('capacityUrl', api_url('capacity'));
+
+        $this->db = \Config\Database::connect();
         // Preload any models, libraries, etc, here.
         // E.g.: $this->session = service('session');
         $this->stockModel = new StockModel();

@@ -1027,4 +1027,23 @@ class PengeluaranModel extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function countRequest(): int
+    {
+        $today      = date('Y-m-d');
+        $twoDaysAgo = date('Y-m-d', strtotime('-2 days'));
+
+        return $this->select('pengeluaran.id_pengeluaran')
+            ->join(
+                'pemesanan',
+                'pemesanan.id_total_pemesanan = pengeluaran.id_total_pemesanan',
+                'left'
+            )
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->where('pemesanan.tgl_pakai >=', $twoDaysAgo)
+            ->where('pemesanan.tgl_pakai <=', $today)
+            ->groupBy('pengeluaran.id_total_pemesanan')
+            ->countAllResults();
+    }
+
 }
