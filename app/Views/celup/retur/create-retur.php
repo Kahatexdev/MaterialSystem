@@ -161,7 +161,7 @@
                                                                 <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
-                                                                <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
+                                                                <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup][0]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
                                                                 <td><input type="text" class="form-control operator_packing_input" name="operator_packing[0][0]" id="operator_packing" required></td>
                                                                 <td><select class="form-control" name="shift[0][0]" id="shift" required>
                                                                         <option value="">Pilih Shift</option>
@@ -694,7 +694,7 @@
             <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
+            <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup][${rowCount-1}]" id="lot_celup" value="<?= $schData['lot_celup'] ?>" required></td>
             <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" disabled></td>
             <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" disabled>
                 <option value=""></option>
