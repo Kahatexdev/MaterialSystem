@@ -60,6 +60,7 @@
                             <th colspan="2" class="text-center text-uppercase">Pesan</th>
                             <th colspan="4" class="text-center text-uppercase">PO Tambahan Gbn</th>
                             <th rowspan="2" class="text-center text-uppercase">Admin</th>
+                            <th rowspan="2" class="text-center text-uppercase">Note</th>
                         </tr>
                         <tr>
                             <th class="text-center text-uppercase">Kg</th>
@@ -160,6 +161,7 @@
                                 item.delivery_po_plus || '',
                                 parseFloat(item.kg_po_plus || 0).toFixed(2) || '',
                                 item.admin || '',
+                                item.note || '' //note disini 
                             ]).draw(false);
                         });
 
