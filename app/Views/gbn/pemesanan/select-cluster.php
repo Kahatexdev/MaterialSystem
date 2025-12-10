@@ -376,7 +376,8 @@
                     data-nama-cluster="<?= esc($item['nama_cluster'], 'attr'); ?>"
                     data-no-model="<?= esc($item['no_model'], 'attr'); ?>"
                     data-item-type="<?= esc($item['item_type'], 'attr'); ?>"
-                    data-kode-warna="<?= esc($item['kode_warna'], 'attr'); ?>">
+                    data-kode-warna="<?= esc($item['kode_warna'], 'attr'); ?>"
+                    data-lot-final="<?= esc($item['lot_final'], 'attr'); ?>">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <span class="d-flex align-items-center">
                             <i class="fas fa-warehouse me-2 text-white"></i>
@@ -541,10 +542,11 @@
                 const noModel = this.getAttribute('data-no-model');
                 const itemType = this.getAttribute('data-item-type');
                 const kodeWarna = this.getAttribute('data-kode-warna');
+                const lotFinal = this.getAttribute('data-lot-final');
 
                 document.getElementById('idStok').value = idStok;
 
-                fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?id_stok=${idStok}&no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}`)
+                fetch(`<?= base_url('/gbn/pemasukan/getDataByCluster') ?>?id_stok=${idStok}&no_model=${encodeURIComponent(noModel)}&item_type=${encodeURIComponent(itemType)}&kode_warna=${encodeURIComponent(kodeWarna)}&cluster=${encodeURIComponent(cluster)}&lot_final=${encodeURIComponent(lotFinal)}`)
                     .then(resp => {
                         if (!resp.ok) throw new Error('Network error');
                         return resp.json();

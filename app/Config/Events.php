@@ -2,6 +2,7 @@
 
 namespace Config;
 
+use App\Models\PengeluaranModel;
 use CodeIgniter\Events\Events;
 use CodeIgniter\Exceptions\FrameworkException;
 use CodeIgniter\HotReloader\HotReloader;
@@ -80,6 +81,14 @@ Events::on('pre_system', static function (): void {
         } catch (\Throwable $th) {
 
             // $renderer->setVar('returReq', 0);
+        }
+        try {
+            $pengeluaranModel = new PengeluaranModel();
+            $pengeluaranCount = $pengeluaranModel->countRequest();
+            $renderer->setVar('pengeluaranReq', $pengeluaranCount);
+        } catch (\Throwable $th) {
+            log_message('error', 'Error hitung pengeluaranReq: ' . $th->getMessage());
+            $renderer->setVar('pengeluaranReq', 0);
         }
     });
 });

@@ -1767,11 +1767,15 @@ class ApiController extends ResourceController
 
     public function historyPindahOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $noModelOld   = $this->request->getGet('no_model_old') ?? '';
+        $noModelNew   = $this->request->getGet('no_model_new') ?? '';
+        $kodeWarna    = $this->request->getGet('kode_warna') ?? '';
 
-        // 1) Ambil data
-        $dataPindah = $this->historyStock->getHistoryPindahOrder($noModel, $kodeWarna);
+        if ($noModelOld === '' && $noModelNew === '' && $kodeWarna === '') {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder(null, null, null, 10);
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahOrder($noModelOld, $noModelNew, $kodeWarna);
+        }
 
         return $this->response->setJSON($dataPindah);
     }

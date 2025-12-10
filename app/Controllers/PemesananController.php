@@ -1825,8 +1825,10 @@ class PemesananController extends BaseController
         // === Ambil QTY Capacity BATCH ===
         // cache 5 menit biar cepet kalo user bolak-balik
         $cacheKeyQty = safeCacheKey('qty_bulk', [$area, $noModel, implode(',', $styleSizes)]);
+        /** @var \CodeIgniter\Cache\CacheInterface $cache */
+        $cache = cache();
         // Ambil + cache 10 detik
-        $qtyMap = cache()->remember($cacheKeyQty, 10, function () use ($noModel, $area, $styleSizes) {
+        $qtyMap = $cache->remember($cacheKeyQty, 10, function () use ($noModel, $area, $styleSizes) {
             $client = service('curlrequest');
             $query  = http_build_query([
                 'no_model'    => $noModel,
@@ -2059,7 +2061,7 @@ class PemesananController extends BaseController
     public function getDataByCluster()
     {
         $dataRaw = $this->request->getGet();
-        log_message('debug', 'ini data cluster : ' . json_encode($dataRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        // log_message('debug', 'ini data cluster : ' . json_encode($dataRaw, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
         // normalize $data (trim + bersihkan whitespace aneh + samakan slash)
         $data = array_map(static function ($v) {
@@ -2083,7 +2085,7 @@ class PemesananController extends BaseController
         } else {
             log_message('debug', 'DATA KOSONG');
         }
-        log_message('debug', 'ini : ' . json_encode($stock));
+        // log_message('debug', 'ini : ' . json_encode($stock));
 
         $data = [];
         foreach ($stock as $dt) {
