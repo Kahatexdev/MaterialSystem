@@ -121,18 +121,16 @@ class WarehouseController extends BaseController
             }
         }
 
-            $kategori = $this->kategoriModel->findAll();
+        $kategori = $this->kategoriModel->findAll();
 
-            $data = [
-                'active' => $this->active,
-                'title' => 'Material System',
-                'role' => $this->role,
-                'kategori' => $kategori,
-            ];
-            return view($this->role . '/warehouse/index', $data);
-        }
+        $data = [
+            'active' => $this->active,
+            'title' => 'Material System',
+            'role' => $this->role,
+            'kategori' => $kategori,
+        ];
+        return view($this->role . '/warehouse/index', $data);
     }
-
 
     public function pemasukan()
     {
@@ -3095,7 +3093,6 @@ class WarehouseController extends BaseController
         ];
         $bulan = $bulanMap[$delivery] ?? null;
         $data = $this->stockModel->getFilterSisaPakaiNylon($bulan, $noModel, $kodeWarna);
-
         return $this->response->setJSON($data);
     }
 
@@ -4753,7 +4750,7 @@ class WarehouseController extends BaseController
 
         $clusterTujuan = trim((string) $this->request->getGet('cluster_tujuan'));
         $detail        = $this->request->getGet('detail');
-        log_message('debug', 'DATA CEK = '.$detail);
+        log_message('debug', 'DATA CEK = ' . $detail);
         var_dump($detail);
 
         $db = \Config\Database::connect();

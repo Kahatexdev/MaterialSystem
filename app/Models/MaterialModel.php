@@ -907,19 +907,31 @@ class MaterialModel extends Model
                 AND s.kode_warna = m.kode_warna
             ) AS lot_awal,
 
-            -- pengeluaran (pakai benang)
+           -- pengeluaran total (pengeluaran + other_out)
             (
-                SELECT COALESCE(SUM(p.kgs_out), 0)
-                FROM pengeluaran p
-                WHERE p.status = 'Pengiriman Area'
-                AND p.id_total_pemesanan IN (
-                    SELECT DISTINCT pem.id_total_pemesanan
-                    FROM pemesanan pem
-                    JOIN material mat ON mat.id_material = pem.id_material
-                    WHERE mat.id_order = mo.id_order
-                    AND mat.item_type = m.item_type
-                    AND mat.kode_warna = m.kode_warna
-                )
+                COALESCE((
+                    SELECT SUM(p.kgs_out)
+                    FROM pengeluaran p
+                    WHERE p.status = 'Pengiriman Area'
+                    AND p.id_total_pemesanan IN (
+                        SELECT DISTINCT pem.id_total_pemesanan
+                        FROM pemesanan pem
+                        JOIN material mat ON mat.id_material = pem.id_material
+                        WHERE mat.id_order = mo.id_order
+                        AND mat.item_type = m.item_type
+                        AND mat.kode_warna = m.kode_warna
+                    )
+                ), 0)
+                +
+                COALESCE((
+                    SELECT SUM(oo.kgs_other_out)
+                    FROM other_out oo
+                    LEFT JOIN pemasukan pem ON pem.id_out_celup = oo.id_out_celup
+                    LEFT JOIN stock s3 ON s3.id_stock = pem.id_stock
+                    WHERE s3.no_model = mo.no_model
+                    AND s3.item_type = m.item_type
+                    AND s3.kode_warna = m.kode_warna
+                ), 0)
             ) AS kgs_out,
 
             -- pengeluaran (pakai (+) benang & nylon)
