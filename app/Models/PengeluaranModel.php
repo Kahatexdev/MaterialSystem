@@ -721,6 +721,20 @@ class PengeluaranModel extends Model
             ->first();
     }
 
+    public function getTtlPengiriman($jenis, $tglPakai)
+    {
+        return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
+            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+            ->join('master_material', 'master_material.item_type=stock.item_type', 'left')
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
+            ->where('master_material.jenis', $jenis)
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->where('pengeluaran.status', 'Pengiriman Area')
+            ->groupBy('master_material.jenis')
+            ->first();
+    }
+
     public function getPakaiArea($key, $jenis = null)
     {
         $builder = $this->db->table('pengeluaran p')
@@ -1045,5 +1059,4 @@ class PengeluaranModel extends Model
             ->groupBy('pengeluaran.id_total_pemesanan')
             ->countAllResults();
     }
-
 }

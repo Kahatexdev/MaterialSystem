@@ -2077,10 +2077,9 @@ class PemesananController extends BaseController
 
         // log_message('debug', 'ini trim data : ' . json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
 
-        if(!empty($data['id_stok'])){
+        if (!empty($data['id_stok'])) {
             $stock = $this->pemasukanModel->getDataByCluster($data);
-        } 
-        elseif (!empty($data['lot'])){
+        } elseif (!empty($data['lot'])) {
             $stock = $this->pemasukanModel->getDataByLot($data);
         } else {
             log_message('debug', 'DATA KOSONG');
@@ -2406,6 +2405,7 @@ class PemesananController extends BaseController
 
         $ttlPesan = $this->totalPemesananModel->getTtlPesan($jenis, $tglPakai);
         $ttlPersiapan = $this->pengeluaranModel->getTtlPersiapan($jenis, $tglPakai);
+        $ttlPengiriman = $this->pengeluaranModel->getTtlPengiriman($jenis, $tglPakai);
         // dd($ttlPesan, $ttlPersiapan);
 
         // Ambil noModel sesuai jenis request
@@ -2438,7 +2438,8 @@ class PemesananController extends BaseController
             'tglPakai' => $tglPakai,
             'detail'   => $detail,
             'ttlPesan' => $ttlPesan,
-            'ttlPersiapan' => $ttlPersiapan
+            'ttlPersiapan' => $ttlPersiapan,
+            'ttlPengiriman' => $ttlPengiriman
         ];
         return view($this->role . '/pemesanan/detailPersiapanBarangPertgl', $data);
     }
