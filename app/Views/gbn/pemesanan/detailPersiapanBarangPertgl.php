@@ -150,32 +150,46 @@
 
                     <!-- Grid Cards -->
                     <div class="row g-2">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Kg Pesan</h6>
                                 <?php $kgPesan = isset($ttlPesan['ttl_pesan_kg']) ? $ttlPesan['ttl_pesan_kg'] : 0; ?>
                                 <h4 class="fw-semibold mb-0"> <?= number_format($kgPesan, 2) ?? 0 ?>Kg</h4>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Cns Pesan</h6>
                                 <?php $cnsPesan = isset($ttlPesan['ttl_pesan_cns']) ? $ttlPesan['ttl_pesan_cns'] : 0; ?>
                                 <h4 class="fw-semibold mb-0"><?= $cnsPesan ?> Cns</h4>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Kg Persiapan</h6>
                                 <?php $kgPersiapan = isset($ttlPersiapan['kgs_out']) ? $ttlPersiapan['kgs_out'] : 0; ?>
                                 <h4 class="fw-semibold mb-0"><?= number_format($kgPersiapan, 2) ?? 0 ?> Kg</h4>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
                                 <h6 class="text-muted mb-1 small">Cns Persiapan</h6>
                                 <?php $cnsPersiapan = isset($ttlPersiapan['cns_out']) ? $ttlPersiapan['cns_out'] : 0; ?>
-                                <h4 class="fw-semibold mb-0"><?= $cnsPersiapan ?> Kg</h4>
+                                <h4 class="fw-semibold mb-0"><?= $cnsPersiapan ?> Cns</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Kg Pengiriman</h6>
+                                <?php $kgPengiriman = isset($ttlPengiriman['kgs_out']) ? $ttlPengiriman['kgs_out'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"><?= number_format($kgPengiriman, 2) ?? 0 ?> Kg</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="p-2 border rounded-3 bg-gradient-light shadow-sm text-center">
+                                <h6 class="text-muted mb-1 small">Cns Pengiriman</h6>
+                                <?php $cnsPengiriman = isset($ttlPengiriman['cns_out']) ? $ttlPengiriman['cns_out'] : 0; ?>
+                                <h4 class="fw-semibold mb-0"><?= $cnsPengiriman ?> Cns</h4>
                             </div>
                         </div>
                     </div>
