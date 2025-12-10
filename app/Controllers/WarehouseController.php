@@ -1871,32 +1871,89 @@ class WarehouseController extends BaseController
         $jenis = $this->request->getGet('jenis') ?? null;
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
         // dd($data);
-        $startMc = [];
+        $cache = [];
         $result = [];
 
         foreach ($data as $row) {
             $model = isset($row['no_model']) ? $row['no_model'] : '';
+            $currentItemType = $row['item_type'];
+            $currentKodeWarna = $row['kode_warna'];
 
             if ($model === '') {
                 $row['start_mc'] = 'Belum Ada Start Mc';
+                $row['area']  = 'Area Belum di Assign';
                 $result[] = $row;
                 continue;
             }
 
             // getStartMc
-            if (!isset($startMc[$model])) {
+            if (!isset($cache[$model])) {
                 $url = api_url('capacity') . 'getStartMc/' . urlencode($model);
-                $resp = @file_get_contents($url);
+
+                $context = stream_context_create([
+                    "http" => [
+                        "timeout" => 10
+                    ],
+                    "ssl" => [
+                        "verify_peer"      => false,
+                        "verify_peer_name" => false,
+                        "allow_self_signed" => true,
+                    ]
+                ]);
+                $resp = @file_get_contents($url, false, $context);
+
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
-                    $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
+                    // $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
+                    $cache[$model] = [
+                        'start_mc' => $json['startMc']['start_mc'] ?? 'Belum Ada Start Mc',
+                        'area'     => $json['areaMc'] ?? 'Area Belum di Assign'
+
+                    ];
                 } else {
                     // fallback jika API error / tidak dapat diakses
-                    $startMc[$model] = 'Belum Ada Start Mc';
+                    // $startMc[$model] = 'Belum Ada Start Mc';
+                    $cache[$model] = [
+                        'start_mc' => 'Belum Ada Start Mc',
+                        'area'  => 'Area Belum di Assign',
+                    ];
                 }
             }
 
-            $row['start_mc'] = $startMc[$model];
+
+            // ⭐ GET NOTE
+            $note = $this->totalPoTambahanModel->getPoTambahan($model, $jenis);
+
+            // ⭐ LOG NOTE DI SINI
+            log_message('info', 'NOTE for model ' . $model . ': ' . json_encode($note));
+
+            $filteredNote = [];
+
+            foreach ($note as $n) {
+                if (
+                    $n['item_type'] === $currentItemType &&
+                    $n['kode_warna'] === $currentKodeWarna
+                ) {
+                    $filteredNote[] = $n;
+                }
+            }
+
+            // BUILD NOTE STRING UNTUK VIEW
+            if (!empty($filteredNote)) {
+                $counter = 1;
+                $noteString = '';
+                foreach ($filteredNote as $n) {
+                    $noteString .= "po(+) ke-{$counter} tgl: {$n['tgl_po_tamabahan']} qty: {$n['ttl_tambahan_kg']} area: {$n['area_po_tambahan']}<br>";
+                    $counter++;
+                }
+            } else {
+                $noteString = '-';
+            }
+
+            $row['note'] = $noteString;
+
+            $row['start_mc'] = $cache[$model]['start_mc'];
+            $row['area']  = $cache[$model]['area'];
             $result[] = $row;
         }
 
