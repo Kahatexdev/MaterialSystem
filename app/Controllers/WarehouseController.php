@@ -143,7 +143,6 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/index', $data);
     }
 
-
     public function pemasukan()
     {
         $id = $this->request->getPost('barcode');
@@ -3162,7 +3161,6 @@ class WarehouseController extends BaseController
         ];
         $bulan = $bulanMap[$delivery] ?? null;
         $data = $this->stockModel->getFilterSisaPakaiNylon($bulan, $noModel, $kodeWarna);
-
         return $this->response->setJSON($data);
     }
 

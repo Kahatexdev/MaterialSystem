@@ -1040,7 +1040,7 @@ class PengeluaranModel extends Model
                 'left'
             )
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            ->where('pemesanan.tgl_pakai >=', $twoDaysAgo)
+            ->where('pemesanan.tgl_pakai >', $twoDaysAgo)
             ->where('pemesanan.tgl_pakai <=', $today)
             ->groupBy('pengeluaran.id_total_pemesanan')
             ->countAllResults();

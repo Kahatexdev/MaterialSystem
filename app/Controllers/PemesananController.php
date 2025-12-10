@@ -3155,46 +3155,30 @@ class PemesananController extends BaseController
         $detail = $this->stockModel->getPinjamOrderDetail($noModel, $itemType, $kodeWarna, $cluster);
         return $this->response->setJSON($detail);
     }
-    public function HistoryPinjamOrder()
+    public function historyPinjamOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
+        $noModel   = $this->request->getGet('model');
+        $kodeWarna = $this->request->getGet('kode_warna');
 
-        $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
-        // dd($dataPinjam);
-
-        // // 2) Siapkan HTTP client
-        // $client = \Config\Services::curlrequest([
-        //     'baseURI' => api_url('capacity').'',
-        //     'timeout' => 5
-        // ]);
-
-        // // 3) Loop dan merge API result
-        // foreach ($dataPindah as &$row) {
-        //     try {
-        //         $res = $client->get('getDeliveryAwalAkhir', [
-        //             'query' => ['model' => $row['no_model_new']]
-        //         ]);
-        //         $body = json_decode($res->getBody(), true);
-        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
-        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
-        //     } catch (\Exception $e) {
-        //         $row['delivery_awal']  = '-';
-        //         $row['delivery_akhir'] = '-';
-        //     }
-        // }
-        // unset($row);
-
-        // 4) Response
+        // Kalau AJAX → baru ambil data
         if ($this->request->isAJAX()) {
-            return $this->response->setJSON($dataPinjam);
+
+            // Validasi: kalau filter kosong jangan izinkan all data
+            if (empty($noModel) && empty($kodeWarna)) {
+                return $this->response->setJSON([]);
+            }
+
+            $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
+
+            return $this->response->setJSON($dataPinjam ?? []);
         }
 
+        // First load: TIDAK QUERY apa-apa
         return view($this->role . '/pemesanan/history-pinjam-order', [
             'role'    => $this->role,
             'title'   => 'History Pindah Order',
             'active'  => $this->active,
-            'history' => $dataPinjam,
+            'history' => [], // atau bisa dihapus, nggak dipakai juga
         ]);
     }
     public function saveKetGbnInPemesanan()
