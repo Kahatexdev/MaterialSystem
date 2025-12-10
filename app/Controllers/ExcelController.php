@@ -11600,9 +11600,8 @@ class ExcelController extends BaseController
     }
     public function exportHistoryPinjamOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-
+        $noModel   = $this->request->getGet('model');
+        $kodeWarna = $this->request->getGet('kode_warna');
         // 1) Ambil data
         $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
 
