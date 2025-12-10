@@ -12329,7 +12329,7 @@ class ExcelController extends BaseController
             $sheet->setCellValue('L' . $row, $item['item_type']);
             $sheet->setCellValue('M' . $row, $item['kode_warna']);
             $sheet->setCellValue('N' . $row, $item['color']);
-            $sheet->setCellValue('O' . $row, number_format($item['kgs_stock_awal'], 2));
+            $sheet->setCellValue('O' . $row, number_format($item['kgs_awal'], 2));
             $sheet->setCellValue('P' . $row, $item['lot_awal']);
             $sheet->setCellValue('Q' . $row, number_format($item['kg_po'], 2));
             $sheet->setCellValue('R' . $row, $item['tgl_terima_po_plus_gbn'] ?? '');

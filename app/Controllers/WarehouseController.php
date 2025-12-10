@@ -1858,7 +1858,7 @@ class WarehouseController extends BaseController
     {
         $data = [
             'role' => $this->role,
-            'title' => 'Report PO Benang',
+            'title' => 'Report PO ' . $jenis,
             'active' => $this->active,
             'jenis' => $jenis
         ];
@@ -4763,7 +4763,7 @@ class WarehouseController extends BaseController
 
         $clusterTujuan = trim((string) $this->request->getGet('cluster_tujuan'));
         $detail        = $this->request->getGet('detail');
-        log_message('debug', 'DATA CEK = '.$detail);
+        log_message('debug', 'DATA CEK = ' . $detail);
         var_dump($detail);
 
         $db = \Config\Database::connect();
