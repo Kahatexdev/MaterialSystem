@@ -247,6 +247,18 @@
 
 <script>
     $(document).ready(function() {
+        // === INIT DATATABLE ===
+        let dataTable = $('#dataTable').DataTable({
+            paging: true,
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            searching: false,
+            ordering: false,
+            info: true,
+            responsive: true
+        });
+
+        // ==== LOADING FUNCTIONS ====
         function showLoading() {
             $('#loadingOverlay').addClass('active');
             $('#btnSearch').prop('disabled', true);
@@ -271,7 +283,9 @@
             $('#progressText').text(percent + '%');
         }
 
+        // ==== LOAD DATA FUNCTION ====
         function loadData() {
+
             const delivery_awal = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
@@ -280,7 +294,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Input Tidak Boleh Kosong!',
-                    text: 'Silakan isi minimal salah satu input untuk pencarian.',
+                    text: 'Silakan isi minimal satu input.',
                 });
                 return;
             }
@@ -300,22 +314,26 @@
                 },
                 xhr: function() {
                     let xhr = new window.XMLHttpRequest();
-
-                    // progress download data dari server
                     xhr.addEventListener("progress", function(evt) {
                         if (evt.lengthComputable) {
                             let percentComplete = Math.round((evt.loaded / evt.total) * 100);
                             updateProgress(percentComplete);
                         }
                     }, false);
-
                     return xhr;
                 },
+
                 success: function(response) {
+
+                    // === HAPUS DATA SEBELUMNYA ===
+                    dataTable.clear().destroy();
+
                     let html = '';
+
                     if (response.length > 0) {
+
                         $.each(response, function(index, item) {
-                            // console.log(item);
+
                             const kgsAwal = parseFloat(item.kgs_stock_awal) || 0;
                             const kgsDatang = parseFloat(item.kgs_datang) || 0;
                             const kgsTambahanDatang = parseFloat(item.kgs_datang_plus) || 0;
@@ -323,69 +341,82 @@
                             const kgPo = parseFloat(item.kg_po) || 0;
                             const kgPoPlus = parseFloat(item.kg_po_plus) || 0;
                             const qtyRetur = parseFloat(item.qty_retur) || 0;
-                            let sisa = 0;
-                            if (gantiRetur > 0) {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + gantiRetur) - (kgPo - kgPoPlus - qtyRetur);
-                            } else {
-                                sisa = (kgsAwal + kgsDatang + kgsTambahanDatang) - (kgPo - kgPoPlus);
-                            }
+
+                            let sisa = (kgsAwal + kgsDatang + kgsTambahanDatang + (gantiRetur > 0 ? gantiRetur : 0)) -
+                                (kgPo - kgPoPlus - (gantiRetur > 0 ? qtyRetur : 0));
 
                             html += `
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.lco_date || ''}</td>
-                                    <td>${item.foll_up || ''}</td>
-                                    <td>${item.no_model || ''}</td>
-                                    <td>${item.no_order || ''}</td>
-                                    <td>${item.area || ''}</td>
-                                    <td>${item.buyer || ''}</td>
-                                    <td>${item.start_mc || ''}</td>
-                                    <td>${item.delivery_awal || ''}</td>
-                                    <td>${item.delivery_akhir || ''}</td>
-                                    <td>${item.unit || ''}</td>
-                                    <td>${item.item_type || ''}</td>
-                                    <td>${item.kode_warna || ''}</td>
-                                    <td>${item.color || ''}</td>
-                                    <td>${item.kgs_stock_awal || 0}</td>
-                                    <td>${item.lot_awal || ''}</td>
-                                    <td>${(parseFloat(item.kg_po) || 0).toFixed(2)}</td>
-                                    <td>${item.tgl_terima_po_plus || ''}</td>
-                                    <td>${item.tgl_po_plus_area || ''}</td>
-                                    <td>${item.delivery_po_plus || ''}</td>
-                                    <td>${item.kg_po_plus || 0}</td>
-                                    <td>${(parseFloat(item.kgs_datang) || 0).toFixed(2)}</td>
-                                    <td>${item.kgs_datang_plus || 0}</td>
-                                    <td>${item.kgs_retur || 0}</td>
-                                    <td>${item.qty_retur || 0}</td>
-                                    <td>${sisa.toFixed(2)}</td>
-                                </tr>
-                            `;
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${item.lco_date || ''}</td>
+                                <td>${item.foll_up || ''}</td>
+                                <td>${item.no_model || ''}</td>
+                                <td>${item.no_order || ''}</td>
+                                <td>${item.area || ''}</td>
+                                <td>${item.buyer || ''}</td>
+                                <td>${item.start_mc || ''}</td>
+                                <td>${item.delivery_awal || ''}</td>
+                                <td>${item.delivery_akhir || ''}</td>
+                                <td>${item.unit || ''}</td>
+                                <td>${item.item_type || ''}</td>
+                                <td>${item.kode_warna || ''}</td>
+                                <td>${item.color || ''}</td>
+                                <td>${item.kgs_stock_awal || 0}</td>
+                                <td>${item.lot_awal || ''}</td>
+                                <td>${kgPo.toFixed(2)}</td>
+                                <td>${item.tgl_terima_po_plus || ''}</td>
+                                <td>${item.tgl_po_plus_area || ''}</td>
+                                <td>${item.delivery_po_plus || ''}</td>
+                                <td>${kgPoPlus}</td>
+                                <td>${kgsDatang.toFixed(2)}</td>
+                                <td>${item.kgs_datang_plus || 0}</td>
+                                <td>${item.kgs_retur || 0}</td>
+                                <td>${item.qty_retur || 0}</td>
+                                <td>${sisa.toFixed(2)}</td>
+                            </tr>
+                        `;
                         });
+
                         $('#dataTable tbody').html(html);
                         $('#btnExport').removeClass('d-none');
+
                     } else {
+
                         let colCount = $('#dataTable thead th').length;
+
                         $('#dataTable tbody').html(`
-                            <tr>
-                                <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
-                                    ⚠ Tidak ada data ditemukan
-                                </td>
-                            </tr>
-                        `);
+                        <tr>
+                            <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
+                                ⚠ Tidak ada data ditemukan
+                            </td>
+                        </tr>
+                    `);
 
                         $('#btnExport').addClass('d-none');
                     }
 
+                    // === REINIT DATATABLES SESUDAH ISI HTML ===
+                    dataTable = $('#dataTable').DataTable({
+                        paging: true,
+                        pageLength: 10,
+                        searching: false,
+                        ordering: false,
+                        info: true,
+                        responsive: true
+                    });
                 },
+
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
                 },
+
                 complete: function() {
-                    updateProgress(100); // pastikan full
-                    setTimeout(() => hideLoading(), 400); // kasih jeda biar animasi progress keliatan
+                    updateProgress(100);
+                    setTimeout(() => hideLoading(), 400);
                 }
             });
         }
+
 
         $('#btnSearch').click(function() {
             loadData();
@@ -395,6 +426,7 @@
             const delivery = $('#delivery').val();
             const no_model = $('#no_model').val().trim();
             const kode_warna = $('#kode_warna').val().trim();
+
             const url = "<?= base_url($role . '/warehouse/exportReportSisaDatangSpandex') ?>" +
                 "?delivery=" + encodeURIComponent(delivery) +
                 "&no_model=" + encodeURIComponent(no_model) +
@@ -403,22 +435,26 @@
             window.location.href = url;
         });
 
-        dataTable.clear().draw();
-    });
 
-    // Fitur Reset
-    $('#btnReset').click(function() {
-        // Kosongkan input
-        $('input[type="text"]').val('');
+        // === FITUR RESET HARUS DI DALAM READY ===
+        $('#btnReset').click(function() {
 
-        // Kosongkan delivery
-        $('#delivery').val('');
+            $('input[type="text"]').val('');
+            $('#delivery').val('');
+            $('#dataTable tbody').html('');
 
-        // Kosongkan tabel hasil pencarian
-        $('#dataTable tbody').html('');
+            dataTable.clear().destroy(); // hapus instance
 
-        // Sembunyikan tombol Export Excel
-        $('#btnExport').addClass('d-none');
+            // Re-init kosong
+            dataTable = $('#dataTable').DataTable({
+                paging: true,
+                searching: false,
+                ordering: false,
+                info: true
+            });
+
+            $('#btnExport').addClass('d-none');
+        });
     });
 </script>
 <script>

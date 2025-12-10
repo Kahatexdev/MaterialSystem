@@ -1858,7 +1858,7 @@ class WarehouseController extends BaseController
     {
         $data = [
             'role' => $this->role,
-            'title' => 'Report PO Benang',
+            'title' => 'Report PO ' . $jenis,
             'active' => $this->active,
             'jenis' => $jenis
         ];
