@@ -710,58 +710,31 @@ class PengeluaranModel extends Model
     }
     public function getTtlPersiapan($jenis, $tglPakai)
     {
+        $builder = $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
+            ->where('master_material.jenis', $jenis)
+            ->where('pengeluaran.status', 'Pengeluaran Jalur')
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->groupBy('master_material.jenis');
+
+        $builder
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left');
+
         if ($jenis === "BENANG" || $jenis === "NYLON") {
-            return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
-                ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
-                ->join('master_material', 'master_material.item_type=stock.item_type', 'left')
-                ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
-                ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
-                ->where('master_material.jenis', $jenis)
-                ->where('pemesanan.tgl_pakai', $tglPakai)
-                ->where('pengeluaran.status', 'Pengeluaran Jalur')
-                ->groupBy('master_material.jenis')
-                ->first();
+
+            $builder->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+                ->join('master_material', 'master_material.item_type=stock.item_type', 'left');
         } else {
-            // untuk spandex karet
-            return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
-                ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
-                ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
-                ->join('material', 'material.id_material=pemesanan.id_material', 'left')
-                ->join('master_material', 'master_material.item_type=material.item_type', 'left')
-                ->where('master_material.jenis', $jenis)
-                ->where('pemesanan.tgl_pakai', $tglPakai)
-                ->where('pengeluaran.status', 'Pengeluaran Jalur')
-                ->groupBy('master_material.jenis')
-                ->first();
+
+            $builder->join('material', 'material.id_material=pemesanan.id_material', 'left')
+                ->join('master_material', 'master_material.item_type=material.item_type', 'left');
         }
+
+        return $builder->first();
     }
 
     public function getTtlPengiriman($jenis, $tglPakai)
     {
-        // if ($jenis === "BENANG" || $jenis === "NYLON") {
-        //     return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
-        //         ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
-        //         ->join('master_material', 'master_material.item_type=stock.item_type', 'left')
-        //         ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
-        //         ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
-        //         ->where('master_material.jenis', $jenis)
-        //         ->where('pemesanan.tgl_pakai', $tglPakai)
-        //         ->where('pengeluaran.status', 'Pengiriman Area')
-        //         ->groupBy('master_material.jenis')
-        //         ->first();
-        // } else {
-        //     // untuk spandex karet
-        //     return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
-        //         ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
-        //         ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
-        //         ->join('material', 'material.id_material=pemesanan.id_material', 'left')
-        //         ->join('master_material', 'master_material.item_type=material.item_type', 'left')
-        //         ->where('master_material.jenis', $jenis)
-        //         ->where('pemesanan.tgl_pakai', $tglPakai)
-        //         ->where('pengeluaran.status', 'Pengiriman Area')
-        //         ->groupBy('master_material.jenis')
-        //         ->first();
-        // }
         $builder = $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
             ->where('master_material.jenis', $jenis)
             ->where('pengeluaran.status', 'Pengiriman Area')
