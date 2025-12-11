@@ -162,30 +162,19 @@
                                             <p class="text-sm font-weight-bold mb-0"><?= $tgl['tgl_pakai'] ?></p>
                                         </td>
                                         <td class="text-center"></td>
-                                        <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
-                                            <td class="text-center">
+                                        <td class="text-center">
+                                            <?php if ($jenis === 'SPANDEX' || $jenis === 'KARET') : ?>
                                                 <a href="<?= base_url($role . '/pemesanan/exportListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
                                                     <i class="fas fa-file-excel fa-2x"></i>
                                                 </a>
                                                 <a href="<?= base_url($role . '/pemesanan/exportPdfListPemesananSpdxKaretPertgl?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-danger" target="_blank">
                                                     <i class="fas fa-file-pdf fa-2x"></i>
                                                 </a>
-                                            </td>
-                                        <?php else : ?>
-                                            <td class="text-center">
-                                                <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
-                                                    <i class="fas fa-eye fa-2x"></i>
-                                                </a>
-                                                <!-- <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-success" target="_blank">
-                                                <i class="fas fa-file-excel fa-2x"></i>
-                                            </a> -->
-                                            </td>
-                                        <?php endif; ?>
-                                        <!-- <td class="text-center">
-                                            <a href="<?= base_url($role . '/pemesanan/exportListBarangKeluar/' . $tgl['tgl_pakai'] . '/' . $jenis) ?>" class="btn btn-success btn-xs">
-                                                <i class="fa fa-file-excel fa-xl" style="font-size: 16px !important;"></i> Excel
+                                            <?php endif; ?>
+                                            <a href="<?= base_url($role . '/pemesanan/detailListBarangKeluar?jenis=' . $jenis . '&tglPakai=' . $tgl['tgl_pakai']) ?>" class="btn bg-gradient-info" target="_blank">
+                                                <i class="fas fa-eye fa-2x"></i>
                                             </a>
-                                        </td> -->
+                                        </td>
                                     </tr>
 
                                 <?php endforeach; ?>
