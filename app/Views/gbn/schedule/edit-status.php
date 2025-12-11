@@ -149,7 +149,7 @@
                                     <!-- Lot Celup -->
                                     <div class="form-group" id="lotCelupGroup">
                                         <label for="qty_celup">Lot Celup</label>
-                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>" disabled>
+                                        <input type="text" class="form-control" name="lot_celup" id="lot_celup" value="<?= $data['lot_celup'] ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -284,7 +284,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-<script>
+<!-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tglCelup = document.getElementById('tgl_celup');
         const tglAcc = document.getElementById('tgl_acc');
@@ -315,6 +315,6 @@
         // Update otomatis kalau tgl_celup berubah
         tglCelup.addEventListener('change', toggleReadonly);
     });
-</script>
+</script> -->
 
 <?php $this->endSection(); ?>
