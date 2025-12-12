@@ -455,6 +455,7 @@ class PengeluaranModel extends Model
             pengeluaran.lot_out,
             out_celup.no_karung,
             pengeluaran.id_pengeluaran,
+            pengeluaran.id_psk,
             pengeluaran.id_stock,
             pengeluaran.id_out_celup,
             total_pemesanan.id_total_pemesanan,
@@ -709,16 +710,52 @@ class PengeluaranModel extends Model
     }
     public function getTtlPersiapan($jenis, $tglPakai)
     {
-        return $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
-            ->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
-            ->join('master_material', 'master_material.item_type=stock.item_type', 'left')
-            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
-            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left')
+        $builder = $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
             ->where('master_material.jenis', $jenis)
-            ->where('pemesanan.tgl_pakai', $tglPakai)
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            ->groupBy('master_material.jenis')
-            ->first();
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->groupBy('master_material.jenis');
+
+        $builder
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left');
+
+        if ($jenis === "BENANG" || $jenis === "NYLON") {
+
+            $builder->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+                ->join('master_material', 'master_material.item_type=stock.item_type', 'left');
+        } else {
+
+            $builder->join('material', 'material.id_material=pemesanan.id_material', 'left')
+                ->join('master_material', 'master_material.item_type=material.item_type', 'left');
+        }
+
+        return $builder->first();
+    }
+
+    public function getTtlPengiriman($jenis, $tglPakai)
+    {
+        $builder = $this->select('SUM(pengeluaran.kgs_out) AS kgs_out, SUM(pengeluaran.cns_out) AS cns_out')
+            ->where('master_material.jenis', $jenis)
+            ->where('pengeluaran.status', 'Pengiriman Area')
+            ->where('pemesanan.tgl_pakai', $tglPakai)
+            ->groupBy('master_material.jenis');
+
+        $builder
+            ->join('total_pemesanan', 'total_pemesanan.id_total_pemesanan=pengeluaran.id_total_pemesanan', 'left')
+            ->join('pemesanan', 'total_pemesanan.id_total_pemesanan=pemesanan.id_total_pemesanan', 'left');
+
+        if ($jenis === "BENANG" || $jenis === "NYLON") {
+
+            $builder->join('stock', 'stock.id_stock = pengeluaran.id_stock', 'left')
+                ->join('master_material', 'master_material.item_type=stock.item_type', 'left');
+        } else {
+
+            $builder->join('material', 'material.id_material=pemesanan.id_material', 'left')
+                ->join('master_material', 'master_material.item_type=material.item_type', 'left');
+        }
+
+        return $builder->first();
     }
 
     public function getPakaiArea($key, $jenis = null)
@@ -1040,10 +1077,9 @@ class PengeluaranModel extends Model
                 'left'
             )
             ->where('pengeluaran.status', 'Pengeluaran Jalur')
-            ->where('pemesanan.tgl_pakai >=', $twoDaysAgo)
+            ->where('pemesanan.tgl_pakai >', $twoDaysAgo)
             ->where('pemesanan.tgl_pakai <=', $today)
             ->groupBy('pengeluaran.id_total_pemesanan')
             ->countAllResults();
     }
-
 }

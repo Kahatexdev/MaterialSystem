@@ -327,22 +327,22 @@
 
                 success: function(response) {
 
-                    // ====== HAPUS INSTANCE DATATABLES SEBELUM ISI ULANG ======
-                    dataTable.clear().destroy();
+                    const data = Array.isArray(response)
+                        ? response
+                        : (Array.isArray(response?.data) ? response.data : []);
 
-                    let html = '';
+                    dataTable.clear();
 
-                    if (response.length > 0) {
+                    if (data.length > 0) {
+                        $.each(data, function(index, item) {
 
-                        $.each(response, function(index, item) {
-
-                            const kgsAwal = parseFloat(item.kgs_stock_awal) || 0;
-                            const kgsDatang = parseFloat(item.kgs_datang) || 0;
-                            const kgsPlus = parseFloat(item.kgs_datang_plus) || 0;
-                            const gantiRetur = parseFloat(item.kgs_retur) || 0;
-                            const kgPo = parseFloat(item.kg_po) || 0;
-                            const kgPoPlus = parseFloat(item.kg_po_plus) || 0;
-                            const qtyRetur = parseFloat(item.qty_retur) || 0;
+                            const kgsAwal     = parseFloat(item.kgs_stock_awal)  || 0;
+                            const kgsDatang   = parseFloat(item.kgs_datang)      || 0;
+                            const kgsPlus     = parseFloat(item.kgs_datang_plus) || 0;
+                            const gantiRetur  = parseFloat(item.kgs_retur)       || 0;
+                            const kgPo        = parseFloat(item.kg_po)           || 0;
+                            const kgPoPlus    = parseFloat(item.kg_po_plus)      || 0;
+                            const qtyRetur    = parseFloat(item.qty_retur)       || 0;
 
                             let sisa = 0;
                             if (gantiRetur > 0) {
@@ -351,72 +351,59 @@
                                 sisa = (kgsAwal + kgsDatang + kgsPlus) - (kgPo - kgPoPlus);
                             }
 
-                            html += `
-                            <tr>
-                                <td>${index + 1}</td>
-                                <td>${item.lco_date || ''}</td>
-                                <td>${item.foll_up || ''}</td>
-                                <td>${item.no_model || ''}</td>
-                                <td>${item.no_order || ''}</td>
-                                <td>${item.area || ''}</td>
-                                <td>${item.buyer || ''}</td>
-                                <td>${item.start_mc || ''}</td>
-                                <td>${item.delivery_awal || ''}</td>
-                                <td>${item.delivery_akhir || ''}</td>
-                                <td>${item.unit || ''}</td>
-                                <td>${item.item_type || ''}</td>
-                                <td>${item.kode_warna || ''}</td>
-                                <td>${item.color || ''}</td>
-                                <td>${(parseFloat(item.kgs_awal) || 0).toFixed(2)}</td>
-                                <td>${item.lot_awal || ''}</td>
-                                <td>${kgPo.toFixed(2)}</td>
-                                <td>${item.tgl_terima_po_plus || ''}</td>
-                                <td>${item.tgl_po_plus_area || ''}</td>
-                                <td>${item.delivery_po_plus || ''}</td>
-                                <td>${kgPoPlus}</td>
-                                <td>${kgsDatang.toFixed(2)}</td>
-                                <td>${kgsPlus.toFixed(2)}</td>
-                                <td>${gantiRetur.toFixed(2)}</td>
-                                <td>${qtyRetur}</td>
-                                <td>${sisa.toFixed(2)}</td>
-                            </tr>
-                        `;
+                            dataTable.row.add([
+                                index + 1,
+                                item.lco_date || '',
+                                item.foll_up || '',
+                                item.no_model || '',
+                                item.no_order || '',
+                                item.area || '',
+                                item.buyer || '',
+                                item.start_mc || '',
+                                item.delivery_awal || '',
+                                item.delivery_akhir || '',
+                                item.unit || '',
+                                item.item_type || '',
+                                item.kode_warna || '',
+                                item.color || '',
+                                (parseFloat(item.kgs_awal) || 0).toFixed(2),
+                                item.lot_awal || '',
+                                kgPo.toFixed(2),
+                                item.tgl_terima_po_plus || '',
+                                item.tgl_po_plus_area || '',
+                                item.delivery_po_plus || '',
+                                kgPoPlus.toFixed(2),
+                                kgsDatang.toFixed(2),
+                                kgsPlus.toFixed(2),
+                                gantiRetur.toFixed(2),
+                                qtyRetur.toFixed(2),
+                                sisa.toFixed(2),
+                            ]);
                         });
 
-                        $('#dataTable tbody').html(html);
                         $('#btnExport').removeClass('d-none');
 
                     } else {
+                        // 🔧 GUNAKAN JUMLAH KOLOM DARI DATATABLE, BUKAN DARI THEAD
+                        const colCount = dataTable.columns().count();
 
-                        let colCount = $('#dataTable thead th').length;
+                        let emptyRow = new Array(colCount).fill('');
+                        emptyRow[0] = '<span class="text-danger font-weight-bold">⚠ Tidak ada data ditemukan</span>';
 
-                        $('#dataTable tbody').html(`
-                        <tr>
-                            <td colspan="${colCount}" class="text-center text-danger font-weight-bold">
-                                ⚠ Tidak ada data ditemukan
-                            </td>
-                        </tr>
-                    `);
-
+                        dataTable.row.add(emptyRow);
                         $('#btnExport').addClass('d-none');
                     }
 
-                    // ====== REINIT DATATABLE SESUDAH ISI DATA ======
-                    dataTable = $('#dataTable').DataTable({
-                        paging: true,
-                        pageLength: 10,
-                        searching: false,
-                        ordering: false,
-                        info: true,
-                        responsive: true
-                    });
-
+                    dataTable.draw();
                 },
-
                 error: function(xhr, status, error) {
                     console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: 'Terjadi kesalahan saat mengambil data.',
+                    });
                 },
-
                 complete: function() {
                     updateProgress(100);
                     setTimeout(() => hideLoading(), 400);
