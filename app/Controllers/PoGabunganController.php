@@ -60,7 +60,7 @@ class PoGabunganController extends BaseController
 
     public function poGabungan($jenis)
     {
-        $masterOrder = $this->masterOrderModel->select('master_order.id_order,master_order.no_model')->findAll();
+        $masterOrder = $this->masterOrderModel->select('master_order.id_order,master_order.no_model')->where('no_model !=', '')->where('no_order !=', '-')->orderBy('no_model', 'ASC')->findAll();
         // dd($masterOrder);
         $data = [
             'model' => $masterOrder,
