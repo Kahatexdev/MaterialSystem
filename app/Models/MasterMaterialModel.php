@@ -12,7 +12,7 @@ class MasterMaterialModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran','created_at', 'updated_at', 'deleted_at'];
+    protected $allowedFields    = ['item_type', 'deskripsi', 'jenis', 'ukuran', 'created_at', 'updated_at', 'deleted_at'];
 
 
     protected bool $allowEmptyInserts = false;
@@ -79,6 +79,7 @@ class MasterMaterialModel extends Model
     {
         $query = $this->distinct()
             ->select('jenis')
+            ->where('jenis !=', '')
             ->orderBy('jenis', 'ASC')
             ->findAll();
 
