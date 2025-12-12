@@ -320,7 +320,26 @@
             $('#delete-no_model').val($(this).data('no_model'));
             $('#modalDeletePO').modal('show');
         });
+
+        hitungCones();
     });
+
+    $('#edit-kg_percones, #edit-kg_po').on('input', function() {
+        hitungCones();
+    });
+
+    function hitungCones() {
+        var kg_percones = parseFloat($('#edit-kg_percones').val()) || 0;
+        var kg_po = parseFloat($('#edit-kg_po').val()) || 0;
+
+        if (kg_percones <= 0) {
+            $('#edit-jumlah_cones').val('');
+            return;
+        }
+
+        var jumlah_cones = Math.ceil(kg_po / kg_percones);
+        $('#edit-jumlah_cones').val(jumlah_cones);
+    }
 </script>
 
 <script>
@@ -355,8 +374,6 @@
         });
     });
 </script>
-
-<!-- Pastikan jQuery load pertama -->
 
 <script>
     $(document).ready(function() {
