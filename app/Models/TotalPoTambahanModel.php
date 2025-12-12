@@ -111,4 +111,20 @@ class TotalPoTambahanModel extends Model
             ->groupBy('master_order.no_model, material.item_type, material.kode_warna')
             ->findAll();
     }
+
+    public function getPoTambahan($model, $jenis)
+    {
+        return $this->select('material.item_type, material.kode_warna, material.color, total_potambahan.ttl_tambahan_kg, po_tambahan.admin as area_po_tambahan, DATE(po_tambahan.created_at) AS tgl_po_tamabahan')
+            ->join('po_tambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+            ->join('material', 'material.id_material = po_tambahan.id_material')
+            ->join('master_order', 'master_order.id_order = material.id_order')
+            ->join('master_material', 'master_material.item_type = material.item_type')
+            ->where('master_order.no_model', $model)
+            ->where('master_material.jenis', $jenis)
+            ->like('po_tambahan.status', 'approved')
+            ->groupBy('total_potambahan.id_total_potambahan')
+            ->orderBy('po_tambahan.created_at', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

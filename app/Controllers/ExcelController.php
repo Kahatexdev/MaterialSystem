@@ -837,42 +837,91 @@ class ExcelController extends BaseController
 
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
 
+        $cacheAPI = [];
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Judul
         $sheet->setCellValue('A1', 'Report PO ' . $jenis);
-        $sheet->mergeCells('A1:P1'); // Menggabungkan sel untuk judul
+        $sheet->mergeCells('A1:Z1'); // Menggabungkan sel untuk judul
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["No", "Waktu Input", "Tanggal PO", "Foll Up", "No Model", "No Order", "Area", "Memo", "Buyer", "Start Mc", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "Kg (Stock Awal)", "Lot (Stock Awal)", "Kg Pesan", "Loss Pesan", "Tgl Terima Po(+) Gbn", "Tgl Po(+) Area", "Delivery Po(+) Area", "Kg Po(+)", "Admin"];
+        $header = ["No", "Waktu Input", "Tanggal PO", "Foll Up", "No Model", "No Order", "Area", "Memo", "Buyer", "Start Mc", "Delivery Awal", "Delivery Akhir", "Order Type", "Item Type", "Kode Warna", "Warna", "Kg (Stock Awal)", "Lot (Stock Awal)", "Kg Pesan", "Loss Pesan", "Tgl Terima Po(+) Gbn", "Tgl Po(+) Area", "Delivery Po(+) Area", "Kg Po(+)", "Admin", "Note"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
-        $sheet->getStyle('A3:Y3')->getFont()->setBold(true);
-        $sheet->getStyle('A3:Y3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A3:Y3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A3:Z3')->getFont()->setBold(true);
+        $sheet->getStyle('A3:Z3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3:Z3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
             $model = $item['no_model'];
-            // Ambil data dari API ge172.23.44.14
-            $getStartMcUrl = api_url('capacity') . 'getStartMc/' . $model;
+            $itemType = $item['item_type'];
+            $kodeWarna = $item['kode_warna'];
 
-            $getStartMcResponse = @file_get_contents($getStartMcUrl);
-            if ($getStartMcResponse === false) {
-                $startMc = 'Gagal Ambil Data Start Mc';
-            } else {
-                $getStartMc = json_decode($getStartMcResponse, true);
+            // ===== API START_MC & AREA (CACHE-FIRST) =====
+            if (!isset($cacheAPI[$model])) {
 
-                if ($this->request->isAJAX()) {
-                    return $this->response->setJSON($getStartMc);
+                if ($model !== '') {
+                    $url = api_url('capacity') . 'getStartMc/' . urlencode($model);
+
+                    $context = stream_context_create([
+                        "http" => ["timeout" => 10],
+                        "ssl"  => [
+                            "verify_peer" => false,
+                            "verify_peer_name" => false,
+                            "allow_self_signed" => true
+                        ]
+                    ]);
+
+                    $resp = @file_get_contents($url, false, $context);
+
+                    if ($resp !== false) {
+                        $json = json_decode($resp, true);
+                        $cacheAPI[$model] = [
+                            "start_mc" => $json['startMc']['start_mc'] ?? 'Belum Ada Start Mc',
+                            "area"     => $json['areaMc'] ?? 'Area Belum di Assign'
+                        ];
+                    } else {
+                        $cacheAPI[$model] = [
+                            "start_mc" => 'Belum Ada Start Mc',
+                            "area"     => 'Area Belum di Assign'
+                        ];
+                    }
                 } else {
-                    $startMc = $getStartMc['start_mc'] ?? 'Belum Ada Start Mc';
+                    $cacheAPI[$model] = [
+                        "start_mc" => 'Belum Ada Start Mc',
+                        "area"     => 'Area Belum di Assign'
+                    ];
                 }
+            }
+
+            // ===== GET NOTE PO TAMBAHAN =====
+            $notes = $this->totalPoTambahanModel->getPoTambahan($model, $jenis);
+
+            // Filter per item_type + kode_warna
+            $filtered = [];
+            foreach ($notes as $n) {
+                if ($n['item_type'] === $itemType && $n['kode_warna'] === $kodeWarna) {
+                    $filtered[] = $n;
+                }
+            }
+
+            // Build NOTE untuk Excel (multiline)
+            if (!empty($filtered)) {
+                $counter = 1;
+                $noteString = "";
+                foreach ($filtered as $n) {
+                    $noteString .= "PO(+) KE-{$counter} TGL: {$n['tgl_po_tamabahan']} QTY: {$n['ttl_tambahan_kg']}KG AREA: {$n['area_po_tambahan']}\r\n";
+                    $counter++;
+                }
+            } else {
+                $noteString = "-";
             }
 
             $sheet->fromArray([
@@ -883,10 +932,10 @@ class ExcelController extends BaseController
                     $item['foll_up'],
                     $item['no_model'],
                     $item['no_order'],
-                    $item['area'],
+                    $cacheAPI[$model]['area'],
                     $item['memo'],
                     $item['buyer'],
-                    $startMc,
+                    $cacheAPI[$model]['start_mc'],
                     $item['delivery_awal'],
                     $item['delivery_akhir'],
                     $item['unit'],
@@ -901,7 +950,8 @@ class ExcelController extends BaseController
                     $item['tgl_po_plus_area'] ?? '',
                     $item['delivery_po_plus'] ?? '',
                     format_number($item['kg_po_plus'], 2) ?? 0,
-                    $item['admin'] ?? ''
+                    $item['admin'] ?? '',
+                    $noteString
                 ]
             ], NULL, 'A' . $row);
             $row++;
@@ -916,16 +966,24 @@ class ExcelController extends BaseController
                 ],
             ],
         ];
-        $sheet->getStyle('A3:Y' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('A3:Z' . ($row - 1))->applyFromArray($styleArray);
+        $sheet->getStyle('Z4:Z' . ($row - 1))->getAlignment()->setWrapText(true);
+        // Perbaiki auto height agar NOTE bisa center vertical
+        for ($i = 4; $i <= $row - 1; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(-1); // Auto height
+        }
 
         // Set auto width untuk setiap kolom
         foreach (range('A', 'Y') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
+        // NOTE column special handling
+        $sheet->getColumnDimension('Z')->setAutoSize(false);
+        $sheet->getColumnDimension('Z')->setWidth(55);
 
         // Set isi tabel agar rata tengah
-        $sheet->getStyle('A4:Y' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('A4:Y' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('A4:Z' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4:Z' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
         $fileName = 'Report_Po_Benang_' . date('Y-m-d') . '.xlsx';
@@ -11607,9 +11665,8 @@ class ExcelController extends BaseController
     }
     public function exportHistoryPinjamOrder()
     {
-        $noModel   = $this->request->getGet('model')     ?? '';
-        $kodeWarna = $this->request->getGet('kode_warna') ?? '';
-
+        $noModel   = $this->request->getGet('model');
+        $kodeWarna = $this->request->getGet('kode_warna');
         // 1) Ambil data
         $dataPinjam = $this->historyStock->getHistoryPinjamOrder($noModel, $kodeWarna);
 
