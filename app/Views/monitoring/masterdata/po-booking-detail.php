@@ -227,7 +227,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="edit-jumlah_cones" class="form-label">Permintan Kelos (Total Cones)</label>
-                                    <input type="text" class="form-control" id="edit-jumlah_cones" name="jumlah_cones">
+                                    <input type="text" class="form-control" id="edit-jumlah_cones" name="jumlah_cones" readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -293,6 +293,17 @@
     </div>
 <?php endif; ?>
 <script>
+    function hitungTotalCones() {
+        let kg_po = parseFloat($('#edit-kg_po').val()) || 0;
+        let kg_percones = parseFloat($('#edit-kg_percones').val()) || 0;
+
+        if (kg_po > 0 && kg_percones > 0) {
+            let total = kg_po / kg_percones;
+            $('#edit-jumlah_cones').val(Math.ceil(total));
+        } else {
+            $('#edit-jumlah_cones').val('');
+        }
+    }
     $(document).ready(function() {
         // Edit button click
         $('.btn-edit').on('click', function() {
@@ -310,7 +321,16 @@
             $('#edit-kg_percones').val($(this).data('kg_percones') || '');
             $('#edit-jumlah_cones').val($(this).data('jumlah_cones') || '');
             $('#edit-jenis_produksi').val($(this).data('jenis_produksi') || '');
+
+            // hitung saat modal dibuka
+            hitungTotalCones();
+
             $('#modalEditPO').modal('show');
+        });
+
+        // Recalculate when kg_po, kg_percones changes
+        $('#edit-kg_po, #edit-kg_percones').on('input', function() {
+            hitungTotalCones();
         });
 
         // Delete button click

@@ -350,6 +350,7 @@
             }
             $btn.remove();
             $pane.remove();
+            calculateTotal();
             // setelah hapus, selalu aktifkan tab pertama
             new bootstrap.Tab($navTab.find('button').first()[0]).show();
         }
