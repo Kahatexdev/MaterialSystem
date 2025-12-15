@@ -284,6 +284,7 @@
             deferRender: true, // ✅ render baris saat perlu
             autoWidth: false, // ✅ hindari layout thrash
             pageLength: 10,
+            ordering: true,
             ajax: {
                 url: "<?= base_url($role . '/getDataSchedule') ?>",
                 type: "POST",

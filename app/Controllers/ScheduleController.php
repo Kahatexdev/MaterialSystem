@@ -934,7 +934,7 @@ class ScheduleController extends BaseController
                         : 'Gagal menyimpan jadwal baru!';
                 }
 
-            // ----------- INSERT BARU -----------
+                // ----------- INSERT BARU -----------
             } else {
                 $insertData = $data;
                 unset($insertData['id_celup']);
@@ -1684,10 +1684,16 @@ class ScheduleController extends BaseController
         $no = $start + 1;
         foreach ($data as $row) {
 
+            $poFull = $row['no_model'];
+            if (isset($row['po_plus']) && $row['po_plus'] == 1) {
+                $poFull = '(+) ' . $poFull;
+            }
+            $poDisplay = strlen($poFull) > 27 ? substr($poFull, 0, 27) . '...' : $poFull;
+
             $result[] = [
                 'no' => "<span>{$no}</span>",
                 'no_mc' => "<span>{$row['no_mesin']}</span>",
-                'no_model' => "<span>{$row['no_model']}</span>",
+                'no_model' => "<span>{$poDisplay}</span>",
                 'item_type' => "<span>{$row['item_type']}</span>",
                 'lot_celup' => "<span>{$row['lot_celup']}</span>",
                 'kode_warna' => "<span>{$row['kode_warna']}</span>",
@@ -1766,9 +1772,36 @@ class ScheduleController extends BaseController
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
 
-        $data = $builder
-            ->orderBy('schedule_celup.id_celup', 'DESC')
-            ->findAll($length, $start);
+        $order = $postData['order'][0] ?? null;
+        if ($order) {
+            $colIndex = $order['column']; // index kolom dari DataTables
+            $colName  = $postData['columns'][$colIndex]['data']; // nama kolom sesuai definisi
+            $colDir   = $order['dir']; // asc / desc
+
+            // Hindari mengurutkan kolom yang tidak ada di DB (misal kolom no, action)
+            $allowedCols = [
+                'no_mc',
+                'no_model',
+                'item_type',
+                'lot_celup',
+                'kode_warna',
+                'warna',
+                'start_mc',
+                'tanggal_schedule',
+                'last_status',
+                'kg_po',
+                'kg_celup'
+            ];
+
+            if (in_array($colName, $allowedCols)) {
+                $builder->orderBy("schedule_celup.$colName", $colDir);
+            }
+        } else {
+            // default
+            $builder->orderBy('schedule_celup.id_celup', 'DESC');
+        }
+
+        $data = $builder->findAll($length, $start);
 
         $result = [];
         $no = $start + 1;
@@ -1911,11 +1944,9 @@ class ScheduleController extends BaseController
                 'success' => true,
                 'message' => 'Mesin schedule berhasil di-update'
             ]);
-
         } catch (\Throwable $th) {
             log_message('error', 'Gagal updateMesinSchedule: ' . $th->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat update mesin schedule.');
         }
     }
-
 }
