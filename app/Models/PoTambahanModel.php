@@ -169,6 +169,7 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
+            ->groupBy('po_tambahan.admin')
             ->groupBy('po_tambahan.status')
             ->orderBy('po_tambahan.status', 'ASC')
             ->orderBy('po_tambahan.created_at', 'DESC')

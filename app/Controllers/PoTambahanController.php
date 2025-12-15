@@ -131,6 +131,7 @@ class PoTambahanController extends BaseController
             ->builder()
             ->whereIn('id_material', $idMaterial)
             ->where('status', $status)
+            ->where('admin', $area)
             ->like('created_at', $tglPo, 'after');
 
         $updated = $builder->update([
