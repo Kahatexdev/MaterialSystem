@@ -262,7 +262,7 @@
                             const gantiRetur = Number(item.ganti_retur) || 0;
                             const datangLurex = Number(item.datang_lurex) || 0;
                             const plusDatangLurex = Number(item.plus_datang_lurex) || 0;
-                            const returPbGbn = Number(item.retur_pb_area) || 0;
+                            const returPbGbn = Number(item.retur_pb_gbn) || 0;
                             const returPbArea = Number(item.retur_pb_area) || 0;
                             const pakaiArea = Number(item.pakai_area) || 0;
                             const stockAkhir = Number(item.stock_akhir) || 0;
@@ -293,7 +293,7 @@
                                 fmt(gantiRetur), // ganti retur
                                 fmt(datangLurex), // datang lurex
                                 fmt(plusDatangLurex), // (+) datang lurex
-                                fmt(returCelup), // retur celup
+                                fmt(returPbGbn), // retur celup
                                 fmt(returPbArea), // retur pb area
                                 fmt(pakaiArea), // pakai area 
                                 fmt(kgsOtherOut), // pakai lain-lain
