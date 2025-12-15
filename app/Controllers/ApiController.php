@@ -1256,6 +1256,7 @@ class ApiController extends ResourceController
 
                 $existPo = $this->poTambahanModel
                     ->where('id_material', $idMat)
+                    ->where('admin', $item['admin'])
                     ->where('DATE(created_at)', $today)
                     ->first();
 
