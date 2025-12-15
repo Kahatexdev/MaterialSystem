@@ -888,6 +888,7 @@ class MaterialModel extends Model
                 WHERE mat.id_order = mo.id_order
                 AND mat.item_type = m.item_type
                 AND mat.kode_warna = m.kode_warna
+                AND mat.deleted_at IS NULL
             ) AS kg_pesan,
 
             -- stock awal
@@ -1088,6 +1089,7 @@ class MaterialModel extends Model
         ")
             ->join('master_material mm', 'm.item_type = mm.item_type', 'left')
             ->join('master_order mo', 'mo.id_order = m.id_order', 'left')
+            ->where('m.deleted_at IS NULL')
             ->where('mm.jenis', $jenis);
 
         if (!empty($noModel)) {
