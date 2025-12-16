@@ -619,8 +619,34 @@
         background: rgba(248, 250, 252, 0.8);
     }
 
+    .quick-reply-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem;
+        margin: .25rem 0 .5rem;
+    }
 
+    .btn-quick-reply {
+        border: 1px solid rgba(148, 163, 184, .55);
+        background: rgba(248, 250, 252, .9);
+        color: #334155;
+        padding: .22rem .55rem;
+        /* lebih kecil */
+        font-size: .72rem;
+        /* lebih kecil */
+        border-radius: 999px;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        line-height: 1.2;
+    }
 
+    .btn-quick-reply i {
+        font-size: .75rem;
+        color: #0ea5e9;
+    }
 
     /* ===== RESPONSIVE ===== */
     @media (max-width: 768px) {
@@ -841,15 +867,50 @@
                         <?php endif; ?>
                     </div>
 
-
-                    <!-- Form reply -->
-                    <form class="form-reply" data-id="<?= $p['id_pengaduan'] ?>">
+                    <!-- Form reply (di bawahnya) -->
+                    <form class="form-reply" data-id="<?= (int)$p['id_pengaduan'] ?>">
                         <input type="hidden" name="username" value="<?= esc(session()->get('username')) ?>">
-                        <textarea name="isi" class="auto-resize" placeholder="Tulis balasan..." required></textarea>
+
+                        <textarea
+                            id="reply-ta-<?= (int)$p['id_pengaduan'] ?>"
+                            name="isi"
+                            class="auto-resize"
+                            placeholder="Tulis balasan..."
+                            required></textarea>
+
                         <button type="submit">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </form>
+
+                    <div class="quick-reply-wrap" data-target="#reply-ta-<?= (int)$p['id_pengaduan'] ?>" aria-label="Balas cepat">
+                        <button type="button" class="btn-quick-reply" data-mode="replace"
+                            data-text="Baik, data sedang kami lakukan pengecekan.">
+                            <i class="fas fa-bolt"></i> Cek dulu
+                        </button>
+                        
+                        <button type="button" class="btn-quick-reply" data-mode="replace"
+                            data-text="Data sudah diperbarui. Mohon lakukan pengecekan kembali.">
+                            <i class="fas fa-bolt"></i> Sudah diperbarui
+                        </button>
+
+                        <button type="button" class="btn-quick-reply" data-mode="replace"
+                            data-text="Silahkan Konfirmasi Ke Gudang Benang.">
+                            <i class="fas fa-bolt"></i> Konfirmasi GBN
+                        </button>
+                        
+                        <button type="button" class="btn-quick-reply" data-mode="replace"
+                            data-text="Sudah dikirim permintaan manualnya, Mohon lakukan pengecekan kembali.">
+                            <i class="fas fa-bolt"></i> Permintaan manual
+                        </button>
+
+                        <button type="button" class="btn-quick-reply" data-mode="append"
+                            data-text=" Mohon dilengkapi detail: PDK/jenis/cluster, tanggal & jam pemesanan, serta kronologi singkat.">
+                            <i class="fas fa-bolt"></i> Minta detail
+                        </button>
+                    </div>
+
+
                 </div>
             <?php endforeach; ?>
 
@@ -1157,42 +1218,42 @@
 
 <script>
     let lastPengaduanId = 0;
-let lastReplyId = 0;
+    let lastReplyId = 0;
 
-function initCursorFromDOM() {
-  // ambil dari card terakhir (kalau mau)
-  const cards = document.querySelectorAll('.pengaduan-card');
-  cards.forEach(c => {
-    const id = parseInt(c.getAttribute('data-id') || '0', 10);
-    if (id > lastPengaduanId) lastPengaduanId = id;
-  });
+    function initCursorFromDOM() {
+        // ambil dari card terakhir (kalau mau)
+        const cards = document.querySelectorAll('.pengaduan-card');
+        cards.forEach(c => {
+            const id = parseInt(c.getAttribute('data-id') || '0', 10);
+            if (id > lastPengaduanId) lastPengaduanId = id;
+        });
 
-  // kalau reply punya data-id juga
-  const replies = document.querySelectorAll('.reply-item[data-reply-id]');
-  replies.forEach(r => {
-    const rid = parseInt(r.getAttribute('data-reply-id') || '0', 10);
-    if (rid > lastReplyId) lastReplyId = rid;
-  });
-}
+        // kalau reply punya data-id juga
+        const replies = document.querySelectorAll('.reply-item[data-reply-id]');
+        replies.forEach(r => {
+            const rid = parseInt(r.getAttribute('data-reply-id') || '0', 10);
+            if (rid > lastReplyId) lastReplyId = rid;
+        });
+    }
 
-function escapeHtml(str) {
-  return String(str ?? '')
-    .replaceAll('&','&amp;').replaceAll('<','&lt;')
-    .replaceAll('>','&gt;').replaceAll('"','&quot;')
-    .replaceAll("'","&#039;");
-}
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+            .replaceAll("'", "&#039;");
+    }
 
-function nl2br(str) {
-  return escapeHtml(str).replace(/\n/g, '<br>');
-}
+    function nl2br(str) {
+        return escapeHtml(str).replace(/\n/g, '<br>');
+    }
 
-function renderPengaduanCard(p, currentUser) {
-  const username = escapeHtml(p.username);
-  const initial = username ? username[0].toUpperCase() : '?';
-  const role = escapeHtml(p.display_role || p.target_role);
-  const waktu = escapeHtml(p.formatted_time || p.created_at);
+    function renderPengaduanCard(p, currentUser) {
+        const username = escapeHtml(p.username);
+        const initial = username ? username[0].toUpperCase() : '?';
+        const role = escapeHtml(p.display_role || p.target_role);
+        const waktu = escapeHtml(p.formatted_time || p.created_at);
 
-  return `
+        return `
   <div class="pengaduan-card"
        data-id="${p.id_pengaduan}"
        data-role="${escapeHtml(p.target_role)}"
@@ -1213,10 +1274,6 @@ function renderPengaduanCard(p, currentUser) {
           <i class="fas fa-clock"></i>
           <strong>${waktu}</strong>
         </div>
-        <button type="button" class="btn-pdf"
-          onclick="window.location.href='${p.pdf_url}'">
-          <i class="fas fa-file-pdf"></i> PDF
-        </button>
       </div>
     </div>
 
@@ -1228,17 +1285,45 @@ function renderPengaduanCard(p, currentUser) {
       <div class="no-reply">Belum ada balasan.</div>
     </div>
 
-    <form class="form-reply" data-id="${p.id_pengaduan}">
-      <input type="hidden" name="username" value="${escapeHtml(currentUser)}">
-      <textarea name="isi" class="auto-resize" placeholder="Tulis balasan..." required></textarea>
+    <form class="form-reply" data-id="${pid}">
+      <input type="hidden" name="username" value="${escapeHtml(p.current_user || '')}">
+      <textarea id="reply-ta-${pid}" name="isi" class="auto-resize" placeholder="Tulis balasan..." required></textarea>
       <button type="submit"><i class="fas fa-paper-plane"></i></button>
     </form>
-  </div>`;
-}
 
-function renderReplyBubble(r, currentUser) {
-  const isMe = (String(r.username || '').toLowerCase() === String(currentUser || '').toLowerCase());
-  return `
+    <div class="quick-reply-wrap" data-target="#reply-ta-${pid}">
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Baik, data sedang kami lakukan pengecekan.">
+            <i class="fas fa-bolt"></i> Cek dulu
+        </button>
+        
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Data sudah diperbarui. Mohon lakukan pengecekan kembali.">
+            <i class="fas fa-bolt"></i> Sudah diperbarui
+        </button>
+
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Silahkan Konfirmasi Ke Gudang Benang.">
+            <i class="fas fa-bolt"></i> Konfirmasi GBN
+        </button>
+        
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Sudah dikirim permintaan manualnya, Mohon lakukan pengecekan kembali.">
+            <i class="fas fa-bolt"></i> Permintaan manual
+        </button>
+
+        <button type="button" class="btn-quick-reply" data-mode="append"
+            data-text=" Mohon dilengkapi detail: PDK/jenis/cluster, tanggal & jam pemesanan, serta kronologi singkat.">
+            <i class="fas fa-bolt"></i> Minta detail
+        </button>
+    </div>
+
+  </div>`;
+    }
+
+    function renderReplyBubble(r, currentUser) {
+        const isMe = (String(r.username || '').toLowerCase() === String(currentUser || '').toLowerCase());
+        return `
   <div class="reply-row ${isMe ? 'reply-row-me' : 'reply-row-other'}">
     <div class="reply-item ${isMe ? 'reply-me' : 'reply-other'}" data-reply-id="${r.id_reply}">
       <div class="reply-author"><i class="fas fa-reply"></i> ${escapeHtml(r.username)}</div>
@@ -1246,81 +1331,104 @@ function renderReplyBubble(r, currentUser) {
       <div class="reply-time">${escapeHtml(r.created_at)}</div>
     </div>
   </div>`;
-}
-
-function upsertReplyToCard(reply, currentUser) {
-  const card = document.querySelector(`.pengaduan-card[data-id="${reply.id_pengaduan}"]`);
-  if (!card) return; // kalau card belum ada, bisa skip atau nanti handle
-
-  const container = card.querySelector('.replies-container');
-  if (!container) return;
-
-  // hilangkan "Belum ada balasan"
-  const noReply = container.querySelector('.no-reply');
-  if (noReply) noReply.remove();
-
-  // cegah duplikasi
-  if (container.querySelector(`.reply-item[data-reply-id="${reply.id_reply}"]`)) return;
-
-  container.insertAdjacentHTML('beforeend', renderReplyBubble(reply, currentUser));
-}
-
-function startPollingPengaduan({ role, currentUser }) {
-  initCursorFromDOM();
-
-  async function tick() {
-    try {
-      const url = `${CapacityUrl}pengaduan/fetchNew?last_id=${lastPengaduanId}&last_reply_id=${lastReplyId}&role=${encodeURIComponent(role)}` +
-        `&username=${encodeURIComponent(currentUser)}`;
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      const json = await res.json();
-
-      if (!json || !json.success) return;
-
-      // 1) pengaduan baru -> prepend
-      if (Array.isArray(json.data) && json.data.length) {
-        const list = document.getElementById('listPengaduan');
-        json.data
-          .sort((a,b) => a.id_pengaduan - b.id_pengaduan)
-          .forEach(p => {
-            if (document.querySelector(`.pengaduan-card[data-id="${p.id_pengaduan}"]`)) return;
-            list.insertAdjacentHTML('afterbegin', renderPengaduanCard(p, currentUser));
-          });
-
-        // re-init textarea resize + re-apply filter
-        window.initAutoResize?.();
-        window.applyFilter?.();
-      }
-
-      // 2) reply baru -> append ke card yg sesuai
-      if (Array.isArray(json.replies) && json.replies.length) {
-        json.replies
-          .sort((a,b) => a.id_reply - b.id_reply)
-          .forEach(r => upsertReplyToCard(r, currentUser));
-
-        window.applyFilter?.();
-      }
-
-      // update cursor
-      if (json.max_id) lastPengaduanId = Math.max(lastPengaduanId, Number(json.max_id));
-      if (json.max_reply_id) lastReplyId = Math.max(lastReplyId, Number(json.max_reply_id));
-
-    } catch (e) {
-      console.error('poll error', e);
     }
-  }
 
-  tick();
-  setInterval(tick, 5000);
-}
+    function upsertReplyToCard(reply, currentUser) {
+        const card = document.querySelector(`.pengaduan-card[data-id="${reply.id_pengaduan}"]`);
+        if (!card) return; // kalau card belum ada, bisa skip atau nanti handle
 
-// panggil ini setelah DOM ready
-startPollingPengaduan({
-  role: '<?= esc($role) ?>',                // atau session role
-  currentUser: '<?= esc(session()->get('username')) ?>'
-});
+        const container = card.querySelector('.replies-container');
+        if (!container) return;
 
+        // hilangkan "Belum ada balasan"
+        const noReply = container.querySelector('.no-reply');
+        if (noReply) noReply.remove();
 
+        // cegah duplikasi
+        if (container.querySelector(`.reply-item[data-reply-id="${reply.id_reply}"]`)) return;
+
+        container.insertAdjacentHTML('beforeend', renderReplyBubble(reply, currentUser));
+    }
+
+    function startPollingPengaduan({
+        role,
+        currentUser
+    }) {
+        initCursorFromDOM();
+
+        async function tick() {
+            try {
+                const url = `${CapacityUrl}pengaduan/fetchNew?last_id=${lastPengaduanId}&last_reply_id=${lastReplyId}&role=${encodeURIComponent(role)}` +
+                    `&username=${encodeURIComponent(currentUser)}`;
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const json = await res.json();
+
+                if (!json || !json.success) return;
+
+                // 1) pengaduan baru -> prepend
+                if (Array.isArray(json.data) && json.data.length) {
+                    const list = document.getElementById('listPengaduan');
+                    json.data
+                        .sort((a, b) => a.id_pengaduan - b.id_pengaduan)
+                        .forEach(p => {
+                            if (document.querySelector(`.pengaduan-card[data-id="${p.id_pengaduan}"]`)) return;
+                            list.insertAdjacentHTML('afterbegin', renderPengaduanCard(p, currentUser));
+                        });
+
+                    // re-init textarea resize + re-apply filter
+                    window.initAutoResize?.();
+                    window.applyFilter?.();
+                }
+
+                // 2) reply baru -> append ke card yg sesuai
+                if (Array.isArray(json.replies) && json.replies.length) {
+                    json.replies
+                        .sort((a, b) => a.id_reply - b.id_reply)
+                        .forEach(r => upsertReplyToCard(r, currentUser));
+
+                    window.applyFilter?.();
+                }
+
+                // update cursor
+                if (json.max_id) lastPengaduanId = Math.max(lastPengaduanId, Number(json.max_id));
+                if (json.max_reply_id) lastReplyId = Math.max(lastReplyId, Number(json.max_reply_id));
+
+            } catch (e) {
+                console.error('poll error', e);
+            }
+        }
+
+        tick();
+        setInterval(tick, 5000);
+    }
+
+    // panggil ini setelah DOM ready
+    startPollingPengaduan({
+        role: '<?= esc($role) ?>', // atau session role
+        currentUser: '<?= esc(session()->get('username')) ?>'
+    });
+
+    // ===== QUICK REPLY HANDLER (delegation - aman untuk AJAX reload & polling) =====
+    $(document).on('click', '.btn-quick-reply', function() {
+        const text = $(this).data('text') || '';
+        const mode = String($(this).data('mode') || 'replace').toLowerCase();
+
+        // cari target textarea dari wrapper
+        const $wrap = $(this).closest('.quick-reply-wrap');
+        const targetSel = $wrap.data('target');
+        const $ta = targetSel ? $(targetSel) : $wrap.nextAll('form.form-reply:first').find('textarea[name="isi"]');
+
+        if (!$ta.length) return;
+
+        const current = $ta.val() || '';
+        const next = (mode === 'append') ? (current ? (current + text) : text) : text;
+
+        $ta.val(next).trigger('input').focus();
+    });
 </script>
 
 
