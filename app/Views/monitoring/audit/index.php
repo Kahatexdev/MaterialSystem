@@ -10,7 +10,7 @@
                 <div class="card-body p-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Sparepart System</p>
+                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Material System</p>
                             <h5 class="font-weight-bolder mb-0">Audit Log</h5>
                         </div>
                         <div class="icon icon-shape bg-gradient-dark shadow text-center rounded-circle">
