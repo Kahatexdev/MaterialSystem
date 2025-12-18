@@ -105,43 +105,85 @@ class WarehouseController extends BaseController
             return redirect()->to(base_url('/login'));
         }
     }
+    // public function index()
+    // {
+    //     $updateOrder = $this->masterOrderModel->getNullMc();
+
+    //     foreach ($updateOrder as $od) {
+    //         $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+
+    //         try {
+    //             // Fetch data dari API
+    //             $json = file_get_contents($reqStartMc);
+    //             // Decode JSON response
+    //             $startMc = json_decode($json, true);
+    //             if (empty($startMc)) {
+    //                 log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+    //             } else {
+    //                 $this->masterOrderModel->update(
+    //                     $od['id_order'],
+    //                     ['start_mc' => $startMc['start_mc']]
+    //                 );
+    //             }
+    //         } catch (\Exception $e) {
+
+    //             // Log error
+    //             log_message('error', 'Error fetching API data: ' . $e->getMessage());
+    //         }
+    //     }
+
+    //     $kategori = $this->kategoriModel->findAll();
+
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'kategori' => $kategori,
+    //     ];
+    //     return view($this->role . '/warehouse/index', $data);
+    // }
+
     public function index()
     {
-        $updateOrder = $this->masterOrderModel->getNullMc();
+        $orders = $this->masterOrderModel->getNullMc();
 
-        foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        if (!empty($orders)) {
+            $models = array_column($orders, 'no_model');
+            
+            $client = \Config\Services::curlrequest([
+                'timeout' => 5,
+                'http_errors' => false,
+            ]);
 
-            try {
-                // Fetch data dari API
-                $json = file_get_contents($reqStartMc);
-                // Decode JSON response
-                $startMc = json_decode($json, true);
-                if (empty($startMc)) {
-                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-                } else {
-                    $this->masterOrderModel->update(
-                        $od['id_order'],
-                        ['start_mc' => $startMc['start_mc']]
-                    );
+            $response = $client->post(
+                'http://172.23.44.14/CapacityApps/public/api/reqstartmc-bulk',
+                [
+                    'json' => $models
+                ]
+            );
+            
+            if ($response->getStatusCode() === 200) {
+                $bulkResult = json_decode($response->getBody(), true);
+                
+                foreach ($orders as $od) {
+                    if (!empty($bulkResult[$od['no_model']])) {
+                        $this->masterOrderModel->update(
+                            $od['id_order'],
+                            ['start_mc' => $bulkResult[$od['no_model']]]
+                        );
+                    }
                 }
-            } catch (\Exception $e) {
-
-                // Log error
-                log_message('error', 'Error fetching API data: ' . $e->getMessage());
             }
         }
 
-        $kategori = $this->kategoriModel->findAll();
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'kategori' => $kategori,
-        ];
-        return view($this->role . '/warehouse/index', $data);
+        return view($this->role . '/warehouse/index', [
+            'active'   => $this->active,
+            'title'    => 'Material System',
+            'role'     => $this->role,
+            'kategori' => $this->kategoriModel->findAll(),
+        ]);
     }
+
 
     public function pemasukan()
     {
@@ -2083,6 +2125,7 @@ class WarehouseController extends BaseController
                 } else {
                     $ketGbn = $ket;
                 }
+
                 // Update field out_jalur pada tabel pemasukan
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
@@ -2102,6 +2145,62 @@ class WarehouseController extends BaseController
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
                 // dd ($insertData);
+
+                helper('audit');
+
+                $actionAudit = 'OUT_JALUR';
+
+                if ($rawKgsManual > 0 || $rawCnsManual > 0) {
+                    $actionAudit = 'OUT_JALUR_CONES';
+                }
+
+                if ($pinjam === 'YA') {
+                    $actionAudit = 'OUT_JALUR_PINJAM';
+                }
+
+                // optional: snapshot stok sebelum update
+                $payloadOld = [
+                    'cluster' => $pemasukan['nama_cluster'],
+                    'stock' => [
+                        'kgs' => $stok[0]['kgs_stock_awal'] ?? null,
+                        'cns' => $stok[0]['cns_stock_awal'] ?? null,
+                        'krg' => $stok[0]['krg_stock_awal'] ?? null,
+                    ],
+                ];
+
+                // payload sesudah
+                $payloadNew = [
+                    'cluster'   => $pemasukan['nama_cluster'],
+                    'direction' => 'OUT',
+                    'qty'       => [
+                        'kgs' => $kgsOut,
+                        'cns' => $cnsOut,
+                        'krg' => $krgOut,
+                    ],
+                    'area'      => $area,
+                    'lot'       => $outCelup['lot_kirim'],
+                    'pinjam'    => $pinjam === 'YA',
+                    'ref'       => [
+                        'id_stock'          => $pemasukan['id_stock'],
+                        'id_out_celup'       => $pemasukan['id_out_celup'],
+                        'id_pemasukan'       => $pemasukan['id_pemasukan'],
+                        'id_total_pemesanan' => $idTtlPemesanan,
+                    ],
+                    'keterangan' => $ketGbn,
+                    'admin'      => session()->get('username'),
+                    'timestamp'  => date('Y-m-d H:i:s'),
+                ];
+
+                log_audit(
+                    module: 'SELECT_CLUSTER',
+                    action: $actionAudit,
+                    refType: 'STOCK',
+                    refId: $pemasukan['id_stock'],
+                    message: 'Pengeluaran jalur',
+                    payloadOld: $payloadOld,
+                    payloadNew: $payloadNew,
+                );
+                
                 // Insert data pengeluaran
                 $this->pengeluaranModel->insert($insertData);
 

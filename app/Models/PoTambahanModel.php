@@ -169,6 +169,7 @@ class PoTambahanModel extends Model
             ->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
+            ->groupBy('po_tambahan.admin')
             ->groupBy('po_tambahan.status')
             ->orderBy('po_tambahan.status', 'ASC')
             ->orderBy('po_tambahan.created_at', 'DESC')
@@ -332,25 +333,33 @@ class PoTambahanModel extends Model
             ->orderBy('material.style_size', 'ASC')
             ->findAll();
     }
+    // public function countRequest()
+    // {
+    //     $data = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.item_type, material.kode_warna, material.color, total_potambahan.ttl_tambahan_kg AS kg_poplus, total_potambahan.ttl_tambahan_cns AS cns_poplus, total_potambahan.ttl_sisa_jatah AS sisa_jatah, total_potambahan.ttl_sisa_bb_dimc AS sisa_bb_mc, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, master_material.jenis, po_tambahan.ket_gbn, total_potambahan.id_total_potambahan')
+    //         ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
+    //         ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
+    //         ->join('master_order', 'material.id_order = master_order.id_order', 'left')
+    //         ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+    //         ->where('po_tambahan.status !=', 'approved')
+    //         ->where('po_tambahan.status !=', 'rejected')
+    //         ->groupBy('DATE(po_tambahan.created_at)', false)
+    //         ->groupBy('master_order.no_model')
+    //         ->groupBy('material.item_type')
+    //         ->groupBy('material.kode_warna')
+    //         ->groupBy('po_tambahan.status')
+    //         ->orderBy('po_tambahan.status', 'ASC')
+    //         ->orderBy('po_tambahan.created_at', 'DESC')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     return count($data);
+    // }
     public function countRequest()
     {
-        $data = $this->select('po_tambahan.id_po_tambahan, master_order.no_model, material.item_type, material.kode_warna, material.color, total_potambahan.ttl_tambahan_kg AS kg_poplus, total_potambahan.ttl_tambahan_cns AS cns_poplus, total_potambahan.ttl_sisa_jatah AS sisa_jatah, total_potambahan.ttl_sisa_bb_dimc AS sisa_bb_mc, po_tambahan.status, DATE(po_tambahan.created_at) AS tgl_poplus, po_tambahan.admin, master_material.jenis, po_tambahan.ket_gbn, total_potambahan.id_total_potambahan')
-            ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
-            ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
-            ->join('master_order', 'material.id_order = master_order.id_order', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->where('po_tambahan.status !=', 'approved')
-            ->where('po_tambahan.status !=', 'rejected')
-            ->groupBy('DATE(po_tambahan.created_at)', false)
-            ->groupBy('master_order.no_model')
-            ->groupBy('material.item_type')
-            ->groupBy('material.kode_warna')
-            ->groupBy('po_tambahan.status')
-            ->orderBy('po_tambahan.status', 'ASC')
-            ->orderBy('po_tambahan.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
-
-        return count($data);
+        return $this->select('id_total_potambahan')
+                ->where('status !=', 'approved')
+                ->where('status !=', 'rejected')
+                ->groupBy('id_total_potambahan')
+                ->countAllResults();
     }
 }

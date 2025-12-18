@@ -124,7 +124,7 @@ class CelupController extends BaseController
             $warna = $id['warna'];
             // Debug untuk memastikan parameter tidak null
             if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
-                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                // log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip data jika ada parameter kosong
             }
             // dd($sch);
@@ -150,7 +150,7 @@ class CelupController extends BaseController
                         $pdk['delivery_akhir'] = $deliv[0]['delivery_akhir'] ?? null;
                     } else {
 
-                        log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
+                        // log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
                     }
                 }
             }
@@ -365,6 +365,68 @@ class CelupController extends BaseController
         // dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
+
+        // LOG AUDIT
+        helper('audit');
+
+        // Ambil data setelah update
+        $updatedProduction = $this->scheduleCelupModel->find($id);
+
+        // Filter payload OLD (sebelum)
+        $payloadOld = [
+            'last_status'   => $existingProduction['last_status'] ?? null,
+            'ket_daily_cek' => $existingProduction['ket_daily_cek'] ?? null,
+            'kg_celup'      => $existingProduction['kg_celup'] ?? null,
+            'lot_celup'    => $existingProduction['lot_celup'] ?? null,
+            'tanggal' => [
+                'tanggal_bon' => $existingProduction['tanggal_bon'] ?? null,
+                'tanggal_celup' => $existingProduction['tanggal_celup'] ?? null,
+                'tanggal_bongkar' => $existingProduction['tanggal_bongkar'] ?? null,
+                'tanggal_press_oven' => $existingProduction['tanggal_press_oven'] ?? null,
+                // 'tanggal_oven' => $existingProduction['tanggal_oven'] ?? null,
+                'tanggal_rajut_pagi' => $existingProduction['tanggal_rajut_pagi'] ?? null,
+                'tangggal_serah_terima_acc' => $existingProduction['serah_terima_acc'] ?? null,
+                'acc'      => $existingProduction['tanggal_acc'] ?? null,
+                'tanggal_matching' => $existingProduction['tanggal_matching'] ?? null,
+                'tanggal_perbaikan' => $existingProduction['tanggal_perbaikan'] ?? null,
+                'tanggal_kelos' => $existingProduction['tanggal_kelos'] ?? null,
+                'tanggal_tl' => $existingProduction['tanggal_tl'] ?? null
+            ],
+            'ket_schedule' => $existingProduction['ket_schedule'] ?? null,
+        ];
+
+        // Filter payload NEW (sesudah)
+        $payloadNew = [
+            'last_status'   => $updatedProduction['last_status'] ?? null,
+            'ket_daily_cek' => $updatedProduction['ket_daily_cek'] ?? null,
+            'kg_celup'      => $updatedProduction['kg_celup'] ?? null,
+            'lot_celup'    => $updatedProduction['lot_celup'] ?? null,
+            'tanggal' => [
+                'tanggal_bon' => $updatedProduction['tanggal_bon'] ?? null,
+                'tanggal_celup' => $updatedProduction['tanggal_celup'] ?? null,
+                'tanggal_bongkar' => $updatedProduction['tanggal_bongkar'] ?? null,
+                'tanggal_press_oven' => $updatedProduction['tanggal_press_oven'] ?? null,
+                // 'tanggal_oven' => $updatedProduction['tanggal_oven'] ?? null,
+                'tanggal_rajut_pagi' => $updatedProduction['tanggal_rajut_pagi'] ?? null,
+                'tangggal_serah_terima_acc' => $updatedProduction['serah_terima_acc'] ?? null,
+                'acc'      => $updatedProduction['tanggal_acc'] ?? null,
+                'tanggal_matching' => $updatedProduction['tanggal_matching'] ?? null,
+                'tanggal_perbaikan' => $updatedProduction['tanggal_perbaikan'] ?? null,
+                'tanggal_kelos' => $updatedProduction['tanggal_kelos'] ?? null,
+                'tanggal_tl' => $updatedProduction['tanggal_tl'] ?? null
+            ],
+            'ket_schedule' => $updatedProduction['ket_schedule'] ?? null,
+        ];
+
+        log_audit(
+            module: 'CELUP',
+            action: 'UPDATE_STATUS',
+            refType: 'SCHEDULE_CELUP',
+            refId: $id,
+            message: 'Update status schedule celup',
+            payloadOld: $payloadOld,
+            payloadNew: $payloadNew
+        );
 
         // Redirect ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->withInput()->with('success', 'Data Berhasil diupdate');

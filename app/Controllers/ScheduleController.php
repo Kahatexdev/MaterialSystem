@@ -1217,49 +1217,70 @@ class ScheduleController extends BaseController
 
     public function reqschedule()
     {
-        $filterTglSch = $this->request->getPost('filter_tglsch');
-        $filterTglSchsampai = $this->request->getPost('filter_tglschsampai');
-        $filterNoModel = $this->request->getPost('filter_nomodel');
-        $showExcel = (!empty($filterTglSch) || !empty($filterTglSchsampai) || !empty($filterNoModel));
+        $filterTglSch        = $this->request->getPost('filter_tglsch');
+        $filterTglSchsampai  = $this->request->getPost('filter_tglschsampai');
+        $filterNoModel       = $this->request->getPost('filter_nomodel');
 
-        $sch = $this->scheduleCelupModel->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
+        $showExcel = !empty($filterTglSch) 
+            || !empty($filterTglSchsampai) 
+            || !empty($filterNoModel);
 
-        // fetching delivery
-        $listPdk = $this->masterOrderModel->getNullDeliv() ?? null;
-        if ($listPdk) {
+        // 1. Ambil schedule (read only)
+        $sch = $this->scheduleCelupModel
+            ->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
+        
+        // 2. Sync delivery (background-style, cepat)
+        $listPdk = $this->masterOrderModel->getNullDeliv();
+        // dd ($listPdk);
+        if (!empty($listPdk)) {
+            $models = array_column($listPdk, 'no_model');
+
             $client = \Config\Services::curlrequest([
-                'baseURI' => api_url('capacity') . '',
-                'timeout' => 5
+                'baseURI'     => api_url('capacity'),
+                'timeout'     => 5,
+                'http_errors' => false
             ]);
 
-            // 3) Loop dan merge API result
-            foreach ($listPdk as &$row) {
-                try {
-                    $res = $client->get('getDeliveryAwalAkhir', [
-                        'query' => ['model' => $row['no_model']]
-                    ]);
-                    $body = json_decode($res->getBody(), true);
-                    $this->masterOrderModel->updateDeliv($row['no_model'], $body);
-                    continue;
-                } catch (\Exception $e) {
-                    continue;
+            $res = $client->post('getDeliveryAwalAkhir-bulk', [
+                'json' => $models
+            ]);
+            
+            if ($res->getStatusCode() === 200) {
+                $bulk = json_decode($res->getBody(), true);
+
+                // batch update
+                $updates = [];
+
+                foreach ($bulk as $model => $row) {
+                    $updates[] = [
+                        'no_model'        => $model,
+                        'delivery_awal'   => $row['delivery_awal'],
+                        'delivery_akhir'  => $row['delivery_akhir'],
+                        'unit'            => $row['unit'],
+                    ];
+                }
+
+                if ($updates) {
+                    $this->masterOrderModel->updateBatch(
+                        $updates,
+                        'no_model'
+                    );
                 }
             }
         }
 
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Schedule',
-            'role' => $this->role,
-            'data_sch' => $sch,
-            'showExcel' => $showExcel,
-            'filterTglSch' => $filterTglSch,
-            'filterTglSchsampai' => $filterTglSchsampai,
-            'filterNoModel' => $filterNoModel,
-        ];
-        return view($this->role . '/schedule/reqschedule', $data);
+        return view($this->role . '/schedule/reqschedule', [
+            'active'               => $this->active,
+            'title'                => 'Schedule',
+            'role'                 => $this->role,
+            'data_sch'              => $sch,
+            'showExcel'            => $showExcel,
+            'filterTglSch'         => $filterTglSch,
+            'filterTglSchsampai'   => $filterTglSchsampai,
+            'filterNoModel'        => $filterNoModel,
+        ]);
     }
+
 
     public function showschedule($id)
     {
