@@ -105,43 +105,85 @@ class WarehouseController extends BaseController
             return redirect()->to(base_url('/login'));
         }
     }
+    // public function index()
+    // {
+    //     $updateOrder = $this->masterOrderModel->getNullMc();
+
+    //     foreach ($updateOrder as $od) {
+    //         $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+
+    //         try {
+    //             // Fetch data dari API
+    //             $json = file_get_contents($reqStartMc);
+    //             // Decode JSON response
+    //             $startMc = json_decode($json, true);
+    //             if (empty($startMc)) {
+    //                 log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+    //             } else {
+    //                 $this->masterOrderModel->update(
+    //                     $od['id_order'],
+    //                     ['start_mc' => $startMc['start_mc']]
+    //                 );
+    //             }
+    //         } catch (\Exception $e) {
+
+    //             // Log error
+    //             log_message('error', 'Error fetching API data: ' . $e->getMessage());
+    //         }
+    //     }
+
+    //     $kategori = $this->kategoriModel->findAll();
+
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'kategori' => $kategori,
+    //     ];
+    //     return view($this->role . '/warehouse/index', $data);
+    // }
+
     public function index()
     {
-        $updateOrder = $this->masterOrderModel->getNullMc();
+        $orders = $this->masterOrderModel->getNullMc();
 
-        foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        if (!empty($orders)) {
+            $models = array_column($orders, 'no_model');
+            
+            $client = \Config\Services::curlrequest([
+                'timeout' => 5,
+                'http_errors' => false,
+            ]);
 
-            try {
-                // Fetch data dari API
-                $json = file_get_contents($reqStartMc);
-                // Decode JSON response
-                $startMc = json_decode($json, true);
-                if (empty($startMc)) {
-                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-                } else {
-                    $this->masterOrderModel->update(
-                        $od['id_order'],
-                        ['start_mc' => $startMc['start_mc']]
-                    );
+            $response = $client->post(
+                'http://172.23.44.14/CapacityApps/public/api/reqstartmc-bulk',
+                [
+                    'json' => $models
+                ]
+            );
+            
+            if ($response->getStatusCode() === 200) {
+                $bulkResult = json_decode($response->getBody(), true);
+                
+                foreach ($orders as $od) {
+                    if (!empty($bulkResult[$od['no_model']])) {
+                        $this->masterOrderModel->update(
+                            $od['id_order'],
+                            ['start_mc' => $bulkResult[$od['no_model']]]
+                        );
+                    }
                 }
-            } catch (\Exception $e) {
-
-                // Log error
-                log_message('error', 'Error fetching API data: ' . $e->getMessage());
             }
         }
 
-        $kategori = $this->kategoriModel->findAll();
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'kategori' => $kategori,
-        ];
-        return view($this->role . '/warehouse/index', $data);
+        return view($this->role . '/warehouse/index', [
+            'active'   => $this->active,
+            'title'    => 'Material System',
+            'role'     => $this->role,
+            'kategori' => $this->kategoriModel->findAll(),
+        ]);
     }
+
 
     public function pemasukan()
     {
