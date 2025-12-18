@@ -319,9 +319,10 @@ class MaterialModel extends Model
         if (stripos($itemType, 'JHT') === false) {
             $builder->where('material.composition >', 0);
         }
-        if ($warna !== null) {
+        if (!empty($warna)) {
             $builder->where('material.color', $warna);
         }
+
 
         return $builder->groupBy('material.style_size, material.composition')->findAll();
     }
@@ -1249,7 +1250,7 @@ class MaterialModel extends Model
                 MAX(material.loss)            AS loss,
                 MAX(material.material_type)   AS material_type,
 
-                SUM(material.kgs)             AS kg_po,
+                /* SUM(material.kgs) AS kg_po, */
                 MIN(material.created_at)      AS tgl_input,
                 material.admin           AS admin,
 
@@ -1285,10 +1286,10 @@ class MaterialModel extends Model
 
         if (!empty($key)) {
             $builder->groupStart()
-                ->like('mo.no_model', $key)
-                ->orLike('material.item_type', $key)
-                ->orLike('material.kode_warna', $key)
-                ->orLike('material.color', $key)
+                ->where('mo.no_model', $key)
+                ->orWhere('material.item_type', $key)
+                ->orWhere('material.kode_warna', $key)
+                ->orWhere('material.color', $key)
                 ->groupEnd();
         }
 

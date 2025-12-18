@@ -285,6 +285,9 @@
             autoWidth: false, // ✅ hindari layout thrash
             pageLength: 10,
             ordering: true,
+            order: [
+                [8, 'desc']
+            ],
             ajax: {
                 url: "<?= base_url($role . '/getDataSchedule') ?>",
                 type: "POST",
