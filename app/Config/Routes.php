@@ -992,6 +992,9 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     // pengaduan
     $routes->get('pengaduan', 'ApiController::getpengaduan');
+
+    $routes->get('audit', 'AuditLogController::index');
+    $routes->get('audit/datatables', 'AuditLogController::datatables');
 });
 
 $routes->options('(:any)', function () {

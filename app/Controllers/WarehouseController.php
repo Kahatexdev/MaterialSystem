@@ -2050,6 +2050,7 @@ class WarehouseController extends BaseController
                 } else {
                     $ketGbn = $ket;
                 }
+
                 // Update field out_jalur pada tabel pemasukan
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
@@ -2069,6 +2070,62 @@ class WarehouseController extends BaseController
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
                 // dd ($insertData);
+
+                helper('audit');
+
+                $actionAudit = 'OUT_JALUR';
+
+                if ($rawKgsManual > 0 || $rawCnsManual > 0) {
+                    $actionAudit = 'OUT_JALUR_CONES';
+                }
+
+                if ($pinjam === 'YA') {
+                    $actionAudit = 'OUT_JALUR_PINJAM';
+                }
+
+                // optional: snapshot stok sebelum update
+                $payloadOld = [
+                    'cluster' => $pemasukan['nama_cluster'],
+                    'stock' => [
+                        'kgs' => $stok[0]['kgs_stock_awal'] ?? null,
+                        'cns' => $stok[0]['cns_stock_awal'] ?? null,
+                        'krg' => $stok[0]['krg_stock_awal'] ?? null,
+                    ],
+                ];
+
+                // payload sesudah
+                $payloadNew = [
+                    'cluster'   => $pemasukan['nama_cluster'],
+                    'direction' => 'OUT',
+                    'qty'       => [
+                        'kgs' => $kgsOut,
+                        'cns' => $cnsOut,
+                        'krg' => $krgOut,
+                    ],
+                    'area'      => $area,
+                    'lot'       => $outCelup['lot_kirim'],
+                    'pinjam'    => $pinjam === 'YA',
+                    'ref'       => [
+                        'id_stock'          => $pemasukan['id_stock'],
+                        'id_out_celup'       => $pemasukan['id_out_celup'],
+                        'id_pemasukan'       => $pemasukan['id_pemasukan'],
+                        'id_total_pemesanan' => $idTtlPemesanan,
+                    ],
+                    'keterangan' => $ketGbn,
+                    'admin'      => session()->get('username'),
+                    'timestamp'  => date('Y-m-d H:i:s'),
+                ];
+
+                log_audit(
+                    module: 'SELECT_CLUSTER',
+                    action: $actionAudit,
+                    refType: 'STOCK',
+                    refId: $pemasukan['id_stock'],
+                    message: 'Pengeluaran jalur',
+                    payloadOld: $payloadOld,
+                    payloadNew: $payloadNew,
+                );
+                
                 // Insert data pengeluaran
                 $this->pengeluaranModel->insert($insertData);
 
