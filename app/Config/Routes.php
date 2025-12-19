@@ -248,6 +248,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakai');
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakai');
     $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
+    $routes->get('warehouse/historyPindahCluster', 'WarehouseController::historyPindahCluster');
+    $routes->get('warehouse/exportHistoryPindahCluster', 'ExcelController::exportHistoryPindahCluster');
     $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
     $routes->get('pemesanan/historyPinjamOrder', 'PemesananController::HistoryPinjamOrder');
     $routes->get('pemesanan/exportHistoryPinjamOrder', 'ExcelController::exportHistoryPinjamOrder');
