@@ -836,6 +836,34 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis') ?? 'BENANG';
 
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['color']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['color']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+        // dd($qtyMap);
+        $cacheAPI = [];
 
         $cacheAPI = [];
 
@@ -863,6 +891,8 @@ class ExcelController extends BaseController
             $model = $item['no_model'];
             $itemType = $item['item_type'];
             $kodeWarna = $item['kode_warna'];
+            $color = $item['color'];
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
 
             // ===== API START_MC & AREA (CACHE-FIRST) =====
             if (!isset($cacheAPI[$model])) {
@@ -922,6 +952,13 @@ class ExcelController extends BaseController
                 }
             } else {
                 $noteString = "-";
+            }
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $item['kg_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $item['kg_po']  = 0;
             }
 
             $sheet->fromArray([

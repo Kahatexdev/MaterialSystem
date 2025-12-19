@@ -1912,7 +1912,34 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? null;
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['color']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['color']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         $cache = [];
         $result = [];
 
@@ -1920,6 +1947,9 @@ class WarehouseController extends BaseController
             $model = isset($row['no_model']) ? $row['no_model'] : '';
             $currentItemType = $row['item_type'];
             $currentKodeWarna = $row['kode_warna'];
+            $currentColor = $row['color'];
+
+            $uniqueKey  = $model . '|' . $currentItemType . '|' . $currentKodeWarna . '|' . $currentColor;
 
             if ($model === '') {
                 $row['start_mc'] = 'Belum Ada Start Mc';
@@ -1946,7 +1976,6 @@ class WarehouseController extends BaseController
 
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
-                    // $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
                     $cache[$model] = [
                         'start_mc' => $json['startMc']['start_mc'] ?? 'Belum Ada Start Mc',
                         'area'     => $json['areaMc'] ?? 'Area Belum di Assign'
@@ -1954,7 +1983,6 @@ class WarehouseController extends BaseController
                     ];
                 } else {
                     // fallback jika API error / tidak dapat diakses
-                    // $startMc[$model] = 'Belum Ada Start Mc';
                     $cache[$model] = [
                         'start_mc' => 'Belum Ada Start Mc',
                         'area'  => 'Area Belum di Assign',
@@ -1962,12 +1990,8 @@ class WarehouseController extends BaseController
                 }
             }
 
-
             // ⭐ GET NOTE
             $note = $this->totalPoTambahanModel->getPoTambahan($model, $jenis);
-
-            // ⭐ LOG NOTE DI SINI
-            log_message('info', 'NOTE for model ' . $model . ': ' . json_encode($note));
 
             $filteredNote = [];
 
@@ -1993,9 +2017,18 @@ class WarehouseController extends BaseController
             }
 
             $row['note'] = $noteString;
-
             $row['start_mc'] = $cache[$model]['start_mc'];
             $row['area']  = $cache[$model]['area'];
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['kg_po']  = $qtyMap[$uniqueKey]['kg_po'];
+                $row['qty_po'] = $qtyMap[$uniqueKey]['qty_po'];
+            } else {
+                $row['kg_po']  = 0;
+                $row['qty_po'] = 0;
+            }
+
             $result[] = $row;
         }
 
@@ -5070,4 +5103,78 @@ class WarehouseController extends BaseController
             'message' => 'Data fix stock berhasil disimpan.',
         ]);
     }
+
+    // private function getQtyPcs(array $filteredData, $jenis = null)
+    // {
+    //     $client = Services::curlrequest();
+    //     $noModel = array_unique(array_column($filteredData, 'no_model'));
+
+    //     $getQtyUrl = api_url('capacity') . 'getQtyOrderByNoModel';
+
+    //     $qtyResponse = $client->post($getQtyUrl, [
+    //         'json' => [
+    //             'models' => $noModel
+    //         ],
+    //         'http_errors' => false
+    //     ]);
+
+    //     $qtyData = json_decode($qtyResponse->getBody(), true);
+
+    //     $sumQtyBySize = [];
+
+    //     //Jumlahkan qty per size untuk setiap mastermodel
+    //     foreach ($qtyData as $row) {
+    //         $mastermodel = $row['mastermodel'];
+    //         $size = $row['size'];
+    //         $qty  = (int) $row['qty'];
+
+    //         if (!isset($sumQtyBySize[$mastermodel][$size])) {
+    //             $sumQtyBySize[$mastermodel][$size] = 0;
+    //         }
+
+    //         $sumQtyBySize[$mastermodel][$size] += $qty;
+    //     }
+
+    //     foreach ($filteredData as $data) {
+    //         $key = $data['no_model'] . '|' . $data['item_type'] . '|' . $data['kode_warna'] . '|' . $data['color'];
+
+    //         $getStyle = $this->materialModel->getStyleSizeByBb(
+    //             $data['no_model'],
+    //             $data['item_type'],
+    //             $data['kode_warna'],
+    //             $data['color']
+    //         );
+
+    //         $ttlKeb = 0;
+    //         $ttlQty = 0;
+
+    //         foreach ($getStyle as $i => $dataStyle) {
+    //             $styleSize = $dataStyle['style_size'];
+
+    //             $qty = $sumQtyBySize[$data['no_model']][$styleSize] ?? 0;
+
+    //             if ($qty >= 0) {
+    //                 if (isset($dataStyle['item_type']) && stripos($dataStyle['item_type'], 'JHT') !== false) {
+    //                     $kebutuhan = $dataStyle['kgs'] ?? 0;
+    //                 } else {
+    //                     $kebutuhan = (
+    //                         ($qty * $dataStyle['gw'] * $dataStyle['composition'] / 100 / 1000)
+    //                         * (1 + ($dataStyle['loss'] / 100))
+    //                     );
+    //                 }
+
+    //                 $ttlKeb += $kebutuhan;
+    //                 $ttlQty += $qty;
+    //             }
+    //         }
+
+    //         $map[$key] = [
+    //             'kg_po'  => round($ttlKeb, 2),
+    //             'qty_po' => $ttlQty,
+    //             'from_capacity' => !empty($qtyData)
+    //         ];
+    //     }
+
+    //     return $map;
+    // }
 }
