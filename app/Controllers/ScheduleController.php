@@ -1221,14 +1221,14 @@ class ScheduleController extends BaseController
         $filterTglSchsampai  = $this->request->getPost('filter_tglschsampai');
         $filterNoModel       = $this->request->getPost('filter_nomodel');
 
-        $showExcel = !empty($filterTglSch) 
-            || !empty($filterTglSchsampai) 
+        $showExcel = !empty($filterTglSch)
+            || !empty($filterTglSchsampai)
             || !empty($filterNoModel);
 
         // 1. Ambil schedule (read only)
         $sch = $this->scheduleCelupModel
             ->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
-        
+
         // 2. Sync delivery (background-style, cepat)
         $listPdk = $this->masterOrderModel->getNullDeliv();
         // dd ($listPdk);
@@ -1244,7 +1244,7 @@ class ScheduleController extends BaseController
             $res = $client->post('getDeliveryAwalAkhir-bulk', [
                 'json' => $models
             ]);
-            
+
             if ($res->getStatusCode() === 200) {
                 $bulk = json_decode($res->getBody(), true);
 

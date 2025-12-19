@@ -149,7 +149,7 @@ class WarehouseController extends BaseController
 
         if (!empty($orders)) {
             $models = array_column($orders, 'no_model');
-            
+
             $client = \Config\Services::curlrequest([
                 'timeout' => 5,
                 'http_errors' => false,
@@ -161,10 +161,10 @@ class WarehouseController extends BaseController
                     'json' => $models
                 ]
             );
-            
+
             if ($response->getStatusCode() === 200) {
                 $bulkResult = json_decode($response->getBody(), true);
-                
+
                 foreach ($orders as $od) {
                     if (!empty($bulkResult[$od['no_model']])) {
                         $this->masterOrderModel->update(
@@ -1663,7 +1663,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -2200,7 +2200,7 @@ class WarehouseController extends BaseController
                     payloadOld: $payloadOld,
                     payloadNew: $payloadNew,
                 );
-                
+
                 // Insert data pengeluaran
                 $this->pengeluaranModel->insert($insertData);
 
@@ -5046,7 +5046,7 @@ class WarehouseController extends BaseController
                     // Buang null/null string kalau kamu mau lebih rapih
                     $pemasukanUpdate = array_filter(
                         $pemasukanUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($pemasukanUpdate)) {
@@ -5066,7 +5066,7 @@ class WarehouseController extends BaseController
 
                     $outUpdate = array_filter(
                         $outUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($outUpdate)) {
@@ -5083,7 +5083,7 @@ class WarehouseController extends BaseController
 
                     $stockUpdate = array_filter(
                         $stockUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($stockUpdate)) {
@@ -5108,7 +5108,7 @@ class WarehouseController extends BaseController
 
                 $historyData = array_filter(
                     $historyData,
-                    fn($v) => $v !== null
+                    fn ($v) => $v !== null
                 );
 
                 if (!empty($historyData)) {
