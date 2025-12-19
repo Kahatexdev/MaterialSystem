@@ -7625,6 +7625,128 @@ class ExcelController extends BaseController
         exit;
     }
 
+
+    public function exportHistoryPindahCluster()
+    {
+        $key = $this->request->getGet('key') ?? '';
+
+        // 1) Ambil data
+        if ($key === '') {
+            return redirect()->back()->with('error', 'Parameter key diperlukan untuk ekspor history pindah cluster.');
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahCluster($key);
+        }
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('REPORT HISTORY PINDAH CLUSTER');
+
+        // border
+        $styleHeader = [
+            'font' => [
+                'bold' => true, // Tebalkan teks
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+
+
+        // Judul
+        $sheet->setCellValue('A1', 'REPORT HISTORY PINDAH CLUSTER');
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $row_header = 3;
+
+        $headers = [
+            'A' => 'NO',
+            'B' => 'NO MODEL',
+            'C' => 'ITEM TYPE',
+            'D' => 'KODE WARNA',
+            'E' => 'WARNA',
+            'F' => 'QTY',
+            'G' => 'CONES',
+            'H' => 'LOT',
+            'I' => 'CLUSTER OLD',
+            'J' => 'CLUSTER NEW',
+            'K' => 'KETERANGAN',
+            'L' => 'ADMIN'
+        ];
+
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue($col . $row_header, $title);
+            $sheet->getStyle($col . $row_header)->applyFromArray($styleHeader);
+        }
+
+
+        // Isi data
+        $row = 4;
+        $no = 1;
+
+        foreach ($dataPindah as $key => $data) {
+            if (!is_array($data)) {
+                continue; // Lewati nilai akumulasi di $result
+            }
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['no_model']);
+            $sheet->setCellValue('C' . $row, $data['item_type']);
+            $sheet->setCellValue('D' . $row, $data['kode_warna']);
+            $sheet->setCellValue('E' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, $data['kgs']);
+            $sheet->setCellValue('G' . $row, $data['cns']);
+            $sheet->setCellValue('H' . $row, $data['lot']);
+            $sheet->setCellValue('I' . $row, $data['cluster_old']);
+            $sheet->setCellValue('J' . $row, $data['cluster_new']);
+            $sheet->setCellValue('K' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' DARI ' . $data['cluster_old'] . ' KE ' . $data['cluster_new']);
+            $sheet->setCellValue('L' . $row, $data['admin']);
+
+            // style body
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+
+            foreach ($columns as $column) {
+                $sheet->getStyle($column . $row)->applyFromArray($styleBody);
+            }
+
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set judul file dan header untuk download
+        $filename = 'REPORT HISTORY PINDAH CLUSTER.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
     public function exportPoTambahan()
     {
         $noModel   = $this->request->getGet('model')     ?? '';

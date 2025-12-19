@@ -3412,6 +3412,52 @@ class WarehouseController extends BaseController
         ]);
     }
 
+    public function historyPindahCluster()
+    {
+        $key  = $this->request->getGet('key')     ?? '';
+
+        // 1) Ambil data
+        if ($key === '') {
+            // $dataPindah = $this->historyStock->getHistoryPindahCluster(null, 10);
+            $dataPindah = [];
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahCluster($key);
+        }
+        // dd ($dataPindah);
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => api_url('capacity') . '',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPindah);
+        }
+
+        return view($this->role . '/warehouse/history-pindah-cluster', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Cluster',
+            'active'  => $this->active,
+            'history' => $dataPindah,
+        ]);
+    }
+
     public function reportSisaDatangBenang()
     {
         $delivery = $this->request->getGet('delivery');
