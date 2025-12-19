@@ -928,19 +928,32 @@ class MasterOrderModel extends Model
             ->where('no_model', $noModel)
             ->first();
     }
+    // public function getNullDeliv(): array
+    // {
+    //     return $this->select('no_model')
+    //         ->where('delivery_awal IS NULL', null, false)
+    //         ->where('delivery_akhir IS NULL', null, false)
+    //         ->where('no_order !=', '')
+    //         ->where('buyer !=', '')
+    //         ->where('foll_up !=', '')
+    //         ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-3 months')))
+    //         ->findAll();
+    // }
+
     public function getNullDeliv(): array
     {
-        // tanggal batas: 3 bulan ke belakang dari sekarang
-        $since = (new \DateTimeImmutable('now'))
-            ->modify('-3 months')
-            ->format('Y-m-d H:i:s');
-
-        return $this->select('no_model')
-            ->where('delivery_awal', null)     // menghasilkan IS NULL
-            ->where('delivery_akhir', null)    // menghasilkan IS NULL
-            ->where('created_at >=', $since)   // dalam 3 bulan terakhir
-            ->findAll();
+        return $this->where('no_order IS NOT NULL')
+                    ->whereNotIn('no_order', ['', '-'])
+                    ->whereNotIn('buyer', ['', '-'])
+                    ->whereNotIn('foll_up', ['', '-'])
+                    ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-12 months')))
+                    ->groupStart()
+                        ->where('delivery_awal IS NULL', null, false)
+                        ->orWhere('delivery_akhir IS NULL', null, false)
+                    ->groupEnd()
+                    ->findAll();
     }
+
 
     public function updateDeliv($model, $body)
     {
@@ -957,21 +970,45 @@ class MasterOrderModel extends Model
             ->set('unit', $unit)
             ->update();
     }
+    // public function getNullMc()
+    // {
+    //     return $this->select('master_order.id_order, no_model')
+    //         ->join('material', 'master_order.id_order =material.id_order ', 'left')
+    //         ->where('start_mc', null)
+    //         ->where('lco_date !=', '0000-00-00')
+    //         ->where('delivery_awal !=', null)
+    //         ->where('delivery_akhir >=', '2025-08-30')
+    //         ->notLike('material.area', 'Gedung')
+    //         ->where('LENGTH(no_model) <=', 6, false) // tambahin false biar ga di-escape
+    //         ->orderBy('RAND()')
+    //         ->groupBy('master_order.id_order, master_order.no_model')
+    //         ->limit(100)
+    //         ->findAll();
+    // }
+
+
     public function getNullMc()
     {
-        return $this->select('master_order.id_order, no_model')
-            ->join('material', 'master_order.id_order =material.id_order ', 'left')
-            ->where('start_mc', null)
-            ->where('lco_date !=', '0000-00-00')
-            ->where('delivery_awal !=', null)
-            ->where('delivery_akhir >=', '2025-08-30')
-            ->notLike('material.area', 'Gedung')
-            ->where('LENGTH(no_model) <=', 6, false) // tambahin false biar ga di-escape
-            ->orderBy('RAND()')
-            ->groupBy('master_order.id_order, master_order.no_model')
+        return $this->select('mo.id_order, mo.no_model')
+            ->from('master_order mo')
+            ->where('mo.start_mc IS NULL', null, false)
+            ->where('mo.lco_date !=', '0000-00-00')
+            ->where('mo.delivery_awal IS NOT NULL', null, false)
+            ->where('mo.delivery_akhir >=', '2025-08-30')
+            ->where('LENGTH(mo.no_model) <= 7', null, false)
+            ->where("
+                NOT EXISTS (
+                    SELECT 1 
+                    FROM material m
+                    WHERE m.id_order = mo.id_order
+                    AND m.area LIKE '%Gedung%'
+                )
+            ", null, false)
             ->limit(100)
             ->findAll();
     }
+
+
 
     public function getFilterKebutuhanBahanBaku($jenis = null, $tanggal_awal = null, $tanggal_akhir = null)
     {

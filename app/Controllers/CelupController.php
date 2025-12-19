@@ -124,7 +124,7 @@ class CelupController extends BaseController
             $warna = $id['warna'];
             // Debug untuk memastikan parameter tidak null
             if (empty($nomodel) || empty($itemtype) || empty($kodewarna)) {
-                log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
+                // log_message('error', "Parameter null: no_model={$nomodel}, item_type={$itemtype}, kode_warna={$kodewarna}");
                 continue; // Skip data jika ada parameter kosong
             }
             // dd($sch);
@@ -150,7 +150,7 @@ class CelupController extends BaseController
                         $pdk['delivery_akhir'] = $deliv[0]['delivery_akhir'] ?? null;
                     } else {
 
-                        log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
+                        // log_message('error', 'Field kode_warna tidak ditemukan pada hasil openPoModel->find()');
                     }
                 }
             }
@@ -365,6 +365,68 @@ class CelupController extends BaseController
         // dd($dataUpdate);
         // Perbarui data di database
         $this->scheduleCelupModel->update($id, $dataUpdate);
+
+        // LOG AUDIT
+        helper('audit');
+
+        // Ambil data setelah update
+        $updatedProduction = $this->scheduleCelupModel->find($id);
+
+        // Filter payload OLD (sebelum)
+        $payloadOld = [
+            'last_status'   => $existingProduction['last_status'] ?? null,
+            'ket_daily_cek' => $existingProduction['ket_daily_cek'] ?? null,
+            'kg_celup'      => $existingProduction['kg_celup'] ?? null,
+            'lot_celup'    => $existingProduction['lot_celup'] ?? null,
+            'tanggal' => [
+                'tanggal_bon' => $existingProduction['tanggal_bon'] ?? null,
+                'tanggal_celup' => $existingProduction['tanggal_celup'] ?? null,
+                'tanggal_bongkar' => $existingProduction['tanggal_bongkar'] ?? null,
+                'tanggal_press_oven' => $existingProduction['tanggal_press_oven'] ?? null,
+                // 'tanggal_oven' => $existingProduction['tanggal_oven'] ?? null,
+                'tanggal_rajut_pagi' => $existingProduction['tanggal_rajut_pagi'] ?? null,
+                'tangggal_serah_terima_acc' => $existingProduction['serah_terima_acc'] ?? null,
+                'acc'      => $existingProduction['tanggal_acc'] ?? null,
+                'tanggal_matching' => $existingProduction['tanggal_matching'] ?? null,
+                'tanggal_perbaikan' => $existingProduction['tanggal_perbaikan'] ?? null,
+                'tanggal_kelos' => $existingProduction['tanggal_kelos'] ?? null,
+                'tanggal_tl' => $existingProduction['tanggal_tl'] ?? null
+            ],
+            'ket_schedule' => $existingProduction['ket_schedule'] ?? null,
+        ];
+
+        // Filter payload NEW (sesudah)
+        $payloadNew = [
+            'last_status'   => $updatedProduction['last_status'] ?? null,
+            'ket_daily_cek' => $updatedProduction['ket_daily_cek'] ?? null,
+            'kg_celup'      => $updatedProduction['kg_celup'] ?? null,
+            'lot_celup'    => $updatedProduction['lot_celup'] ?? null,
+            'tanggal' => [
+                'tanggal_bon' => $updatedProduction['tanggal_bon'] ?? null,
+                'tanggal_celup' => $updatedProduction['tanggal_celup'] ?? null,
+                'tanggal_bongkar' => $updatedProduction['tanggal_bongkar'] ?? null,
+                'tanggal_press_oven' => $updatedProduction['tanggal_press_oven'] ?? null,
+                // 'tanggal_oven' => $updatedProduction['tanggal_oven'] ?? null,
+                'tanggal_rajut_pagi' => $updatedProduction['tanggal_rajut_pagi'] ?? null,
+                'tangggal_serah_terima_acc' => $updatedProduction['serah_terima_acc'] ?? null,
+                'acc'      => $updatedProduction['tanggal_acc'] ?? null,
+                'tanggal_matching' => $updatedProduction['tanggal_matching'] ?? null,
+                'tanggal_perbaikan' => $updatedProduction['tanggal_perbaikan'] ?? null,
+                'tanggal_kelos' => $updatedProduction['tanggal_kelos'] ?? null,
+                'tanggal_tl' => $updatedProduction['tanggal_tl'] ?? null
+            ],
+            'ket_schedule' => $updatedProduction['ket_schedule'] ?? null,
+        ];
+
+        log_audit(
+            module: 'CELUP',
+            action: 'UPDATE_STATUS',
+            refType: 'SCHEDULE_CELUP',
+            refId: $id,
+            message: 'Update status schedule celup',
+            payloadOld: $payloadOld,
+            payloadNew: $payloadNew
+        );
 
         // Redirect ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->withInput()->with('success', 'Data Berhasil diupdate');
@@ -705,7 +767,32 @@ class CelupController extends BaseController
 
     public function updateBon()
     {
+        helper('audit');
+
         $id_bon = $this->request->getPost('id_bon');
+
+        // ===== DATA LAMA BON =====
+        $oldBon = $this->bonCelupModel->find($id_bon);
+
+        // ===== DATA LAMA KARUNG (GROUP BY id_out_celup) =====
+        $oldKarungRows = $this->outCelupModel
+            ->where('id_bon', $id_bon)
+            ->findAll();
+
+        $oldKarung = [];
+        foreach ($oldKarungRows as $r) {
+            $oldKarung[$r['id_out_celup']] = [
+                'no_karung'   => $r['no_karung'],
+                'l_m_d'       => $r['l_m_d'],
+                'harga'       => $r['harga'],
+                'ganti_retur' => $r['ganti_retur'],
+                'gw_kirim'    => $r['gw_kirim'],
+                'kgs_kirim'   => $r['kgs_kirim'],
+                'cones_kirim' => $r['cones_kirim'],
+                'lot_kirim'   => $r['lot_kirim'],
+            ];
+        }
+
         $statusBon = $this->bonCelupModel->select('status')->where('id_bon', $id_bon)->first();
 
         $dataBon = [
@@ -752,6 +839,76 @@ class CelupController extends BaseController
                 $this->outCelupModel->update($id_out_celup, $dataKarung);
             }
         }
+
+        // ===== DATA BARU =====
+        $newBon = $this->bonCelupModel->find($id_bon);
+
+        // ambil ulang karung terbaru
+        $newKarungRows = $this->outCelupModel
+            ->where('id_bon', $id_bon)
+            ->findAll();
+
+        $newKarung = [];
+        foreach ($newKarungRows as $r) {
+            $newKarung[$r['id_out_celup']] = [
+                'no_karung'   => $r['no_karung'],
+                'l_m_d'       => $r['l_m_d'],
+                'harga'       => $r['harga'],
+                'ganti_retur' => $r['ganti_retur'],
+                'gw_kirim'    => $r['gw_kirim'],
+                'kgs_kirim'   => $r['kgs_kirim'],
+                'cones_kirim' => $r['cones_kirim'],
+                'lot_kirim'   => $r['lot_kirim'],
+            ];
+        }
+
+        // ===== HITUNG DIFF KARUNG =====
+        $karungDiff = [];
+
+        foreach ($newKarung as $id_out => $newRow) {
+            $oldRow = $oldKarung[$id_out] ?? [];
+
+            $diffOld = [];
+            $diffNew = [];
+
+            foreach ($newRow as $field => $valNew) {
+                $valOld = $oldRow[$field] ?? null;
+                if ((string)$valOld !== (string)$valNew) {
+                    $diffOld[$field] = $valOld;
+                    $diffNew[$field] = $valNew;
+                }
+            }
+
+            if (!empty($diffNew)) {
+                $karungDiff[$id_out] = [
+                    'old' => $diffOld,
+                    'new' => $diffNew,
+                ];
+            }
+        }
+
+        // ===== PAYLOAD AUDIT =====
+        $payloadOld = [
+            'bon'    => $oldBon,
+            'karung' => array_map(fn($v) => $v, $oldKarung),
+        ];
+
+        $payloadNew = [
+            'bon'    => $newBon,
+            'karung' => $karungDiff, // hanya karung yang berubah
+        ];
+
+        // ===== SIMPAN AUDIT LOG =====
+        log_audit(
+            module: 'OUT_CELUP',
+            action: 'UPDATE',
+            refType: 'BON',
+            refId: $id_bon,
+            message: 'Update data bon & karung',
+            payloadOld: $payloadOld,
+            payloadNew: $payloadNew
+        );
+
 
         // Redirect kembali dengan pesan sukses
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'Data berhasil diperbarui');

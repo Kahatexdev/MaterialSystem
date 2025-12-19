@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controllers;
+
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\CLIRequest;
@@ -37,6 +38,7 @@ use App\Models\HistoryStock;
 use App\Models\OtherOutModel;
 use App\Models\WarehouseBBModel;
 use App\Models\HistoryStockBBModel;
+use App\Services\QtyPcsService;
 
 /**
  * Class BaseController
@@ -84,6 +86,7 @@ abstract class BaseController extends Controller
     protected $historyStock;
     protected $otherOutModel;
     protected $masterBuyerModel;
+    protected $qtyPcsService;
 
     /**
      * @var BaseConnection
@@ -154,7 +157,7 @@ abstract class BaseController extends Controller
         $this->historyStock = new HistoryStock();
         $this->masterBuyerModel = new MasterBuyerModel();
         $this->otherOutModel = new OtherOutModel();
-
+        $this->qtyPcsService = new QtyPcsService();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');
