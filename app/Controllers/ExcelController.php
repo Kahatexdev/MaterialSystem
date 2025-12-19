@@ -865,6 +865,8 @@ class ExcelController extends BaseController
         // dd($qtyMap);
         $cacheAPI = [];
 
+        $cacheAPI = [];
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
