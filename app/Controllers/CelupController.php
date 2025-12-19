@@ -648,6 +648,7 @@ class CelupController extends BaseController
                 $jmldatapertab = count($data['no_karung'][$h]);
 
                 for ($i = 0; $i < $jmldatapertab; $i++) {
+                    // dd($data);
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
                         'id_celup' => $id_celup ?? null,
@@ -658,7 +659,7 @@ class CelupController extends BaseController
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $data['items'][$h]['lot_celup'] ?? null,
+                        'lot_kirim' => $data['lot_celup'][$h][$i] ?? null,
                         'ganti_retur' => $gantiRetur,
                         'operator_packing' => $operatorPerTab,
                         'shift' => $shiftPerTab,
@@ -890,7 +891,7 @@ class CelupController extends BaseController
         // ===== PAYLOAD AUDIT =====
         $payloadOld = [
             'bon'    => $oldBon,
-            'karung' => array_map(fn($v) => $v, $oldKarung),
+            'karung' => array_map(fn ($v) => $v, $oldKarung),
         ];
 
         $payloadNew = [

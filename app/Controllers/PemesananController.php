@@ -2936,7 +2936,7 @@ class PemesananController extends BaseController
 
     public function sisaKebutuhanAreaData()
     {
-        if (! $this->request->isAJAX()) {
+        if (!$this->request->isAJAX()) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException();
         }
 
