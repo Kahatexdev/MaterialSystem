@@ -375,7 +375,7 @@
                                         <option value="DOUBLE COVER">DOUBLE COVER</option>
                                     </select>
                                 </div>
-                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="number" class="form-control" name="dr"></div>
+                                <div class="mb-3"><label class="form-label">DR (Draw Rasio)</label><input type="number"  step="0.01" class="form-control" name="dr"></div>
                                 <div class="mb-3"><label class="form-label">Jenis Cover</label><select class="form-select" name="jenis_cover" required>
                                         <option value="">Pilih...</option>
                                         <option value="SINGLE">SINGLE</option>
