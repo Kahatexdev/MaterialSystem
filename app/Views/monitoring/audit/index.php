@@ -86,11 +86,10 @@
                             <label class="form-label">Module</label>
                             <select class="form-control" id="module">
                                 <option value="">Semua</option>
-                                <option value="STOCK">STOCK</option>
-                                <option value="TX">TX</option>
-                                <option value="REQUEST">REQUEST</option>
-                                <option value="MASTER">MASTER</option>
                                 <option value="AUTH">AUTH</option>
+                                <option value="SELECT_CLUSTER">SELECT_CLUSTER</option>
+                                <option value="OUT_CELUP">OUT_CELUP</option>
+                                <option value="CELUP">CELUP</option>
                             </select>
                         </div>
 
@@ -98,15 +97,14 @@
                             <label class="form-label">Action</label>
                             <select class="form-control" id="action">
                                 <option value="">Semua</option>
-                                <option value="CREATE">CREATE</option>
-                                <option value="UPDATE">UPDATE</option>
-                                <option value="DELETE">DELETE</option>
                                 <option value="LOGIN">LOGIN</option>
-                                <option value="LOGOUT">LOGOUT</option>
-                                <option value="APPROVE">APPROVE</option>
-                                <option value="REJECT">REJECT</option>
-                                <option value="EXPORT">EXPORT</option>
                                 <option value="LOGIN_FAIL">LOGIN_FAIL</option>
+                                <option value="LOGOUT">LOGOUT</option>
+                                <option value="OUT_JALUR">OUT_JALUR</option>
+                                <option value="OUT_JALUR_CONES">OUT_JALUR_CONES</option>
+                                <option value="OUT_JALUR_PINJAM">OUT_JALUR_PINJAM</option>
+                                <option value="UPDATE">UPDATE</option>
+                                <option value="UPDATE_STATUS">UPDATE_STATUS</option>
                             </select>
                         </div>
 
