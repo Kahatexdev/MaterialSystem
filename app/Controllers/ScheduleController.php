@@ -1639,8 +1639,8 @@ class ScheduleController extends BaseController
             'search' => $search ?? ''
         ];
 
-        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/?' . http_build_query($params);
-
+        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku?' . http_build_query($params);
+        // dd ($apiUrl);
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
         $status = json_decode($response, true);

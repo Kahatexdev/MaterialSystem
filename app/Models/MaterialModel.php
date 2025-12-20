@@ -147,10 +147,11 @@ class MaterialModel extends Model
         no_model,
         item_type,
         kode_warna,
+        lot_celup,
         MAX(lot_urut) AS lot_urut,
         SUM(kg_celup) AS total_kg_celup
     ')
-            ->groupBy('no_model, item_type, kode_warna')
+            ->groupBy('no_model, item_type, kode_warna, lot_celup')
             ->getCompiledSelect();
 
         $builder = $this->db->table("($subQuery) material_sum");
@@ -208,7 +209,7 @@ class MaterialModel extends Model
         if (!empty($search)) {
             $builder->groupStart()
                 ->like('material_sum.kode_warna', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
+                ->orLike('sc.lot_celup', $search)
                 ->groupEnd();
         }
 
