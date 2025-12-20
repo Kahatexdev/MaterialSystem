@@ -156,7 +156,7 @@ class ApiController extends ResourceController
             'kg_stock',
             'total_po_tambahan'
         ];
-        log_message('debug', 'Isi $rows: ' . json_encode($rows));
+        // log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
         foreach ($rows as $row) {
             $jenis = strtoupper($row['jenis']);
