@@ -309,31 +309,31 @@
                               <div class="col-3 d-flex flex-column align-items-center">
                                     <div class="numbers text-center">
                                         <p class="text-sm mb-0 text-capitalize font-weight-bold">No Model</p>
-                                        <h5 class="font-weight-bolder mb-0">${data['master']['no_model'] ?? '-' }</h5>
+                                        <h5 class="font-weight-bolder mb-0">${data['master']['startMc']['no_model'] ?? '-' }</h5>
                                     </div>
                                 </div>
                                 <div class="col-3 d-flex flex-column align-items-center">
                                     <div class="numbers text-center">
                                         <p class="text-sm mb-0 text-capitalize font-weight-bold">Buyer</p>
-                                        <h5 class="font-weight-bolder mb-0">${data['master']['kd_buyer_order']}</h5>
+                                        <h5 class="font-weight-bolder mb-0">${data['master']['startMc']['kd_buyer_order']}</h5>
                                     </div>
                                 </div>
                                 <div class="col-2 d-flex flex-column align-items-center">
                                     <div class="numbers text-center">
                                         <p class="text-sm mb-0 text-capitalize font-weight-bold">Delivery Awal</p>
-                                        <h5 class="font-weight-bolder mb-0">${data['master']['delivery_awal']}</h5>
+                                        <h5 class="font-weight-bolder mb-0">${data['master']['startMc']['delivery_awal']}</h5>
                                     </div>
                                 </div>
                                 <div class="col-2 d-flex flex-column align-items-center">
                                     <div class="numbers text-center">
                                         <p class="text-sm mb-0 text-capitalize font-weight-bold">Delivery Akhir</p>
-                                        <h5 class="font-weight-bolder mb-0">${data['master']['delivery_akhir']}</h5>
+                                        <h5 class="font-weight-bolder mb-0">${data['master']['startMc']['delivery_akhir']}</h5>
                                     </div>
                                 </div>
                               <div class="col-2 d-flex flex-column align-items-center">
                                     <div class="numbers text-center">
                                         <p class="text-sm mb-0 text-capitalize font-weight-bold">Start MC</p>
-                                        <h5 class="font-weight-bolder mb-0">${data['master']['start_mc'] ?? '-' }</h5>
+                                        <h5 class="font-weight-bolder mb-0">${data['master']['startMc']['start_mc'] ?? '-' }</h5>
                                     </div>
                                 </div>
                             </div>

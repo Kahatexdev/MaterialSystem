@@ -1652,7 +1652,7 @@ class ScheduleController extends BaseController
             'master' => $master, // Data master dari getStartMc
             'status' => $status // Data status yang sudah difilter (gunakan array_values untuk mereset indeks array)
         ];
-
+        // dd ($responseData);
         // Kembalikan data yang sudah difilter ke frontend
         return $this->response->setJSON($responseData);
     }
