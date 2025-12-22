@@ -365,7 +365,7 @@ class PoTambahanModel extends Model
     }
     public function getKgPoTambahan($validate)
     {
-        return $this->select('SUM(po_tambahan.sisa_order_pcs) AS sisa_order_pcs, SUM(po_tambahan.poplus_mc_kg) AS poplus_mc_kg, MAX(po_tambahan.poplus_mc_cns) AS poplus_mc_cns, SUM(po_tambahan.plus_pck_pcs) AS plus_pck_pcs, SUM(po_tambahan.plus_pck_kg) AS plus_pck_kg, MAX(po_tambahan.plus_pck_cns) AS plus_pck_cns, total_potambahan.ttl_terima_kg, total_potambahan.ttl_sisa_bb_dimc, SUM(total_potambahan.ttl_tambahan_kg) AS ttl_keb_potambahan, total_potambahan.ttl_tambahan_cns, total_potambahan.keterangan AS ket_area, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
+        $query = $this->select('SUM(po_tambahan.sisa_order_pcs) AS sisa_order_pcs, SUM(po_tambahan.poplus_mc_kg) AS poplus_mc_kg, MAX(po_tambahan.poplus_mc_cns) AS poplus_mc_cns, SUM(po_tambahan.plus_pck_pcs) AS plus_pck_pcs, SUM(po_tambahan.plus_pck_kg) AS plus_pck_kg, MAX(po_tambahan.plus_pck_cns) AS plus_pck_cns, total_potambahan.ttl_terima_kg, total_potambahan.ttl_sisa_bb_dimc, SUM(total_potambahan.ttl_tambahan_kg) AS ttl_keb_potambahan, total_potambahan.ttl_tambahan_cns, total_potambahan.keterangan AS ket_area, master_order.no_model, master_order.delivery_akhir, material.item_type, material.kode_warna, material.color, material.style_size, material.kgs, material.composition, material.gw, material.qty_pcs, material.loss')
             ->join('material', 'po_tambahan.id_material = material.id_material', 'left')
             ->join('total_potambahan', 'po_tambahan.id_total_potambahan = total_potambahan.id_total_potambahan', 'left')
             ->join('master_order', 'material.id_order = master_order.id_order', 'left')
@@ -373,8 +373,11 @@ class PoTambahanModel extends Model
             ->where('po_tambahan.status', 'approved')
             ->where('material.item_type', $validate['item_type'])
             ->where('material.kode_warna', $validate['kode_warna'])
-            ->where('master_order.no_model', $validate['no_model'])
-            ->groupBy('master_order.no_model')
+            ->where('master_order.no_model', $validate['no_model']);
+        if (!empty($style_size)) {
+            $query->where('material.style_size', $validate['style_size']);
+        }
+        $query = $query->groupBy('master_order.no_model')
             ->groupBy('material.item_type')
             ->groupBy('material.kode_warna')
             ->groupBy('material.style_size')
@@ -383,5 +386,7 @@ class PoTambahanModel extends Model
             ->orderBy('material.kode_warna', 'ASC')
             ->orderBy('material.style_size', 'ASC')
             ->first();
+
+        return $query;
     }
 }
