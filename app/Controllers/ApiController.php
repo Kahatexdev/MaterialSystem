@@ -1495,7 +1495,8 @@ class ApiController extends ResourceController
         ];
 
         // $data = $this->poTambahanModel->getKgPoTambahan($params);
-        $data = $this->totalPoTambahanModel->getKgPoTambahan($params);
+        // $data = $this->totalPoTambahanModel->getKgPoTambahan($params);
+        $data = $this->poTambahanModel->getKgPoTambahan($params);
 
 
         return $this->response
