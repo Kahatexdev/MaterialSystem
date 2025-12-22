@@ -163,7 +163,8 @@
                 },
                 "columns": [{
                         "data": "no",
-                        "orderable": false
+                        "orderable": false,
+                        "searchable": false
                     },
                     {
                         "data": "item_type"
@@ -175,10 +176,7 @@
                         "data": "jenis"
                     },
                     {
-                        "data": "ukuran",
-                        "orderable": false,
-                        "searchable": false,
-                        "className": "text-center"
+                        "data": "ukuran"
                     },
                     // {
                     //     // "data": "action",

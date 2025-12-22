@@ -58,7 +58,16 @@ class MastermaterialController extends BaseController
             $orderDirection = $request['order'][0]['dir'] ?? 'asc';
 
             // Pastikan nilai kolom valid
-            $orderColumnName = $request['columns'][$orderColumnIndex]['data'] ?? 'item_type';
+            $columnMap = [
+                0 => null,         // kolom "no" → TIDAK ADA di DB
+                1 => 'item_type',
+                2 => 'deskripsi',
+                3 => 'jenis',
+                4 => 'ukuran',
+            ];
+
+            $orderColumnName = $columnMap[$orderColumnIndex] ?? 'item_type';
+
 
             // Query total data tanpa filter
             $totalRecords = $this->masterMaterialModel->countAll();
@@ -72,6 +81,10 @@ class MastermaterialController extends BaseController
                 ->groupEnd();
 
             $filteredRecords = $query->countAllResults(false);
+
+            if ($orderColumnName !== null) {
+                $query->orderBy($orderColumnName, $orderDirection);
+            }
 
             // Sorting dan pagination
             $data = $query->orderBy($orderColumnName, $orderDirection)
