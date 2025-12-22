@@ -39,6 +39,9 @@ use App\Models\OtherOutModel;
 use App\Models\WarehouseBBModel;
 use App\Models\HistoryStockBBModel;
 use App\Services\QtyPcsService;
+use App\Services\AuthService;
+use App\Models\LoginAttemptModel;
+
 
 /**
  * Class BaseController
@@ -87,6 +90,8 @@ abstract class BaseController extends Controller
     protected $otherOutModel;
     protected $masterBuyerModel;
     protected $qtyPcsService;
+    protected $authService;
+    protected $LoginAttemptModel;
 
     /**
      * @var BaseConnection
@@ -158,6 +163,8 @@ abstract class BaseController extends Controller
         $this->masterBuyerModel = new MasterBuyerModel();
         $this->otherOutModel = new OtherOutModel();
         $this->qtyPcsService = new QtyPcsService();
+        $this->authService = new AuthService();
+        $this->LoginAttemptModel = new LoginAttemptModel();
         $this->request = \Config\Services::request();
 
         $this->role = session()->get('role');

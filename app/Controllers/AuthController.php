@@ -18,76 +18,73 @@ class AuthController extends BaseController
     {
         helper('audit');
 
+        // $authService = service('authService');
+
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
-        $userData = $this->userModel->login($username, $password);
-        $ipAddress = $this->request->getIPAddress();
+        $ip       = $this->request->getIPAddress();
 
-        if (!$userData) {
-            // audit login gagal
+        $result = $this->authService->attemptLogin($username, $password, $ip);
+
+        if (!$result['status']) {
+
             log_audit(
                 module: 'AUTH',
-                action: 'LOGIN_FAIL',
+                action: $result['locked'] ?? false ? 'LOGIN_BLOCKED' : 'LOGIN_FAIL',
                 refType: 'USER',
                 refId: $username,
-                message: 'Login gagal (username/password salah)',
+                message: 'Login gagal',
                 payloadOld: null,
-                payloadNew: ['username' => $username, 'ip_address' => $ipAddress]
+                payloadNew: [
+                    'username' => $username,
+                    'ip' => $ip,
+                    'detail' => $result
+                ]
             );
 
-            return redirect()->to(base_url('/login'))
+       
+            // pesan default
+            $errorMessage = 'Invalid username or password';
+
+            if (($result['locked'] ?? false) === true) {
+                $errorMessage = 'Akun terkunci sementara';
+            }
+
+            return redirect()->back()
                 ->withInput()
-                ->with('error', 'Invalid username or password');
+                ->with('error', 'Akun terkunci sementara')
+                ->with('login_info', [
+                    'locked' => true,
+                    'locked_until' => $result['locked_until'] ?? null,
+                    'failed' => $result['failed'] ?? 0,
+                    'max' => $result['max_attempt'] ?? 3,
+                ]);
         }
 
-        session()->set('id_user', $userData['id']);
-        session()->set('username', $userData['username']);
-        session()->set('role', $userData['role']);
+        $user = $result['user'];
 
-        // audit login sukses (pakai actor dari session, tapi kita juga bisa pakai actor manual)
+        session()->set([
+            'id_user'  => $user['id_user'],
+            'username' => $user['username'],
+            'role'     => $user['role'],
+        ]);
+
         log_audit(
             module: 'AUTH',
             action: 'LOGIN',
             refType: 'USER',
-            refId: $userData['id'],
+            refId: $user['id_user'],
             message: 'Login berhasil',
             payloadOld: null,
             payloadNew: [
-                'id_user'   => $userData['id'],
-                'username'  => $userData['username'],
-                'role'      => $userData['role'],
-                'ip_address'=> $ipAddress,
-            ],
-            actor: [
-                'name' => $userData['username'],
-                'role' => $userData['role'],
+                'username' => $user['username'],
+                'ip' => $ip
             ]
         );
 
-        switch ($userData['role']) {
-            case 'gbn':
-                return redirect()->to(base_url('/gbn'));
-                break;
-            case 'celup':
-                return redirect()->to(base_url('/celup'));
-                break;
-            case 'covering':
-                return redirect()->to(base_url('/covering'));
-                break;
-            case 'monitoring':
-                return redirect()->to(base_url('/monitoring'));
-                break;
-            case 'area':
-                return redirect()->to(base_url('/area'));
-                break;
-            case 'kantordepan':
-                return redirect()->to(base_url('/kantordepan/Report'));
-                break;
-            default:
-                return redirect()->to(base_url('/login'))->withInput()->with('error', 'Invalid username or password');
-                break;
-        }
+        return redirect()->to(base_url('/' . $user['role']));
     }
+
     public function logout()
     {
         helper('audit');
@@ -117,4 +114,36 @@ class AuthController extends BaseController
         session()->destroy();
         return redirect()->to(base_url('/login'));
     }
+
+    public function lockedUsers()
+    {
+        $users = $this->LoginAttemptModel->getDataUser();
+        // dd ($users);
+        $data = [
+            'active' => $this->active,
+            'title' => 'Monitoring',
+            'role' => $this->role,
+            'dataUser' => $users,
+        ];
+        return view($this->role . '/user/locked_users', $data);
+    }
+
+
+    public function unlockUser($idUser)
+    {
+        $this->authService->unlockUser($idUser);
+
+        log_audit(
+            module: 'AUTH',
+            action: 'UNLOCK_USER',
+            refType: 'USER',
+            refId: $idUser,
+            message: 'Admin unlock akun',
+            payloadOld: null,
+            payloadNew: ['id_user' => $idUser]
+        );
+
+        return redirect()->back()->with('success', 'Akun berhasil di-unlock');
+    }
+
 }
