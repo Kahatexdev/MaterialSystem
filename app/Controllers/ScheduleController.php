@@ -1814,9 +1814,24 @@ class ScheduleController extends BaseController
                 'kg_celup'
             ];
 
-            if (in_array($colName, $allowedCols)) {
-                $builder->orderBy("schedule_celup.$colName", $colDir);
+            $columnMap = [
+                'no_mc'             => 'mesin_celup.no_mesin',
+                'no_model'          => 'schedule_celup.no_model',
+                'item_type'         => 'schedule_celup.item_type',
+                'lot_celup'         => 'schedule_celup.lot_celup',
+                'kode_warna'        => 'schedule_celup.kode_warna',
+                'warna'             => 'schedule_celup.warna',
+                'start_mc'          => 'schedule_celup.start_mc',
+                'tanggal_schedule'  => 'schedule_celup.tanggal_schedule',
+                'last_status'       => 'schedule_celup.last_status',
+                'kg_po'             => 'open_po.kg_po',          // 🔥 FIX UTAMA
+                'kg_celup'          => 'schedule_celup.kg_celup'
+            ];
+
+            if (isset($columnMap[$colName])) {
+                $builder->orderBy($columnMap[$colName], $colDir);
             }
+
         } else {
             // default
             $builder->orderBy('schedule_celup.id_celup', 'DESC');
