@@ -650,6 +650,8 @@ class PengeluaranModel extends Model
                 'tp.ttl_kg',
                 'tp.ttl_cns',
                 'oc.no_karung',
+                'oc.kgs_kirim',
+                'oc.cones_kirim',
             ])
             // JOIN semua tabel
             ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')

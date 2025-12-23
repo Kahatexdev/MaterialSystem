@@ -579,6 +579,63 @@ class PemesananController extends BaseController
             ]);
         }
 
+        // AMBIL id_out_celup UNIK
+        $idOutCelups = array_values(
+            array_unique(array_column($validDatas, 'id_out_celup'))
+        );
+
+        $agg = $this->getAggregatedData($idOutCelups);
+
+        foreach ($validDatas as &$row) {
+
+            $id = $row['id_out_celup'];
+
+            $other = $agg['other'][$id] ?? [
+                'kgs_other' => 0,
+                'cns_other' => 0
+            ];
+
+            $obc = $agg['obc'][$id] ?? [
+                'kgs_out_by_cns' => 0,
+                'cns_out_by_cns' => 0
+            ];
+
+            $history = $agg['history'][$id] ?? [
+                'kgs_pindah' => 0,
+                'kgs_pinjam' => 0,
+                'kgs_retur'  => 0,
+                'cns_pindah' => 0,
+                'cns_pinjam' => 0,
+                'cns_retur'  => 0
+            ];
+
+            // ======================
+            // HITUNG MAX KGS
+            // ======================
+            $row['max_kgs_kirim'] = round(
+                $row['kgs_kirim']
+                    - $other['kgs_other']
+                    - $obc['kgs_out_by_cns']
+                    - $history['kgs_pindah']
+                    - $history['kgs_pinjam']
+                    - $history['kgs_retur'],
+                2
+            );
+
+            // ======================
+            // HITUNG MAX CONES
+            // ======================
+            $row['max_cones_kirim'] =
+                $row['cones_kirim']
+                - $other['cns_other']
+                - $obc['cns_out_by_cns']
+                - $history['cns_pindah']
+                - $history['cns_pinjam']
+                - $history['cns_retur'];
+        }
+
+        unset($row); // safety reference
+
 
         /** @var \CodeIgniter\Session\Session */
         $session = session();
@@ -616,6 +673,8 @@ class PemesananController extends BaseController
                 'area_out'              => $row['area_out'],
                 'no_karung'             => $row['no_karung'],
                 'tgl_out'               => $row['tgl_out'],
+                'max_kgs'               => $row['ttl_kg'] ?? 0,
+                'max_cns'               => $row['ttl_kg'] ?? 0,
                 'kgs_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['kgs_out'] ?? $row['ttl_kg'] ?? 0),
                 'cns_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['cns_out'] ?? $row['ttl_cns'] ?? 0),
                 'krg_out'               => 0, // asumsi default
@@ -647,6 +706,61 @@ class PemesananController extends BaseController
                 'success'   => true,
                 'message'   => "{$addedCount} record berhasil ditambahkan"
             ]);
+    }
+
+    public function getAggregatedData(array $idOutCelups): array
+    {
+        if (empty($idOutCelups)) {
+            return [
+                'other' => [],
+                'obc' => [],
+                'history' => []
+            ];
+        }
+
+        // OTHER OUT
+        $other = $this->db->table('other_out')
+            ->select('id_out_celup,
+            SUM(kgs_other_out) AS kgs_other,
+            SUM(cns_other_out) AS cns_other')
+            ->whereIn('id_out_celup', $idOutCelups)
+            ->groupBy('id_out_celup')
+            ->get()
+            ->getResultArray();
+
+        // OBC
+        $obc = $this->db->table('pengeluaran')
+            ->select('id_out_celup,
+            SUM(kgs_out) AS kgs_out_by_cns,
+            SUM(cns_out) AS cns_out_by_cns')
+            ->where('krg_out', 0)
+            ->where('status', 'Pengiriman Area')
+            ->whereIn('id_out_celup', $idOutCelups)
+            ->groupBy('id_out_celup')
+            ->get()
+            ->getResultArray();
+
+        // HISTORY STOCK
+        $history = $this->db->table('history_stock')
+            ->select("
+            id_out_celup,
+            SUM(CASE WHEN keterangan = 'Pindah Order' THEN kgs ELSE 0 END) AS kgs_pindah,
+            SUM(CASE WHEN keterangan = 'Pinjam Order' THEN kgs ELSE 0 END) AS kgs_pinjam,
+            SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN kgs ELSE 0 END) AS kgs_retur,
+            SUM(CASE WHEN keterangan = 'Pindah Order' THEN cns ELSE 0 END) AS cns_pindah,
+            SUM(CASE WHEN keterangan = 'Pinjam Order' THEN cns ELSE 0 END) AS cns_pinjam,
+            SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN cns ELSE 0 END) AS cns_retur
+        ")
+            ->whereIn('id_out_celup', $idOutCelups)
+            ->groupBy('id_out_celup')
+            ->get()
+            ->getResultArray();
+
+        return [
+            'other'   => array_column($other, null, 'id_out_celup'),
+            'obc'     => array_column($obc, null, 'id_out_celup'),
+            'history' => array_column($history, null, 'id_out_celup'),
+        ];
     }
 
     public function removeSessionDelivery()
