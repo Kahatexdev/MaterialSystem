@@ -1775,24 +1775,34 @@ class ScheduleController extends BaseController
             ->where('schedule_celup.id_celup !=', null)
             ->where('schedule_celup.id_mesin !=', null);
 
-        if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
+        if ($filterTglSch && !$filterTglSchsampai) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d')); // Hanya ambil data sampai hari ini
+        } elseif ($filterTglSch && $filterTglSchsampai) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
                 ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
-        } elseif (!empty($filterTglSch)) {
-            $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        } else {
+            // Jika tidak ada filter tanggal, ambil data dari 1 bulan lalu sampai hari ini
+            // $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth)
+            //     ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d'));
         }
 
         if (!empty($search)) {
             $builder->groupStart()
                 ->like('schedule_celup.no_model', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
                 ->orLike('schedule_celup.kode_warna', $search)
+                ->orLike('schedule_celup.lot_celup', $search)
                 ->groupEnd();
         }
-        $builder->groupBy('schedule_celup.id_celup');
+        $builder->groupBy([
+            'schedule_celup.id_mesin',
+            'schedule_celup.id_celup',
+            'schedule_celup.tanggal_schedule',
+            'schedule_celup.lot_urut'
+        ]);
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
-
+        
         $order = $postData['order'][0] ?? null;
         if ($order) {
             $colIndex = $order['column']; // index kolom dari DataTables
@@ -1834,7 +1844,7 @@ class ScheduleController extends BaseController
 
         } else {
             // default
-            $builder->orderBy('schedule_celup.id_celup', 'DESC');
+            $builder->orderBy('schedule_celup.created_at', 'DESC');
         }
 
         $data = $builder->findAll($length, $start);

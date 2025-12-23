@@ -996,6 +996,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 
     $routes->get('audit', 'AuditLogController::index');
+    $routes->get('audit/datatables', 'AuditLogController::datatables');
     $routes->get('locked-users', 'AuthController::lockedUsers');
     $routes->post('unlock-user/(:num)', 'AuthController::unlockUser/$1');
 });
