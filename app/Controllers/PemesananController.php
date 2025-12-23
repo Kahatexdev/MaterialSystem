@@ -2982,7 +2982,8 @@ class PemesananController extends BaseController
 
             // Ambil kg po tambahan (pakai style_size terakhir kalau ada)
             $kgPoTambahan = (float)(
-                $this->totalPoTambahanModel->getKgPoTambahan([
+                // $this->totalPoTambahanModel->getKgPoTambahan([
+                $this->poTambahanModel->getKgPoTambahan([
                     'no_model'   => $retur['no_model'],
                     'item_type'  => $retur['item_type'],
                     'kode_warna' => $retur['kode_warna'],

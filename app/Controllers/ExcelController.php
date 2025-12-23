@@ -2009,7 +2009,7 @@ class ExcelController extends BaseController
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
         $data = $this->masterOrderModel->getFilterMasterOrder($key, $tanggal_awal, $tanggal_akhir);
-
+        
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -15193,7 +15193,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Request_Schedule' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report_Request_Schedule ' . $filterTglSch . '_to_' . $filterTglSchsampai . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');

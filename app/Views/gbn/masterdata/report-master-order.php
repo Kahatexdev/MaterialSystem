@@ -184,6 +184,7 @@
 
         $('#btnExport').click(function() {
             let key = $('#keyInput').val().trim();
+            key = encodeURIComponent(key);
             let tanggal_awal = $('#tglAwal').val().trim();
             let tanggal_akhir = $('#tglAkhir').val().trim();
             window.location.href = "<?= base_url($role . '/masterdata/excelMasterOrder') ?>?key=" + key + "&tanggal_awal=" + tanggal_awal + "&tanggal_akhir=" + tanggal_akhir;
