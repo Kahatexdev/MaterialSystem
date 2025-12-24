@@ -212,6 +212,12 @@ class MaterialModel extends Model
                 ->orLike('sc.lot_celup', $search)
                 ->groupEnd();
         }
+        $builder->groupBy('
+        master_order.no_model,
+        material_sum.item_type,
+        material_sum.kode_warna,
+        material_sum.color
+    ');
 
         $builder->orderBy('master_material.jenis');
 
