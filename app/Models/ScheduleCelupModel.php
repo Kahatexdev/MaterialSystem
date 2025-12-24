@@ -560,21 +560,8 @@ class ScheduleCelupModel extends Model
 
         $db = \Config\Database::connect();
 
-        // 2) Build your material-summary subquery
-        $materialSub  = $db->table('material')
-            ->select('
-                           id_order,
-                           item_type,
-                           kode_warna,
-                           color,
-                           SUM(kgs) AS total_kgs
-                       ')
-            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-            ->getCompiledSelect(false);  // false = no trailing semicolon
-
         $datangSub = $db->table('pemasukan')
             ->select("
-            pemasukan.id_out_celup,
             out_celup.no_model,
             schedule_celup.item_type,
             schedule_celup.kode_warna,
@@ -614,7 +601,6 @@ class ScheduleCelupModel extends Model
                 'mesin_celup.no_mesin',
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',
-                'material_summary.total_kgs',
                 'datang_sub.kgs_datang',
                 'datang_sub.tgl_datang',
                 'po_plus_sub.total_poplus',
@@ -623,16 +609,6 @@ class ScheduleCelupModel extends Model
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-            // ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
-            // manual derived‐table join:
-            ->join(
-                "({$materialSub}) AS material_summary",
-                'material_summary.item_type   = schedule_celup.item_type
-             AND material_summary.kode_warna = schedule_celup.kode_warna
-             AND material_summary.color      = schedule_celup.warna
-             AND material_summary.id_order   = master_order.id_order',
-                'left'
-            )
             ->join(
                 "({$datangSub}) AS datang_sub",
                 'datang_sub.no_model = schedule_celup.no_model
@@ -675,6 +651,8 @@ class ScheduleCelupModel extends Model
             $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
                 ->where("schedule_celup.start_mc <=", $tanggal_akhir);
         }
+
+        $builder->groupBy('schedule_celup.id_celup');
 
         return $builder->get()->getResult();
     }
@@ -1543,8 +1521,12 @@ class ScheduleCelupModel extends Model
             ->where('kr.tipe_kategori', 'PENGEMBALIAN')
             ->groupBy(['history_stock.id_out_celup']);
 
+        $subSc = $this->db->table('schedule_celup')
+            ->select('no_model, item_type, kode_warna, warna, SUM(kg_celup) AS qty_sch, MIN(start_mc) AS start_mc')
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'warna']);
+
         // 3) Main query
-        $builder = $this->db->table('schedule_celup sc')
+        $builder = $this->db->table("({$subSc->getCompiledSelect()}) sc")
             ->select([
                 'sc.no_model',
                 'sc.item_type',
@@ -1557,7 +1539,7 @@ class ScheduleCelupModel extends Model
                 'sc.start_mc',
                 'st.stock_awal',
                 'rt.retur_stock',
-                'SUM(DISTINCT sc.kg_celup) AS qty_sch',
+                'sc.qty_sch',
                 'pm.qty_datang_solid',
                 'oc.qty_ganti_retur_solid',
                 'rtbl.retur_belang',
@@ -1567,7 +1549,7 @@ class ScheduleCelupModel extends Model
             ->join("({$subOc->getCompiledSelect()}) oc", 'oc.no_model = sc.no_model AND oc.item_type   = sc.item_type AND oc.kode_warna  = sc.kode_warna AND oc.warna = sc.warna', 'left')
             ->join("({$subSt->getCompiledSelect()}) st", 'st.no_model   = oc.no_model AND st.item_type  = sc.item_type AND st.kode_warna = sc.kode_warna AND st.warna = sc.warna', 'left')
             ->join("({$subPoPlus->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.color = sc.warna', 'left')
-            ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna', 'left')
+            ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna AND sc.warna = rt.warna', 'left')
             ->join("({$subPm->getCompiledSelect()}) pm", 'pm.no_model = sc.no_model AND pm.item_type   = sc.item_type AND pm.kode_warna  = sc.kode_warna AND pm.warna = sc.warna', 'left')
             ->join("({$subRtBl->getCompiledSelect()}) rtbl", 'rtbl.no_model = sc.no_model AND rtbl.item_type = sc.item_type AND rtbl.kode_warna = sc.kode_warna', 'left');
 
