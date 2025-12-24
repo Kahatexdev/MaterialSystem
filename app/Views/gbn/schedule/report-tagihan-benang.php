@@ -290,11 +290,10 @@
     });
 
     $(document).ready(function() {
-        // Trigger pencarian saat tombol Enter ditekan di input apa pun
         $('#noModel, #kodeWarna, #deliveryAwal, #deliveryAkhir, #startMcFrom, #startMcTo').on('keydown', function(e) {
             if (e.key === 'Enter') {
-                e.preventDefault(); // Hindari form submit default (jika ada form)
-                $('#btnSearch').click(); // Trigger tombol Search
+                e.preventDefault();
+                $('#btnSearch').click();
             }
         });
     });
