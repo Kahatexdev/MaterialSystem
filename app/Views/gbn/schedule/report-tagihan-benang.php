@@ -84,28 +84,28 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start Mc</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Opname</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Retur Stock</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Qty Sch</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Qty Datang Solid</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Ganti Retur Solid</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Retur Belang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tagihan Datang Solid</th>
+                            <th class="font-weight-bolder">No</th>
+                            <th class="font-weight-bolder">No Model</th>
+                            <th class="font-weight-bolder">Item Type</th>
+                            <th class="font-weight-bolder">Kode Warna</th>
+                            <th class="font-weight-bolder">Warna</th>
+                            <th class="font-weight-bolder">Area</th>
+                            <th class="font-weight-bolder">Start Mc</th>
+                            <th class="font-weight-bolder">Delivery Awal</th>
+                            <th class="font-weight-bolder">Delivery Akhir</th>
+                            <th class="font-weight-bolder">Qty PO</th>
+                            <th class="font-weight-bolder">Qty PO(+)</th>
+                            <th class="font-weight-bolder">Stock Awal</th>
+                            <th class="font-weight-bolder">Stock Opname</th>
+                            <th class="font-weight-bolder">Retur Stock</th>
+                            <th class="font-weight-bolder">Total Qty Sch</th>
+                            <th class="font-weight-bolder">Total Qty Datang Solid</th>
+                            <th class="font-weight-bolder">Qty Ganti Retur Solid</th>
+                            <th class="font-weight-bolder">Qty Retur Belang</th>
+                            <th class="font-weight-bolder">Tagihan Datang Solid</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -287,6 +287,16 @@
 
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
+    });
+
+    $(document).ready(function() {
+        // Trigger pencarian saat tombol Enter ditekan di input apa pun
+        $('#noModel, #kodeWarna, #deliveryAwal, #deliveryAkhir, #startMcFrom, #startMcTo').on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Hindari form submit default (jika ada form)
+                $('#btnSearch').click(); // Trigger tombol Search
+            }
+        });
     });
 </script>
 

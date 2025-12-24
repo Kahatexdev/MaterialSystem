@@ -192,33 +192,33 @@
     <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase font-bolder" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Jenis</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tanggal Retur</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loss</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Kirim</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty Retur</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Cones Retur</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Karung Retur</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Retur</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kategori</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Area</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Keterangan Gbn</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Waktu Acc</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">User</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Jenis</th>
+                            <th class="text-center">Tanggal Retur</th>
+                            <th class="text-center">Area</th>
+                            <th class="text-center">No Model</th>
+                            <th class="text-center">Item Type</th>
+                            <th class="text-center">Kode Warna</th>
+                            <th class="text-center">Warna</th>
+                            <th class="text-center">Loss</th>
+                            <th class="text-center">Qty PO</th>
+                            <th class="text-center">Qty PO(+)</th>
+                            <th class="text-center">Qty Kirim</th>
+                            <th class="text-center">Cones Kirim</th>
+                            <th class="text-center">Karung Kirim</th>
+                            <th class="text-center">LOT Kirim</th>
+                            <th class="text-center">Qty Retur</th>
+                            <th class="text-center">Cones Retur</th>
+                            <th class="text-center">Karung Retur</th>
+                            <th class="text-center">LOT Retur</th>
+                            <th class="text-center">Kategori</th>
+                            <th class="text-center">Keterangan Area</th>
+                            <th class="text-center">Keterangan Gbn</th>
+                            <th class="text-center">Waktu Acc</th>
+                            <th class="text-center">User</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -234,7 +234,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": false,
+            "searching": true,
             "ordering": true,
             "info": true,
             "responsive": true,
@@ -326,12 +326,12 @@
                                 item.warna,
                                 item.loss,
                                 item.total_kgs,
-                                item.qty_po_plus !== undefined && item.qty_po_plus !== null ? item.qty_po_plus : 0,
-                                item.kg_kirim,
-                                item.cns_kirim,
-                                item.krg_kirim,
-                                item.lot_out,
-                                item.kg,
+                                item.qty_po_plus ?? 0,
+                                parseFloat(item.kg_kirim).toFixed(2) ?? 0,
+                                item.cns_kirim ?? 0,
+                                item.krg_kirim ?? 0,
+                                shortLot(item.lot_out),
+                                parseFloat(item.kg).toFixed(2) ?? 0,
                                 item.cns,
                                 item.karung,
                                 item.lot_retur,
@@ -339,10 +339,10 @@
                                 item.keterangan_area,
                                 item.keterangan_gbn,
                                 item.waktu_acc_retur,
-                                item.admin,
-                            ]).draw(false);
+                                item.admin
+                            ]);
                         });
-
+                        dataTable.draw();
                         $('#btnExport').removeClass('d-none'); // Munculkan tombol Export Excel
                     } else {
                         $('#btnExport').addClass('d-none'); // Sembunyikan jika tidak ada data
@@ -385,6 +385,20 @@
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
     });
+
+    function shortLot(lotString, maxLength = 35) {
+        if (!lotString) return '';
+
+        if (lotString.length <= maxLength) {
+            return lotString;
+        }
+
+        return `
+        <span title="${lotString}">
+            ${lotString.substring(0, maxLength)}...
+        </span>
+    `;
+    }
 </script>
 
 

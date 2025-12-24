@@ -149,7 +149,7 @@ class WarehouseController extends BaseController
 
         if (!empty($orders)) {
             $models = array_column($orders, 'no_model');
-            
+
             $client = \Config\Services::curlrequest([
                 'timeout' => 5,
                 'http_errors' => false,
@@ -161,10 +161,10 @@ class WarehouseController extends BaseController
                     'json' => $models
                 ]
             );
-            
+
             if ($response->getStatusCode() === 200) {
                 $bulkResult = json_decode($response->getBody(), true);
-                
+
                 foreach ($orders as $od) {
                     if (!empty($bulkResult[$od['no_model']])) {
                         $this->masterOrderModel->update(
@@ -2200,7 +2200,7 @@ class WarehouseController extends BaseController
                     payloadOld: $payloadOld,
                     payloadNew: $payloadNew,
                 );
-                
+
                 // Insert data pengeluaran
                 $this->pengeluaranModel->insert($insertData);
 

@@ -1221,14 +1221,14 @@ class ScheduleController extends BaseController
         $filterTglSchsampai  = $this->request->getPost('filter_tglschsampai');
         $filterNoModel       = $this->request->getPost('filter_nomodel');
 
-        $showExcel = !empty($filterTglSch) 
-            || !empty($filterTglSchsampai) 
+        $showExcel = !empty($filterTglSch)
+            || !empty($filterTglSchsampai)
             || !empty($filterNoModel);
 
         // 1. Ambil schedule (read only)
         $sch = $this->scheduleCelupModel
             ->getSchedule($filterTglSch, $filterTglSchsampai, $filterNoModel);
-        
+
         // 2. Sync delivery (background-style, cepat)
         $listPdk = $this->masterOrderModel->getNullDeliv();
         // dd ($listPdk);
@@ -1244,7 +1244,7 @@ class ScheduleController extends BaseController
             $res = $client->post('getDeliveryAwalAkhir-bulk', [
                 'json' => $models
             ]);
-            
+
             if ($res->getStatusCode() === 200) {
                 $bulk = json_decode($res->getBody(), true);
 
@@ -1453,22 +1453,64 @@ class ScheduleController extends BaseController
         $deliveryAkhir = $this->request->getGet('delivery_akhir');
         $tglAwal       = $this->request->getGet('tanggal_awal');
         $tglAkhir      = $this->request->getGet('tanggal_akhir');
+        $jenis = 'BENANG';
 
         $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
 
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            // dd($row);
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
             $stockAwal    = (float) $row['stock_awal'];
             $datangSolid  = (float) $row['qty_datang_solid'];
             $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
-            $qtyPo        = (float) $row['qty_po'];
             $poPlus       = (float) ($row['po_plus'] ?? 0);
             $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['qty_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['qty_po']  = 0;
+            }
+            $qtyPo = (float) $row['qty_po'];
 
             if ($gantiRetur > 0) {
                 $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;
             } else {
                 $tagihanDatang = ($stockAwal + $datangSolid) - $qtyPo - $poPlus;
             }
+
             // tambahkan ke array
             $row['tagihan_datang'] = $tagihanDatang;
         }

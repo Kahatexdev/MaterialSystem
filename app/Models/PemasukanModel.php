@@ -607,7 +607,7 @@ class PemasukanModel extends Model
             ->join('master_material', 'master_material.item_type = material.item_type', 'left')
             ->join('master_order', 'master_order.id_order = material.id_order', 'left')
             ->join('total_potambahan', 'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
-            ->join('schedule_celup', 'schedule_celup.no_model = master_order.no_model', 'left')
+            ->join('schedule_celup', 'schedule_celup.no_model = master_order.no_model AND schedule_celup.item_type = material.item_type AND schedule_celup.kode_warna = material.kode_warna AND schedule_celup.warna = material.color', 'left')
             ->join('out_celup', 'out_celup.id_celup = schedule_celup.id_celup', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
             ->join('pemasukan', 'pemasukan.id_out_celup = out_celup.id_out_celup', 'left')
