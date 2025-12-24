@@ -28,6 +28,7 @@ use App\Models\TotalPoTambahanModel;
 use App\Models\HistoryStock;
 use App\Models\MasterRangePemesanan;
 use CodeIgniter\API\ResponseTrait;
+use App\Services\ManualDeliveryService;
 
 
 class PemesananController extends BaseController
@@ -563,90 +564,254 @@ class PemesananController extends BaseController
     // }
 
     // bira
+    // public function saveSessionDeliveryArea()
+    // {
+    //     // Ambil semua input POST
+    //     $postData = $this->request->getPost();
+    //     // dd ($postData);
+    //     // Validasi data yang diperlukan: bisa menghasilkan array of records
+    //     $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
+    //     // log_message('debug', '[saveSessionDeliveryArea] Validated data: ' . json_encode($validDatas));
+    //     // Jika tidak ada data valid, kembalikan error
+    //     if (!is_array($validDatas) || count($validDatas) === 0) {
+    //         return $this->response->setStatusCode(400)->setJSON([
+    //             'success' => false,
+    //             'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
+    //         ]);
+    //     }
+
+    //     // AMBIL id_out_celup UNIK
+    //     $idOutCelups = array_values(
+    //         array_unique(array_column($validDatas, 'id_out_celup'))
+    //     );
+
+    //     $agg = $this->getAggregatedData($idOutCelups);
+    //     log_message('debug', '[saveSessionDeliveryArea] Aggregated data: ' . json_encode($agg));
+    //     foreach ($validDatas as &$row) {
+
+    //         $id = $row['id_out_celup'];
+
+    //         $other = $agg['other'][$id] ?? [
+    //             'kgs_other' => 0,
+    //             'cns_other' => 0
+    //         ];
+
+    //         $obc = $agg['obc'][$id] ?? [
+    //             'kgs_out_by_cns' => 0,
+    //             'cns_out_by_cns' => 0
+    //         ];
+
+    //         $history = $agg['history'][$id] ?? [
+    //             'kgs_pindah' => 0,
+    //             'kgs_pinjam' => 0,
+    //             'kgs_retur'  => 0,
+    //             'cns_pindah' => 0,
+    //             'cns_pinjam' => 0,
+    //             'cns_retur'  => 0
+    //         ];
+
+    //         // ======================
+    //         // HITUNG MAX KGS
+    //         // ======================
+    //         $row['max_kgs_kirim'] = round(
+    //             $row['kgs_kirim']
+    //                 - $other['kgs_other']
+    //                 - $obc['kgs_out_by_cns']
+    //                 - $history['kgs_pindah']
+    //                 - $history['kgs_pinjam']
+    //                 - $history['kgs_retur'],
+    //             2
+    //         );
+
+    //         // ======================
+    //         // HITUNG MAX CONES
+    //         // ======================
+    //         $row['max_cones_kirim'] =
+    //             $row['cones_kirim']
+    //             - $other['cns_other']
+    //             - $obc['cns_out_by_cns']
+    //             - $history['cns_pindah']
+    //             - $history['cns_pinjam']
+    //             - $history['cns_retur'];
+    //     }
+
+    //     unset($row); // safety reference
+
+
+    //     /** @var \CodeIgniter\Session\Session */
+    //     $session = session();
+
+    //     // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
+    //     $manualDelivery = $session->get('manual_delivery') ?? [];
+
+    //     $addedCount = 0;
+
+    //     foreach ($validDatas as $row) {
+    //         // Cek duplikasi berdasarkan id_out_celup + area + tanggal
+    //         $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
+    //             return
+    //                 $item['id_out_celup'] == $row['id_out_celup']
+    //                 && $item['id_pengeluaran'] == $row['id_pengeluaran']
+    //                 && $item['area_out']  == $row['area_out']
+    //                 && $item['tgl_out']   == $row['tgl_out'];
+    //         });
+
+    //         if ($isDuplicate) {
+    //             // Lewati record yang sudah ada
+    //             continue;
+    //         }
+
+    //         // Tambahkan ke array session
+    //         $manualDelivery[] = [
+    //             'id_pengeluaran'        => $row['id_pengeluaran'] ?? null,
+    //             'id_out_celup'          => $row['id_out_celup'],
+    //             'tgl_pakai'             => $row['tgl_pakai'],
+    //             'no_model'              => $row['no_model']    ?? '',
+    //             'item_type'             => $row['item_type']   ?? '',
+    //             'jenis'                 => $row['jenis']       ?? '',
+    //             'kode_warna'            => $row['kode_warna']  ?? '',
+    //             'warna'                 => $row['warna']       ?? '',
+    //             'area_out'              => $row['area_out'],
+    //             'no_karung'             => $row['no_karung'],
+    //             'tgl_out'               => $row['tgl_out'],
+    //             'max_kgs'               => $row['max_kgs_kirim'] ?? 0,
+    //             'max_cns'               => $row['max_cones_kirim'] ?? 0,
+    //             'kgs_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['kgs_out'] ?? $row['ttl_kg'] ?? 0),
+    //             'cns_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['cns_out'] ?? $row['ttl_cns'] ?? 0),
+    //             'krg_out'               => 0, // asumsi default
+    //             'lot_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? '' : ($row['lot_out'] ?? ''),
+    //             'nama_cluster'          => $row['nama_cluster'] ?? '',
+    //             'admin'                 => $session->get('username'),
+    //             'status_pengeluaran'    => $postData['status'],
+    //         ];
+
+    //         $addedCount++;
+    //     }
+
+    //     // Simpan kembali session
+    //     $session->set('manual_delivery', $manualDelivery);
+
+    //     if ($addedCount === 0) {
+    //         return $this->response
+    //             ->setStatusCode(409)
+    //             ->setJSON([
+    //                 'success' => false,
+    //                 'message' => 'Semua data sudah ada di session'
+    //             ]);
+    //     }
+
+    //     return $this->response
+    //         ->setStatusCode(200)
+    //         ->setJSON([
+    //             'success'   => true,
+    //             'message'   => "{$addedCount} record berhasil ditambahkan"
+    //         ]);
+    // }
+
+    // public function getAggregatedData(array $idOutCelups): array
+    // {
+    //     if (empty($idOutCelups)) {
+    //         return [
+    //             'other' => [],
+    //             'obc' => [],
+    //             'history' => []
+    //         ];
+    //     }
+
+    //     // OTHER OUT
+    //     $other = $this->db->table('other_out')
+    //         ->select('id_out_celup,
+    //         SUM(kgs_other_out) AS kgs_other,
+    //         SUM(cns_other_out) AS cns_other')
+    //         ->whereIn('id_out_celup', $idOutCelups)
+    //         ->groupBy('id_out_celup')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     // OBC
+    //     $obc = $this->db->table('pengeluaran')
+    //         ->select('id_out_celup,
+    //         SUM(kgs_out) AS kgs_out_by_cns,
+    //         SUM(cns_out) AS cns_out_by_cns')
+    //         ->where('krg_out', 0)
+    //         ->where('status', 'Pengiriman Area')
+    //         ->whereIn('id_out_celup', $idOutCelups)
+    //         ->groupBy('id_out_celup')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     // HISTORY STOCK
+    //     $history = $this->db->table('history_stock')
+    //         ->select("
+    //         id_out_celup,
+    //         SUM(CASE WHEN keterangan = 'Pindah Order' THEN kgs ELSE 0 END) AS kgs_pindah,
+    //         SUM(CASE WHEN keterangan = 'Pinjam Order' THEN kgs ELSE 0 END) AS kgs_pinjam,
+    //         SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN kgs ELSE 0 END) AS kgs_retur,
+    //         SUM(CASE WHEN keterangan = 'Pindah Order' THEN cns ELSE 0 END) AS cns_pindah,
+    //         SUM(CASE WHEN keterangan = 'Pinjam Order' THEN cns ELSE 0 END) AS cns_pinjam,
+    //         SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN cns ELSE 0 END) AS cns_retur
+    //     ")
+    //         ->whereIn('id_out_celup', $idOutCelups)
+    //         ->groupBy('id_out_celup')
+    //         ->get()
+    //         ->getResultArray();
+
+    //     return [
+    //         'other'   => array_column($other, null, 'id_out_celup'),
+    //         'obc'     => array_column($obc, null, 'id_out_celup'),
+    //         'history' => array_column($history, null, 'id_out_celup'),
+    //     ];
+    // }
+
     public function saveSessionDeliveryArea()
     {
-        // Ambil semua input POST
         $postData = $this->request->getPost();
-        // dd ($postData);
-        // Validasi data yang diperlukan: bisa menghasilkan array of records
-        $validDatas = $this->pengeluaranModel->validateDeliveryData($postData);
-        log_message('debug', '[saveSessionDeliveryArea] Validated data: ' . json_encode($validDatas));
-        // Jika tidak ada data valid, kembalikan error
-        if (!is_array($validDatas) || count($validDatas) === 0) {
-            return $this->response->setStatusCode(400)->setJSON([
-                'success' => false,
-                'message' => 'Tidak ada data baru atau data sudah dikirim sebelumnya'
-            ]);
-        }
+        // $start = microtime(true);
+
+        $validated = $this->pengeluaranModel->validateDeliveryData($postData);
+        // log_message('debug', 'VALIDATE: ' . (microtime(true) - $start));
 
 
-        /** @var \CodeIgniter\Session\Session */
-        $session = session();
+        $service = new ManualDeliveryService(
+            db_connect(),
+            session()
+        );
 
-        // Ambil data session manual_delivery (jika belum ada, inisialisasi array kosong)
-        $manualDelivery = $session->get('manual_delivery') ?? [];
+        // $start = microtime(true);
+        $result = $service->addToSession(
+            $validated,
+            $postData['status'],
+            session()->get('username')
+        );
+        // log_message('debug', 'SERVICE: ' . (microtime(true) - $start));
 
-        $addedCount = 0;
 
-        foreach ($validDatas as $row) {
-            // Cek duplikasi berdasarkan id_out_celup + area + tanggal
-            $isDuplicate = array_filter($manualDelivery, function ($item) use ($row) {
-                return
-                    $item['id_out_celup'] == $row['id_out_celup']
-                    && $item['id_pengeluaran'] == $row['id_pengeluaran']
-                    && $item['area_out']  == $row['area_out']
-                    && $item['tgl_out']   == $row['tgl_out'];
-            });
-
-            if ($isDuplicate) {
-                // Lewati record yang sudah ada
-                continue;
-            }
-
-            // Tambahkan ke array session
-            $manualDelivery[] = [
-                'id_pengeluaran'        => $row['id_pengeluaran'] ?? null,
-                'id_out_celup'          => $row['id_out_celup'],
-                'tgl_pakai'             => $row['tgl_pakai'],
-                'no_model'              => $row['no_model']    ?? '',
-                'item_type'             => $row['item_type']   ?? '',
-                'jenis'                 => $row['jenis']       ?? '',
-                'kode_warna'            => $row['kode_warna']  ?? '',
-                'warna'                 => $row['warna']       ?? '',
-                'area_out'              => $row['area_out'],
-                'no_karung'             => $row['no_karung'],
-                'tgl_out'               => $row['tgl_out'],
-                'kgs_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['kgs_out'] ?? $row['ttl_kg'] ?? 0),
-                'cns_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? 0 : ($row['cns_out'] ?? $row['ttl_cns'] ?? 0),
-                'krg_out'               => 0, // asumsi default
-                'lot_out'               => ($row['status'] ?? '') === 'Pengiriman Area' ? '' : ($row['lot_out'] ?? ''),
-                'nama_cluster'          => $row['nama_cluster'] ?? '',
-                'admin'                 => $session->get('username'),
-                'jenis'                 => $row['jenis'],
-                'status_pengeluaran'    => $postData['status'],
-            ];
-
-            $addedCount++;
-        }
-
-        // Simpan kembali session
-        $session->set('manual_delivery', $manualDelivery);
-
-        if ($addedCount === 0) {
+        return $this->response
+            ->setStatusCode($result['code'])
+            ->setJSON($result);
+    }
+    public function refreshSessionDeliveryArea()
+    {
+        if (! session()->has('manual_delivery')) {
             return $this->response
-                ->setStatusCode(409)
+                ->setStatusCode(204) // No Content
                 ->setJSON([
-                    'success' => false,
-                    'message' => 'Semua data sudah ada di session'
+                    'success' => true,
+                    'message' => 'Session kosong, tidak ada yang direfresh'
                 ]);
         }
 
-        return $this->response
-            ->setStatusCode(200)
-            ->setJSON([
-                'success'   => true,
-                'message'   => "{$addedCount} record berhasil ditambahkan"
-            ]);
+        $service = new ManualDeliveryService(
+            db_connect(),
+            session()
+        );
+
+        // 🔥 INI KUNCINYA
+        $service->refreshSessionMax();
+
+        return $this->response->setJSON([
+            'success' => true
+        ]);
     }
 
     public function removeSessionDelivery()

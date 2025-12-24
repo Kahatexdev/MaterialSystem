@@ -176,7 +176,7 @@
             <div style="text-align:left">
                 <b>Login gagal</b><br>
                 Sisa kesempatan login:
-                <b><?= max(0, ($info['max'] ?? 5) - ($info['failed'] ?? 0)) ?></b>
+                <b><?= max(0, ($info['max'] ?? 3) - ($info['failed'] ?? 0)) ?></b>
             </div>
         `;
                 <?php endif; ?>
