@@ -648,6 +648,7 @@ class CelupController extends BaseController
                 $jmldatapertab = count($data['no_karung'][$h]);
 
                 for ($i = 0; $i < $jmldatapertab; $i++) {
+                    // dd($data);
                     $saveDataOutCelup[] = [
                         'id_bon' => $id_bon,
                         'id_celup' => $id_celup ?? null,
@@ -658,7 +659,7 @@ class CelupController extends BaseController
                         'gw_kirim' => $data['gw_kirim'][$h][$i] ?? null,
                         'kgs_kirim' => $data['kgs_kirim'][$h][$i] ?? null,
                         'cones_kirim' => $data['cones_kirim'][$h][$i] ?? null,
-                        'lot_kirim' => $data['items'][$h]['lot_celup'] ?? null,
+                        'lot_kirim' => $data['lot_celup'][$h][$i] ?? null,
                         'ganti_retur' => $gantiRetur,
                         'operator_packing' => $operatorPerTab,
                         'shift' => $shiftPerTab,
@@ -767,7 +768,32 @@ class CelupController extends BaseController
 
     public function updateBon()
     {
+        helper('audit');
+
         $id_bon = $this->request->getPost('id_bon');
+
+        // ===== DATA LAMA BON =====
+        $oldBon = $this->bonCelupModel->find($id_bon);
+
+        // ===== DATA LAMA KARUNG (GROUP BY id_out_celup) =====
+        $oldKarungRows = $this->outCelupModel
+            ->where('id_bon', $id_bon)
+            ->findAll();
+
+        $oldKarung = [];
+        foreach ($oldKarungRows as $r) {
+            $oldKarung[$r['id_out_celup']] = [
+                'no_karung'   => $r['no_karung'],
+                'l_m_d'       => $r['l_m_d'],
+                'harga'       => $r['harga'],
+                'ganti_retur' => $r['ganti_retur'],
+                'gw_kirim'    => $r['gw_kirim'],
+                'kgs_kirim'   => $r['kgs_kirim'],
+                'cones_kirim' => $r['cones_kirim'],
+                'lot_kirim'   => $r['lot_kirim'],
+            ];
+        }
+
         $statusBon = $this->bonCelupModel->select('status')->where('id_bon', $id_bon)->first();
 
         $dataBon = [
@@ -814,6 +840,76 @@ class CelupController extends BaseController
                 $this->outCelupModel->update($id_out_celup, $dataKarung);
             }
         }
+
+        // ===== DATA BARU =====
+        $newBon = $this->bonCelupModel->find($id_bon);
+
+        // ambil ulang karung terbaru
+        $newKarungRows = $this->outCelupModel
+            ->where('id_bon', $id_bon)
+            ->findAll();
+
+        $newKarung = [];
+        foreach ($newKarungRows as $r) {
+            $newKarung[$r['id_out_celup']] = [
+                'no_karung'   => $r['no_karung'],
+                'l_m_d'       => $r['l_m_d'],
+                'harga'       => $r['harga'],
+                'ganti_retur' => $r['ganti_retur'],
+                'gw_kirim'    => $r['gw_kirim'],
+                'kgs_kirim'   => $r['kgs_kirim'],
+                'cones_kirim' => $r['cones_kirim'],
+                'lot_kirim'   => $r['lot_kirim'],
+            ];
+        }
+
+        // ===== HITUNG DIFF KARUNG =====
+        $karungDiff = [];
+
+        foreach ($newKarung as $id_out => $newRow) {
+            $oldRow = $oldKarung[$id_out] ?? [];
+
+            $diffOld = [];
+            $diffNew = [];
+
+            foreach ($newRow as $field => $valNew) {
+                $valOld = $oldRow[$field] ?? null;
+                if ((string)$valOld !== (string)$valNew) {
+                    $diffOld[$field] = $valOld;
+                    $diffNew[$field] = $valNew;
+                }
+            }
+
+            if (!empty($diffNew)) {
+                $karungDiff[$id_out] = [
+                    'old' => $diffOld,
+                    'new' => $diffNew,
+                ];
+            }
+        }
+
+        // ===== PAYLOAD AUDIT =====
+        $payloadOld = [
+            'bon'    => $oldBon,
+            'karung' => array_map(fn ($v) => $v, $oldKarung),
+        ];
+
+        $payloadNew = [
+            'bon'    => $newBon,
+            'karung' => $karungDiff, // hanya karung yang berubah
+        ];
+
+        // ===== SIMPAN AUDIT LOG =====
+        log_audit(
+            module: 'OUT_CELUP',
+            action: 'UPDATE',
+            refType: 'BON',
+            refId: $id_bon,
+            message: 'Update data bon & karung',
+            payloadOld: $payloadOld,
+            payloadNew: $payloadNew
+        );
+
 
         // Redirect kembali dengan pesan sukses
         return redirect()->to(base_url($this->role . '/outCelup'))->with('success', 'Data berhasil diperbarui');

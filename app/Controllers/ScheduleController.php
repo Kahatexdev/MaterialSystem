@@ -1681,8 +1681,8 @@ class ScheduleController extends BaseController
             'search' => $search ?? ''
         ];
 
-        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku/?' . http_build_query($params);
-
+        $apiUrl = 'http://172.23.44.14/MaterialSystem/public/api/statusbahanbaku?' . http_build_query($params);
+        // dd ($apiUrl);
         // Mengambil data dari API eksternal
         $response = file_get_contents($apiUrl);
         $status = json_decode($response, true);
@@ -1694,7 +1694,7 @@ class ScheduleController extends BaseController
             'master' => $master, // Data master dari getStartMc
             'status' => $status // Data status yang sudah difilter (gunakan array_values untuk mereset indeks array)
         ];
-
+        // dd ($responseData);
         // Kembalikan data yang sudah difilter ke frontend
         return $this->response->setJSON($responseData);
     }
@@ -1817,24 +1817,34 @@ class ScheduleController extends BaseController
             ->where('schedule_celup.id_celup !=', null)
             ->where('schedule_celup.id_mesin !=', null);
 
-        if (!empty($filterTglSch) && !empty($filterTglSchsampai)) {
+        if ($filterTglSch && !$filterTglSchsampai) {
+            $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
+                ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d')); // Hanya ambil data sampai hari ini
+        } elseif ($filterTglSch && $filterTglSchsampai) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
                 ->where('schedule_celup.tanggal_schedule <=', $filterTglSchsampai);
-        } elseif (!empty($filterTglSch)) {
-            $builder->where('schedule_celup.tanggal_schedule', $filterTglSch);
+        } else {
+            // Jika tidak ada filter tanggal, ambil data dari 1 bulan lalu sampai hari ini
+            // $builder->where('schedule_celup.tanggal_schedule >=', $lastMonth)
+            //     ->where('schedule_celup.tanggal_schedule <=', date('Y-m-d'));
         }
 
         if (!empty($search)) {
             $builder->groupStart()
                 ->like('schedule_celup.no_model', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
                 ->orLike('schedule_celup.kode_warna', $search)
+                ->orLike('schedule_celup.lot_celup', $search)
                 ->groupEnd();
         }
-        $builder->groupBy('schedule_celup.id_celup');
+        $builder->groupBy([
+            'schedule_celup.id_mesin',
+            'schedule_celup.id_celup',
+            'schedule_celup.tanggal_schedule',
+            'schedule_celup.lot_urut'
+        ]);
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
-
+        
         $order = $postData['order'][0] ?? null;
         if ($order) {
             $colIndex = $order['column']; // index kolom dari DataTables
@@ -1856,12 +1866,27 @@ class ScheduleController extends BaseController
                 'kg_celup'
             ];
 
-            if (in_array($colName, $allowedCols)) {
-                $builder->orderBy("schedule_celup.$colName", $colDir);
+            $columnMap = [
+                'no_mc'             => 'mesin_celup.no_mesin',
+                'no_model'          => 'schedule_celup.no_model',
+                'item_type'         => 'schedule_celup.item_type',
+                'lot_celup'         => 'schedule_celup.lot_celup',
+                'kode_warna'        => 'schedule_celup.kode_warna',
+                'warna'             => 'schedule_celup.warna',
+                'start_mc'          => 'schedule_celup.start_mc',
+                'tanggal_schedule'  => 'schedule_celup.tanggal_schedule',
+                'last_status'       => 'schedule_celup.last_status',
+                'kg_po'             => 'open_po.kg_po',          // 🔥 FIX UTAMA
+                'kg_celup'          => 'schedule_celup.kg_celup'
+            ];
+
+            if (isset($columnMap[$colName])) {
+                $builder->orderBy($columnMap[$colName], $colDir);
             }
+
         } else {
             // default
-            $builder->orderBy('schedule_celup.id_celup', 'DESC');
+            $builder->orderBy('schedule_celup.created_at', 'DESC');
         }
 
         $data = $builder->findAll($length, $start);

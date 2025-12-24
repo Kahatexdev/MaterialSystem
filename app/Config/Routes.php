@@ -248,6 +248,8 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('warehouse/filterSisaPakaiKaret', 'WarehouseController::filterSisaPakai');
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakai');
     $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
+    $routes->get('warehouse/historyPindahCluster', 'WarehouseController::historyPindahCluster');
+    $routes->get('warehouse/exportHistoryPindahCluster', 'ExcelController::exportHistoryPindahCluster');
     $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
     $routes->get('pemesanan/historyPinjamOrder', 'PemesananController::HistoryPinjamOrder');
     $routes->get('pemesanan/exportHistoryPinjamOrder', 'ExcelController::exportHistoryPinjamOrder');
@@ -995,6 +997,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
 
     $routes->get('audit', 'AuditLogController::index');
     $routes->get('audit/datatables', 'AuditLogController::datatables');
+    $routes->get('locked-users', 'AuthController::lockedUsers');
+    $routes->post('unlock-user/(:num)', 'AuthController::unlockUser/$1');
 });
 
 $routes->options('(:any)', function () {

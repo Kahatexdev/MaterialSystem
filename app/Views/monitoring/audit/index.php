@@ -1,5 +1,45 @@
 <?php $this->extend($role . '/dashboard/header'); ?>
 <?php $this->section('content'); ?>
+<style>
+/* === PAYLOAD VIEWER === */
+.payload-box {
+    background: #0f172a; /* slate-900 */
+    color: #e5e7eb;      /* gray-200 */
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 10px;
+    padding: 14px;
+    max-height: 340px;
+    overflow: auto;
+    border: 1px solid #1e293b;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* scrollbar */
+.payload-box::-webkit-scrollbar {
+    width: 6px;
+}
+.payload-box::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+/* header kecil */
+.payload-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+}
+
+/* OLD / NEW distinction */
+.payload-old {
+    border-left: 4px solid #ef4444; /* red */
+}
+.payload-new {
+    border-left: 4px solid #22c55e; /* green */
+}
+</style>
 
 <div class="container-fluid">
 
@@ -46,11 +86,10 @@
                             <label class="form-label">Module</label>
                             <select class="form-control" id="module">
                                 <option value="">Semua</option>
-                                <option value="STOCK">STOCK</option>
-                                <option value="TX">TX</option>
-                                <option value="REQUEST">REQUEST</option>
-                                <option value="MASTER">MASTER</option>
                                 <option value="AUTH">AUTH</option>
+                                <option value="SELECT_CLUSTER">SELECT_CLUSTER</option>
+                                <option value="OUT_CELUP">OUT_CELUP</option>
+                                <option value="CELUP">CELUP</option>
                             </select>
                         </div>
 
@@ -58,15 +97,14 @@
                             <label class="form-label">Action</label>
                             <select class="form-control" id="action">
                                 <option value="">Semua</option>
-                                <option value="CREATE">CREATE</option>
-                                <option value="UPDATE">UPDATE</option>
-                                <option value="DELETE">DELETE</option>
                                 <option value="LOGIN">LOGIN</option>
-                                <option value="LOGOUT">LOGOUT</option>
-                                <option value="APPROVE">APPROVE</option>
-                                <option value="REJECT">REJECT</option>
-                                <option value="EXPORT">EXPORT</option>
                                 <option value="LOGIN_FAIL">LOGIN_FAIL</option>
+                                <option value="LOGOUT">LOGOUT</option>
+                                <option value="OUT_JALUR">OUT_JALUR</option>
+                                <option value="OUT_JALUR_CONES">OUT_JALUR_CONES</option>
+                                <option value="OUT_JALUR_PINJAM">OUT_JALUR_PINJAM</option>
+                                <option value="UPDATE">UPDATE</option>
+                                <option value="UPDATE_STATUS">UPDATE_STATUS</option>
                             </select>
                         </div>
 
@@ -146,14 +184,28 @@
                     <div id="auditInfo" class="text-sm"></div>
                 </div>
                 <hr>
-                <div class="row">
+                <div class="row g-3">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary mb-2 btn-copy-payload"
+                        data-target="#payloadOld"
+                    >
+                        <i class="fas fa-copy me-1"></i> Copy Payload Old
+                    </button>
+
+
                     <div class="col-md-6">
-                        <small class="text-muted">Payload Old</small>
-                        <pre class="bg-light p-3 rounded" style="max-height: 320px; overflow:auto;"><code id="payloadOld">{}</code></pre>
+                        <div class="payload-title text-danger">
+                            <i class="fas fa-history me-1"></i> Payload Old
+                        </div>
+                        <pre id="payloadOld" class="payload-box payload-old">{}</pre>
                     </div>
+
                     <div class="col-md-6">
-                        <small class="text-muted">Payload New</small>
-                        <pre class="bg-light p-3 rounded" style="max-height: 320px; overflow:auto;"><code id="payloadNew">{}</code></pre>
+                        <div class="payload-title text-success">
+                            <i class="fas fa-check-circle me-1"></i> Payload New
+                        </div>
+                        <pre id="payloadNew" class="payload-box payload-new">{}</pre>
                     </div>
                 </div>
             </div>
@@ -281,12 +333,81 @@
             // tapi kalau suatu saat jadi object, tetap aman:
             const pretty = (v) => (typeof v === 'object' ? JSON.stringify(v, null, 2) : String(v));
 
-            $('#payloadOld').text(pretty(oldP));
-            $('#payloadNew').text(pretty(newP));
+            $('#payloadOld').text(prettyJson(oldP));
+            $('#payloadNew').text(prettyJson(newP));
 
             new bootstrap.Modal(document.getElementById('auditDetailModal')).show();
         });
 
     })();
 </script>
+<script>
+function prettyJson(v) {
+    try {
+        if (typeof v === 'string') v = JSON.parse(v);
+        return JSON.stringify(v, null, 2);
+    } catch (e) {
+        return String(v);
+    }
+}
+</script>
+
+<script>
+$(document).on('click', '.btn-copy-payload', function () {
+    const target = $(this).data('target');
+    const text   = $(target).text().trim();
+
+    if (!text) return;
+
+    // Modern clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            toastCopySuccess();
+        }).catch(() => {
+            fallbackCopy(text);
+        });
+    } else {
+        // Fallback untuk http / browser lama
+        fallbackCopy(text);
+    }
+});
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        toastCopySuccess();
+    } catch (err) {
+        alert('Gagal menyalin payload');
+    }
+
+    document.body.removeChild(textarea);
+}
+
+function toastCopySuccess() {
+    // simple feedback
+    const toast = document.createElement('div');
+    toast.innerHTML = 'Payload berhasil disalin';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.background = '#1f2937';
+    toast.style.color = '#fff';
+    toast.style.padding = '8px 14px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '12px';
+    toast.style.zIndex = 9999;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 1500);
+}
+</script>
+
+
 <?php $this->endSection(); ?>

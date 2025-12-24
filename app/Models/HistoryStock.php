@@ -252,4 +252,29 @@ class HistoryStock extends Model
             ->get()
             ->getResultArray();
     }
+
+    public function getHistoryPindahCluster($key)
+    {
+        $builder = $this->db->table('history_stock')
+            ->select('s_new.no_model, s_old.item_type, s_old.kode_warna, s_old.warna, history_stock.kgs, history_stock.cns, history_stock.lot, history_stock.cluster_old, history_stock.cluster_new, history_stock.keterangan, history_stock.created_at, history_stock.admin')
+            ->join('stock s_old', 's_old.id_stock = history_stock.id_stock_old')
+            ->join('stock s_new', 's_new.id_stock = history_stock.id_stock_new')
+            ->where('keterangan', 'Pindah Cluster');
+
+        if (!empty($key)) {
+            $builder->groupStart()
+                ->like('s_old.no_model', $key)
+                ->orLike('s_new.no_model', $key)
+                ->orLike('s_new.item_type', $key)
+                ->orLike('s_new.kode_warna', $key)
+                ->orLike('history_stock.lot', $key)
+                ->orLike('history_stock.cluster_old', $key)
+                ->orLike('history_stock.cluster_new', $key)
+                ->groupEnd();
+        }
+
+        $builder->orderBy('history_stock.created_at', 'DESC');
+
+        return $builder->get()->getResultArray();
+    }
 }

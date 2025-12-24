@@ -222,9 +222,10 @@ class ScheduleCelupModel extends Model
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
                   IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus,
                   open_po.kg_po')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna');
-
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+            ->where('schedule_celup.id_celup !=', null)
+            ->where('schedule_celup.id_mesin !=', null);
         // Filter berdasarkan tanggal jika ada
         if ($filterTglSch && !$filterTglSchsampai) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)

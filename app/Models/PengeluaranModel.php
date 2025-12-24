@@ -637,7 +637,7 @@ class PengeluaranModel extends Model
     {
         $builder = $this->db
             ->table('pengeluaran as p')
-            ->distinct()
+            // ->distinct()
             ->select([
                 'p.*',
                 'pe.tgl_pakai',
@@ -650,6 +650,8 @@ class PengeluaranModel extends Model
                 'tp.ttl_kg',
                 'tp.ttl_cns',
                 'oc.no_karung',
+                'oc.kgs_kirim',
+                'oc.cones_kirim',
             ])
             // JOIN semua tabel
             ->join('out_celup oc',                'oc.id_out_celup    = p.id_out_celup',            'left')
@@ -657,10 +659,7 @@ class PengeluaranModel extends Model
             ->join('pemesanan_spandex_karet psk', 'psk.id_psk         = p.id_psk',                 'left')
             ->join(
                 'pemesanan pe',
-                '(
-                pe.id_total_pemesanan = psk.id_total_pemesanan
-                OR pe.id_total_pemesanan = p.id_total_pemesanan
-            )',
+                'pe.id_total_pemesanan = COALESCE(psk.id_total_pemesanan, p.id_total_pemesanan)',
                 'left'
             )
             ->join('total_pemesanan tp',         'tp.id_total_pemesanan = p.id_total_pemesanan',   'left')

@@ -286,7 +286,9 @@
                                 <th>Kekurangan</th>
                                 <th>Lot</th>
                                 <th>Kgs</th>
+                                <!-- <th>Max K</th> -->
                                 <th>Cones</th>
+                                <!-- <th>Max C</th> -->
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -330,9 +332,11 @@
                                     </td>
                                     <td>
                                         <input type="number" name="kgs_out[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
+                                        <input type="hidden" name="max_kgs[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['max_kgs']) ? $row['max_kgs'] : '') ?>" step="0.01" min="0">
                                     </td>
                                     <td>
                                         <input type="number" name="cns_out[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
+                                        <input type="hidden" name="max_cns[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['max_cns']) ? $row['max_cns'] : '') ?>" step="1" min="0">
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>

@@ -10,6 +10,13 @@
             </nav>
             <div class="collgbne navbar-collgbne mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
                 <ul class="navbar-nav  justify-content-end">
+                    <!-- locked-users -->
+                    <li class="nav-item d-flex align-items-center me-3">
+                        <a href="<?= base_url($role . '/locked-users') ?>" class=" nav-link text-body font-weight-bold px-0">
+                            <i class="fa fa-lock me-sm-1"></i>
+                            <span class="d-sm-inline d-none">Locked Users</span>
+                        </a>
+                    </li>
                     <li class="nav-item d-flex align-items-center">
                         <a href="" data-bs-toggle="modal" data-bs-target="#LogoutModal" class=" nav-link text-body font-weight-bold px-0">
                             <i class="fa fa-user me-sm-1"></i>

@@ -123,54 +123,153 @@ class MaterialModel extends Model
 
     public function MaterialPDK($model = null, $search = null)
     {
-        $builder = $this->select('
-                master_order.no_model,
-                area,
-                material.kode_warna,
+        // =========================
+        $subQuery = $this->db->table('material')
+            ->select('
+                material.id_order,
+                material.area,
                 material.item_type,
+                material.kode_warna,
                 material.color,
-                SUM(kgs) AS qty_po,
-                master_material.jenis
+                SUM(material.kgs) AS qty_po
             ')
-            ->join('master_order', 'master_order.id_order = material.id_order', 'left')
-            ->join('master_material', 'master_material.item_type = material.item_type', 'left')
-            ->join(
-                'open_po',
-                'open_po.no_model = master_order.no_model
-                AND open_po.item_type = master_material.item_type
-                AND open_po.kode_warna = material.kode_warna',
-                'left'
-            )
-            // self join open_po dengan alias "induk"
-            ->join(
-                'open_po as induk',
-                'open_po.id_induk = induk.id_po',
-                'left'
-            )
-            ->join(
-                'schedule_celup',
-                'schedule_celup.no_model = open_po.no_model
-                AND schedule_celup.item_type = open_po.item_type
-                AND schedule_celup.kode_warna = open_po.kode_warna',
-                'left'
-            );
+            ->groupBy('
+                material.id_order,
+                material.area,
+                material.item_type,
+                material.kode_warna,
+                material.color
+            ')
+            ->getCompiledSelect();
+        // schedule
+        $scSub = $this->db->table('schedule_celup')
+            ->select('
+        no_model,
+        item_type,
+        kode_warna,
+        lot_celup,
+        MAX(lot_urut) AS lot_urut,
+        SUM(kg_celup) AS total_kg_celup
+    ')
+            ->groupBy('no_model, item_type, kode_warna, lot_celup')
+            ->getCompiledSelect();
 
+        $builder = $this->db->table("($subQuery) material_sum");
+
+        $builder->select('
+        master_order.no_model,
+        material_sum.area,
+        material_sum.item_type,
+        material_sum.kode_warna,
+        material_sum.color,
+        material_sum.qty_po,
+        master_material.jenis
+    ');
+
+        $builder->join(
+            'master_order',
+            'master_order.id_order = material_sum.id_order',
+            'left'
+        );
+
+        $builder->join(
+            'master_material',
+            'master_material.item_type = material_sum.item_type',
+            'left'
+        );
+
+        $builder->join(
+            'open_po',
+            'open_po.no_model = master_order.no_model
+                    AND open_po.item_type = material_sum.item_type
+                    AND open_po.kode_warna = material_sum.kode_warna',
+            'left'
+        );
+
+        // self join open_po dengan alias "induk"
+        $builder->join(
+            'open_po as induk',
+            'open_po.id_induk = induk.id_po',
+            'left'
+        );
+
+        $builder->join(
+            "($scSub) sc",
+            'sc.no_model = master_order.no_model
+            AND sc.item_type = material_sum.item_type
+            AND sc.kode_warna = material_sum.kode_warna',
+            'left'
+        );
+
+        // FILTER
         if (!empty($model)) {
             $builder->where('master_order.no_model', $model);
         }
 
         if (!empty($search)) {
-            // dikelompokkan supaya OR tidak lepas dari filter lain
             $builder->groupStart()
-                ->like('material.kode_warna', $search)
-                ->orLike('schedule_celup.lot_celup', $search)
+                ->like('material_sum.kode_warna', $search)
+                ->orLike('sc.lot_celup', $search)
                 ->groupEnd();
         }
+        $builder->groupBy('
+        master_order.no_model,
+        material_sum.item_type,
+        material_sum.kode_warna,
+        material_sum.color
+    ');
 
-        $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
-            ->orderBy('master_material.jenis');
+        $builder->orderBy('master_material.jenis');
 
-        return $builder->findAll();
+        return $builder->get()->getResultArray();
+        // $builder = $this->select('
+        //         master_order.no_model,
+        //         area,
+        //         material.kode_warna,
+        //         material.item_type,
+        //         material.color,
+        //         SUM(kgs) AS qty_po,
+        //         master_material.jenis
+        //     ')
+        //     ->join('master_order', 'master_order.id_order = material.id_order', 'left')
+        //     ->join('master_material', 'master_material.item_type = material.item_type', 'left')
+        //     ->join(
+        //         'open_po',
+        //         'open_po.no_model = master_order.no_model
+        //         AND open_po.item_type = master_material.item_type
+        //         AND open_po.kode_warna = material.kode_warna',
+        //         'left'
+        //     )
+        //     // self join open_po dengan alias "induk"
+        //     ->join(
+        //         'open_po as induk',
+        //         'open_po.id_induk = induk.id_po',
+        //         'left'
+        //     )
+        //     ->join(
+        //         'schedule_celup',
+        //         'schedule_celup.no_model = open_po.no_model
+        //         AND schedule_celup.item_type = open_po.item_type
+        //         AND schedule_celup.kode_warna = open_po.kode_warna',
+        //         'left'
+        //     );
+
+        // if (!empty($model)) {
+        //     $builder->where('master_order.no_model', $model);
+        // }
+
+        // if (!empty($search)) {
+        //     // dikelompokkan supaya OR tidak lepas dari filter lain
+        //     $builder->groupStart()
+        //         ->like('material.kode_warna', $search)
+        //         ->orLike('schedule_celup.lot_celup', $search)
+        //         ->groupEnd();
+        // }
+
+        // $builder->groupBy('master_order.no_model, material.item_type, material.kode_warna, material.color')
+        //     ->orderBy('master_material.jenis');
+
+        // return $builder->findAll();
     }
 
     public function getArea()

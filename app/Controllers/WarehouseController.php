@@ -1663,7 +1663,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -3412,6 +3412,52 @@ class WarehouseController extends BaseController
         ]);
     }
 
+    public function historyPindahCluster()
+    {
+        $key  = $this->request->getGet('key')     ?? '';
+
+        // 1) Ambil data
+        if ($key === '') {
+            // $dataPindah = $this->historyStock->getHistoryPindahCluster(null, 10);
+            $dataPindah = [];
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahCluster($key);
+        }
+        // dd ($dataPindah);
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => api_url('capacity') . '',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPindah);
+        }
+
+        return view($this->role . '/warehouse/history-pindah-cluster', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Cluster',
+            'active'  => $this->active,
+            'history' => $dataPindah,
+        ]);
+    }
+
     public function reportSisaDatangBenang()
     {
         $delivery = $this->request->getGet('delivery');
@@ -5000,7 +5046,7 @@ class WarehouseController extends BaseController
                     // Buang null/null string kalau kamu mau lebih rapih
                     $pemasukanUpdate = array_filter(
                         $pemasukanUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($pemasukanUpdate)) {
@@ -5020,7 +5066,7 @@ class WarehouseController extends BaseController
 
                     $outUpdate = array_filter(
                         $outUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($outUpdate)) {
@@ -5037,7 +5083,7 @@ class WarehouseController extends BaseController
 
                     $stockUpdate = array_filter(
                         $stockUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($stockUpdate)) {
@@ -5062,7 +5108,7 @@ class WarehouseController extends BaseController
 
                 $historyData = array_filter(
                     $historyData,
-                    fn($v) => $v !== null
+                    fn ($v) => $v !== null
                 );
 
                 if (!empty($historyData)) {

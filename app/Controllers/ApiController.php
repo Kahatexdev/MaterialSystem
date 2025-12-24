@@ -115,7 +115,7 @@ class ApiController extends ResourceController
         $model = $this->request->getGet('model') ?? null;
         $search = $this->request->getGet('search') ?? null;
         $rows   = $this->materialModel->MaterialPDK($model, $search);
-
+        // dd ($rows);
         if (empty($rows)) {
             log_message('error', "MaterialPDK kosong untuk model: $model");
             return $this->respond([], 200);
@@ -156,7 +156,7 @@ class ApiController extends ResourceController
             'kg_stock',
             'total_po_tambahan'
         ];
-        log_message('debug', 'Isi $rows: ' . json_encode($rows));
+        // log_message('debug', 'Isi $rows: ' . json_encode($rows));
 
         foreach ($rows as $row) {
             $jenis = strtoupper($row['jenis']);
@@ -239,6 +239,7 @@ class ApiController extends ResourceController
                 $res[] = $newRow;
             }
         }
+        // dd ($res);
         return $this->respond($res, 200);
     }
 
@@ -1495,7 +1496,8 @@ class ApiController extends ResourceController
         ];
 
         // $data = $this->poTambahanModel->getKgPoTambahan($params);
-        $data = $this->totalPoTambahanModel->getKgPoTambahan($params);
+        // $data = $this->totalPoTambahanModel->getKgPoTambahan($params);
+        $data = $this->poTambahanModel->getKgPoTambahan($params);
 
 
         return $this->response
