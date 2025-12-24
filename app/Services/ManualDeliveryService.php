@@ -88,30 +88,27 @@ class ManualDeliveryService
             $obc     = $agg['obc'][$id]     ?? ['kgs_out_by_cns' => 0, 'cns_out_by_cns' => 0];
             $history = $agg['history'][$id] ?? [
                 'kgs_pindah' => 0,
-                'kgs_pinjam' => 0,
                 'kgs_retur'  => 0,
                 'cns_pindah' => 0,
-                'cns_pinjam' => 0,
                 'cns_retur'  => 0
             ];
 
             $row['max_kgs_kirim'] = max(0, round(
                 $row['kgs_kirim']
-                - $other['kgs_other']
-                - $obc['kgs_out_by_cns']
-                - $history['kgs_pindah']
-                - $history['kgs_pinjam']
-                - $history['kgs_retur'],
+                    - $other['kgs_other']
+                    - $obc['kgs_out_by_cns']
+                    - $history['kgs_pindah']
+                    - $history['kgs_retur'],
                 2
             ));
 
-            $row['max_cones_kirim'] = max(0,
+            $row['max_cones_kirim'] = max(
+                0,
                 $row['cones_kirim']
-                - $other['cns_other']
-                - $obc['cns_out_by_cns']
-                - $history['cns_pindah']
-                - $history['cns_pinjam']
-                - $history['cns_retur']
+                    - $other['cns_other']
+                    - $obc['cns_out_by_cns']
+                    - $history['cns_pindah']
+                    - $history['cns_retur']
             );
         }
 
@@ -142,6 +139,9 @@ class ManualDeliveryService
             'nama_cluster'       => $row['nama_cluster'] ?? '',
             'admin'              => $username,
             'status_pengeluaran' => $status,
+            // BASE (TIDAK PERNAH BERUBAH)
+            'base_kgs' => $row['kgs_kirim'],     // ASLI DARI DB
+            'base_cns' => $row['cones_kirim'],   // ASLI DARI DB
         ];
     }
 
@@ -182,10 +182,8 @@ class ManualDeliveryService
             ->select("
                 id_out_celup,
                 SUM(CASE WHEN keterangan = 'Pindah Order' THEN kgs ELSE 0 END) AS kgs_pindah,
-                SUM(CASE WHEN keterangan = 'Pinjam Order' THEN kgs ELSE 0 END) AS kgs_pinjam,
                 SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN kgs ELSE 0 END) AS kgs_retur,
                 SUM(CASE WHEN keterangan = 'Pindah Order' THEN cns ELSE 0 END) AS cns_pindah,
-                SUM(CASE WHEN keterangan = 'Pinjam Order' THEN cns ELSE 0 END) AS cns_pinjam,
                 SUM(CASE WHEN keterangan LIKE 'Retur Celup%' THEN cns ELSE 0 END) AS cns_retur
             ")
             ->whereIn('id_out_celup', $idOutCelups)
@@ -208,5 +206,78 @@ class ManualDeliveryService
             $row['tgl_out'],
         ]);
     }
+    public function refreshSessionMax(): void
+    {
+        $sessionData = $this->session->get('manual_delivery') ?? [];
+        if (empty($sessionData)) {
+            return;
+        }
 
+        /**
+         * 1. Ambil id_out_celup unik dari session
+         */
+        $idOutCelups = array_values(array_unique(
+            array_column($sessionData, 'id_out_celup')
+        ));
+
+        /**
+         * 2. Ambil aggregate GLOBAL (sekali saja)
+         */
+        $aggregates = $this->getAggregatedData($idOutCelups);
+
+        /**
+         * 3. Siapkan base PER id_out_celup (IMMUTABLE)
+         */
+        $baseRows = [];
+        foreach ($sessionData as $item) {
+            $id = $item['id_out_celup'];
+
+            if (!isset($baseRows[$id])) {
+                $baseRows[$id] = [
+                    'id_out_celup' => $id,
+                    'kgs_kirim'    => $item['base_kgs'], // 🔥 ASLI
+                    'cones_kirim'  => $item['base_cns'],
+                ];
+            }
+        }
+
+        /**
+         * 4. Hitung max SEKALI per id_out_celup
+         */
+        $calculated = $this->applyMaxCalculation(
+            array_values($baseRows),
+            $aggregates
+        );
+
+        /**
+         * 5. Mapping hasil max
+         */
+        $maxMap = [];
+        foreach ($calculated as $row) {
+            $maxMap[$row['id_out_celup']] = [
+                'max_kgs' => $row['max_kgs_kirim'],
+                'max_cns' => $row['max_cones_kirim'],
+            ];
+        }
+
+        /**
+         * 6. Update session TANPA hitung ulang
+         */
+        foreach ($sessionData as &$item) {
+            $id = $item['id_out_celup'];
+
+            $item['max_kgs'] = $maxMap[$id]['max_kgs'];
+            $item['max_cns'] = $maxMap[$id]['max_cns'];
+
+            // safety clamp (WAJIB)
+            if ($item['kgs_out'] > $item['max_kgs']) {
+                $item['kgs_out'] = $item['max_kgs'];
+            }
+            if ($item['cns_out'] > $item['max_cns']) {
+                $item['cns_out'] = $item['max_cns'];
+            }
+        }
+
+        $this->session->set('manual_delivery', $sessionData);
+    }
 }
