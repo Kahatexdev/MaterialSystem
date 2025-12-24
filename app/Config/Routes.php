@@ -328,6 +328,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pengiriman/getKodeWarna', 'PemesananController::getKodeWarna');
     $routes->get('pengiriman/getWarna', 'PemesananController::getWarna');
     $routes->post('pengiriman/saveSessionDeliveryArea', 'PemesananController::saveSessionDeliveryArea');
+    $routes->get('pengiriman/refreshSessionDeliveryArea', 'PemesananController::refreshSessionDeliveryArea');
     $routes->post('pengiriman/removeSessionDelivery', 'PemesananController::removeSessionDelivery');
     $routes->post('updateStatusKirim', 'PemesananController::updateStatusKirim');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');

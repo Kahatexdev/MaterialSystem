@@ -1384,9 +1384,53 @@ class ScheduleController extends BaseController
         $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $jenis = 'BENANG';
 
         $data = $this->scheduleCelupModel->getFilterSchBenang($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row->no_model,
+                $row->item_type,
+                $row->kode_warna,
+                $row->warna
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row->no_model,
+                'item_type'  => $row->item_type,
+                'kode_warna' => $row->kode_warna,
+                'color'      => $row->warna
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
+        foreach ($data as &$row) {
+            $model        = $row->no_model;
+            $itemType     = $row->item_type;
+            $kodeWarna    = $row->kode_warna;
+            $color        = $row->warna;
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row->total_kgs  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row->total_kgs  = 0;
+            }
+        }
+        unset($row);
+
         return $this->response->setJSON($data);
     }
 
@@ -1453,22 +1497,63 @@ class ScheduleController extends BaseController
         $deliveryAkhir = $this->request->getGet('delivery_akhir');
         $tglAwal       = $this->request->getGet('tanggal_awal');
         $tglAkhir      = $this->request->getGet('tanggal_akhir');
+        $jenis = 'BENANG';
 
         $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
 
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
             $stockAwal    = (float) $row['stock_awal'];
             $datangSolid  = (float) $row['qty_datang_solid'];
-            $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
-            $qtyPo        = (float) $row['qty_po'];
+            $gantiRetur   = (float) $row['qty_ganti_retur_solid'];
             $poPlus       = (float) ($row['po_plus'] ?? 0);
             $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['qty_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['qty_po']  = 0;
+            }
+            $qtyPo = (float) $row['qty_po'];
 
             if ($gantiRetur > 0) {
                 $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;
             } else {
                 $tagihanDatang = ($stockAwal + $datangSolid) - $qtyPo - $poPlus;
             }
+
             // tambahkan ke array
             $row['tagihan_datang'] = $tagihanDatang;
         }
@@ -1479,7 +1564,6 @@ class ScheduleController extends BaseController
     public function saveScheduleSample()
     {
         $scheduleData = $this->request->getPost();
-        // dd($this->request->getPost());
 
         // Ambil id_mesin dan no_model
         $id_mesin = $this->mesinCelupModel->getIdMesin($scheduleData['no_mesin']);
@@ -1802,7 +1886,7 @@ class ScheduleController extends BaseController
         ]);
 
         $totalFiltered = $this->scheduleCelupModel->countAllResults(false);
-        
+
         $order = $postData['order'][0] ?? null;
         if ($order) {
             $colIndex = $order['column']; // index kolom dari DataTables
@@ -1841,7 +1925,6 @@ class ScheduleController extends BaseController
             if (isset($columnMap[$colName])) {
                 $builder->orderBy($columnMap[$colName], $colDir);
             }
-
         } else {
             // default
             $builder->orderBy('schedule_celup.created_at', 'DESC');

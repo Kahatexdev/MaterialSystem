@@ -2009,7 +2009,7 @@ class ExcelController extends BaseController
         $tanggal_awal = $this->request->getGet('tanggal_awal');
         $tanggal_akhir = $this->request->getGet('tanggal_akhir');
         $data = $this->masterOrderModel->getFilterMasterOrder($key, $tanggal_awal, $tanggal_akhir);
-        
+
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -4384,17 +4384,33 @@ class ExcelController extends BaseController
 
         $data = $this->returModel->getFilterReturArea($area, $kategori, $tglAwal, $tglAkhir);
 
-        if (!empty($data)) {
-            foreach ($data as $key => $dt) {
-                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
-                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
-                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
-                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
-                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
             }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
         }
-        // dd($data);
-        // dd($area, $kategori, $tglAwal, $tglAkhir, $data);
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData);
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -4405,7 +4421,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["NO", "JENIS BAHAN BAKU", "TANGGAL RETUR", "AREA", "NO MODEL", "ITEM TYPE", "KODE WARNA", "WARNA", "LOSS", "QTY PO", "QTY PO(+)", "QTY KIRIM", "CONES KIRIM", "KARUNG KIRIM", "LOT KIRIM", "QTY RETUR", "CONES RETUR", "KARUNG RETUR", "LOT RETUR", "KATEGORI", "KET AREA", "KET GBN", "WAKTU ACC RETUR", "USER"];
+        $header = ["NO", "JENIS BAHAN BAKU", "TANGGAL RETUR", "AREA", "NO MODEL", "ITEM TYPE", "KODE WARNA", "WARNA", "LOSS", "QTY PO", "QTY PO(+)", "QTY KIRIM", "CONES KIRIM", "KARUNG KIRIM", "LOT KIRIM", "QTY RETUR", "CONES RETUR", "NO KARUNG RETUR", "LOT RETUR", "KATEGORI", "KET AREA", "KET GBN", "WAKTU ACC RETUR", "USER"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
@@ -4413,9 +4429,40 @@ class ExcelController extends BaseController
         $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
+        function formatLotForExcel($lotString, $perRow = 5)
+        {
+            if (empty($lotString)) {
+                return '';
+            }
+
+            $lots = array_map('trim', explode(',', $lotString));
+            $chunks = array_chunk($lots, $perRow);
+
+            $lines = [];
+            foreach ($chunks as $chunk) {
+                $lines[] = implode(', ', $chunk);
+            }
+
+            return implode("\n", $lines); // \n untuk Excel
+        }
+
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
+            $model = isset($item['no_model']) ? $item['no_model'] : '';
+            $currentItemType = $item['item_type'];
+            $currentKodeWarna = $item['kode_warna'];
+            $currentColor = $item['warna'];
+
+            $uniqueKey  = $model . '|' . $currentItemType . '|' . $currentKodeWarna . '|' . $currentColor;
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $item['total_kgs']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $item['total_kgs']  = 0;
+            }
+
             $sheet->fromArray([
                 [
                     $index + 1,
@@ -4429,11 +4476,11 @@ class ExcelController extends BaseController
                     $item['loss'] . '%',
                     $item['total_kgs'],
                     $item['qty_po_plus'] ?? 0,
-                    $item['kg_kirim'],
-                    $item['cns_kirim'],
-                    $item['krg_kirim'],
-                    $item['lot_out'],
-                    $item['kg'],
+                    number_format($item['kg_kirim'], 2) ?? 0,
+                    $item['cns_kirim'] ?? 0,
+                    $item['krg_kirim'] ?? 0,
+                    formatLotForExcel($item['lot_out'], 5),
+                    number_format($item['kg'], 2) ?? 0,
                     $item['cns'],
                     $item['karung'],
                     $item['lot_retur'],
@@ -4446,6 +4493,10 @@ class ExcelController extends BaseController
             ], NULL, 'A' . $row);
             $row++;
         }
+
+        $sheet->getStyle('O4:O' . ($row - 1))
+            ->getAlignment()
+            ->setWrapText(true);
 
         // Atur border untuk seluruh tabel
         $styleArray = [
@@ -7336,16 +7387,57 @@ class ExcelController extends BaseController
         $deliveryAkhir = $this->request->getGet('delivery_akhir');
         $tglAwal       = $this->request->getGet('tanggal_awal');
         $tglAkhir      = $this->request->getGet('tanggal_akhir');
+        $jenis = 'BENANG';
 
         $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            // dd($row);
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
             $stockAwal    = (float) $row['stock_awal'];
             $datangSolid  = (float) $row['qty_datang_solid'];
             $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
-            $qtyPo        = (float) $row['qty_po'];
             $poPlus       = (float) ($row['po_plus'] ?? 0);
             $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['qty_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['qty_po']  = 0;
+            }
+            $qtyPo = (float) $row['qty_po'];
 
             if ($gantiRetur > 0) {
                 $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;

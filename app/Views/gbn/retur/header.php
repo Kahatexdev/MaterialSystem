@@ -41,9 +41,9 @@
                                 <span class="d-lg-inline-block d-none ms-1">Report <i class="bi bi-caret-down-fill"></i></span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="navbarDropdownReports">
-                                <li><a class="dropdown-item border-radius-md" href="<?= base_url($role . '/retur/reportReturArea') ?>">Report Area</a></li>
-                                <li><a class="dropdown-item border-radius-md" href="">Report 2</a></li>
-                                <li><a class="dropdown-item border-radius-md" href="">Report 3</a></li>
+                                <li><a class="dropdown-item border-radius-md" href="<?= base_url($role . '/retur/reportReturArea') ?>">Report Retur Area</a></li>
+                                <!-- <li><a class="dropdown-item border-radius-md" href="">Report 2</a></li>
+                                <li><a class="dropdown-item border-radius-md" href="">Report 3</a></li> -->
                             </ul>
                         </li>
                         <li class="nav-item d-flex align-items-center">

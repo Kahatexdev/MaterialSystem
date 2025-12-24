@@ -62,7 +62,6 @@
     <!-- Tabel Data -->
     <div class="card mt-4">
         <div class="card-body">
-            <!-- card loading -->
             <div class="card loading" id="loadingCard" style="display: none;">
                 <div class="card-body text-center">
                     <div class="spinner-border" role="status">
@@ -71,28 +70,29 @@
                 </div>
             </div>
             <div class="table-responsive">
-                <table id="dataTable" class="display text-center text-uppercase text-xs font-bolder" style="width:100%">
+                <table id="dataTable" class="display text-center text-uppercase" style="width:100%">
                     <thead>
                         <tr>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Ket Mesin</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Lot Urut</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No Model</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Item Type</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Kode Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Warna</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Total Datang Solid</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Start Mc</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Delivery Akhir</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Sch</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Qty PO(+)</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Awal</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Stock Opname</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">LOT Sch</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tgl Celup</th>
+                            <th class="font-weight-bolder">No</th>
+                            <th class="font-weight-bolder">No Mesin</th>
+                            <th class="font-weight-bolder">Ket Mesin</th>
+                            <th class="font-weight-bolder">Lot Urut</th>
+                            <th class="font-weight-bolder">No Model</th>
+                            <th class="font-weight-bolder">Item Type</th>
+                            <th class="font-weight-bolder">Kode Warna</th>
+                            <th class="font-weight-bolder">Warna</th>
+                            <th class="font-weight-bolder">Total Datang Solid</th>
+                            <th class="font-weight-bolder">Start Mc</th>
+                            <th class="font-weight-bolder">Delivery Awal</th>
+                            <th class="font-weight-bolder">Delivery Akhir</th>
+                            <th class="font-weight-bolder">Tgl Sch</th>
+                            <th class="font-weight-bolder">Qty PO</th>
+                            <th class="font-weight-bolder">Qty PO(+)</th>
+                            <th class="font-weight-bolder">Stock Awal</th>
+                            <th class="font-weight-bolder">Stock Opname</th>
+                            <th class="font-weight-bolder">Qty Sch</th>
+                            <th class="font-weight-bolder">LOT Sch</th>
+                            <th class="font-weight-bolder">Tgl Celup</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,7 +108,7 @@
     $(document).ready(function() {
         let dataTable = $('#dataTable').DataTable({
             "paging": true,
-            "searching": false,
+            "searching": true,
             "ordering": true,
             "info": true,
             "responsive": true,
@@ -123,14 +123,14 @@
             let tanggal_akhir = $('#startMcTo').val().trim();
 
             // Validasi: Jika semua input kosong, tampilkan alert dan hentikan pencarian
-            if (tanggal_awal === '' && tanggal_akhir === '') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Oops...',
-                    text: 'Tgl Start MC Wajib Diisi Keduanya !',
-                });
-                return;
-            }
+            // if (tanggal_awal === '' && tanggal_akhir === '') {
+            //     Swal.fire({
+            //         icon: 'warning',
+            //         title: 'Oops...',
+            //         text: 'Tgl Start MC Wajib Diisi Keduanya !',
+            //     });
+            //     return;
+            // }
 
 
             $.ajax({
@@ -180,6 +180,7 @@
                                 parseFloat(item.total_poplus ?? 0).toFixed(2),
                                 parseFloat(item.kgs_stock_awal ?? 0).toFixed(2),
                                 parseFloat(item.kgs_stock_opname ?? 0).toFixed(2),
+                                item.kg_celup,
                                 item.lot_celup,
                                 item.tanggal_celup,
                             ]).draw(false);
@@ -229,7 +230,15 @@
         // Sembunyikan tombol Export Excel
         $('#btnExport').addClass('d-none');
     });
-</script>
 
+    $(document).ready(function() {
+        $('#keyInput, #scheduleDate, #startMcFrom, #startMcTo').on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                $('#btnSearch').click();
+            }
+        });
+    });
+</script>
 
 <?php $this->endSection(); ?>
