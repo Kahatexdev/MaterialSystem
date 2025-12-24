@@ -107,7 +107,7 @@
                                                     <label for="itemType">Done Celup</label>
                                                     <select class="form-control" id="add_item" name="add_item" required>
                                                         <option value="">Pilih Item </option>
-                                                        <?php foreach ($no_model as $item): ?>
+                                                        <?php foreach ($no_model as $item) : ?>
                                                             <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
                                                         <?php endforeach; ?>
                                                     </select>
@@ -211,7 +211,7 @@
                                                                 <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[0][0]" required></td>
                                                                 <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[0][0]" required></td>
-                                                                <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" required></td>
+                                                                <td><input type="text" class="form-control lot_celup_input" name="lot_celup[0][0]" required></td>
                                                                 <td><input type="text" class="form-control operator_packing_input" name="operator_packing[0][0]" id="operator_packing" required></td>
                                                                 <td><select class="form-control" name="shift[0][0]" id="shift" required>
                                                                         <option value="">Pilih Shift</option>
@@ -340,7 +340,9 @@
                     $('#kode_warna').val(data.kode_warna);
                     $('#warna').val(data.warna);
                     $('#id_celup').val(idcelup);
-                    $('#lot_celup').val(data.lot_celup);
+                    // update semua lot di tab aktif (tab pertama)
+                    $('#poTable').find('.lot_celup_input').val(data.lot_celup);
+                    lotCelupValue = data.lot_celup;
                 }
             });
         });
@@ -447,7 +449,7 @@
                                                     <label for="itemType">Done Celup</label>
                                                     <select class="form-control slc2" id="add_item_${tabIndex}" name="add_item" required>
                                                         <option value="">Pilih Item </option>
-                                                        <?php foreach ($no_model as $item): ?>
+                                                        <?php foreach ($no_model as $item) : ?>
                                                             <option value="<?= $item['id_celup'] ?>"><?= $item['no_model'] ?> | <?= $item['item_type'] ?> |<?= $item['kode_warna'] ?> | <?= $item['warna']  ?> | Lot <?= $item['lot_celup'] ?> | <?= $item['kg_celup'] ?>kg</option>
                                                         <?php endforeach; ?>
                                                     </select>
@@ -552,7 +554,7 @@
                                                             <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex - 1}][0]" required></td>
                                                             <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex - 1}][0]" required></td>
-                                                            <td><input type="text" class="form-control lot_celup_input" name="items[${tabIndex - 1}][lot_celup]" id="${lotCelupId}" required></td>
+                                                            <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex - 1}][0]" id="${lotCelupId}" required></td>
                                                             <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex - 1}][0]" required></td>
                                                                 <td><select class="form-control" name="shift[${tabIndex - 1}][0]" id="shift" required>
                                                                         <option value="">Pilih Shift</option>
@@ -629,8 +631,11 @@
                             document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
                             document.getElementById(warnaId).innerHTML = `<option value="${data.warna}" selected>${data.warna}</option>`;
                             document.getElementById(poPlusId).checked = (data.po_plus == 1);
-                            document.getElementById(lotCelupId).value = data.lot_celup;
-                            valueLot = data.lot_celup;
+                            const pane = document.getElementById(newContentId); // tab pane yang sedang dibuat
+                            pane.querySelectorAll('.lot_celup_input').forEach(el => el.value = data.lot_celup);
+
+                            // simpan lot untuk addRow tab ini (jangan global 1 doang)
+                            pane.dataset.lot = data.lot_celup;
                         }
                     });
                 });
@@ -661,13 +666,14 @@
             addRowButton.addEventListener("click", function() {
                 const rowCount = newPoTable.querySelectorAll("tbody tr").length + 1;
                 const newRow = document.createElement("tr");
+                const lot = newTabPane.dataset.lot || '';
 
                 newRow.innerHTML = `
                     <td><input type="text" class="form-control text-center" name="no_karung[${tabIndex-2}][${rowCount-1}]" value="${rowCount}" readonly></td>
                     <td><input type="number" step="0.01" class="form-control cones_kirim_input" name="cones_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
                     <td><input type="number" step="0.01" class="form-control gw_kirim_input" name="gw_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
                     <td><input type="number" step="0.01" class="form-control kgs_kirim_input" name="kgs_kirim[${tabIndex-2}][${rowCount-1}]" required></td>
-                    <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${valueLot}" id="${lotCelupId}" required></td>
+                    <td><input type="text" class="form-control lot_celup_input" name="lot_celup[${tabIndex-2}][${rowCount-1}]" value="${lot}" required></td>
                     <td><input type="text" class="form-control operator_packing_input" name="operator_packing[${tabIndex-2}][${rowCount-1}]" disabled></td>
                         <td><select class="form-control" name="shift[${tabIndex-2}][${rowCount-1}]" id="shift" disabled>
                         <option value=""></option>
@@ -782,7 +788,9 @@
                         $('#kode_warna').val(data.kode_warna);
                         $('#warna').val(data.warna);
                         $('#id_celup').val(idcelup);
-                        $('#lot_celup').val(data.lot_celup);
+                        // update semua lot di tab aktif (tab pertama)
+                        $('#poTable').find('.lot_celup_input').val(data.lot_celup);
+                        lotCelupValue = data.lot_celup;
                         lotCelupValue = data.lot_celup; // Simpan nilai lot_celup
                         $('#po_plus').prop('checked', data.po_plus == 1);
                     }
@@ -800,7 +808,7 @@
             <td><input type="number" step="0.01" class="form-control" name="cones_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="gw_kirim[0][${rowCount-1}]" required></td>
             <td><input type="number" step="0.01" class="form-control" name="kgs_kirim[0][${rowCount-1}]" required></td>
-            <td><input type="text" class="form-control lot_celup_input" name="items[0][lot_celup]" id="lot_celup" value="${lotCelupValue}" required></td>
+            <td><input type="text" class="form-control lot_celup_input" name="lot_celup[0][${rowCount-1}]" id="lot_celup" value="${lotCelupValue}" required></td>
             <td><input type="text" class="form-control" name="operator_packing[0][${rowCount - 1}]" disabled></td>
             <td><select class="form-control" name="shift[0][${rowCount - 1}]" id="shift" disabled>
                 <option value=""></option>
@@ -883,7 +891,7 @@
         }
     });
 
-    addNewTab();
+    // addNewTab();
 </script>
 
 <?php $this->endSection(); ?>

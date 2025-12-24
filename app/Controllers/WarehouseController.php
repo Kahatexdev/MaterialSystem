@@ -105,43 +105,85 @@ class WarehouseController extends BaseController
             return redirect()->to(base_url('/login'));
         }
     }
+    // public function index()
+    // {
+    //     $updateOrder = $this->masterOrderModel->getNullMc();
+
+    //     foreach ($updateOrder as $od) {
+    //         $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+
+    //         try {
+    //             // Fetch data dari API
+    //             $json = file_get_contents($reqStartMc);
+    //             // Decode JSON response
+    //             $startMc = json_decode($json, true);
+    //             if (empty($startMc)) {
+    //                 log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
+    //             } else {
+    //                 $this->masterOrderModel->update(
+    //                     $od['id_order'],
+    //                     ['start_mc' => $startMc['start_mc']]
+    //                 );
+    //             }
+    //         } catch (\Exception $e) {
+
+    //             // Log error
+    //             log_message('error', 'Error fetching API data: ' . $e->getMessage());
+    //         }
+    //     }
+
+    //     $kategori = $this->kategoriModel->findAll();
+
+    //     $data = [
+    //         'active' => $this->active,
+    //         'title' => 'Material System',
+    //         'role' => $this->role,
+    //         'kategori' => $kategori,
+    //     ];
+    //     return view($this->role . '/warehouse/index', $data);
+    // }
+
     public function index()
     {
-        $updateOrder = $this->masterOrderModel->getNullMc();
+        $orders = $this->masterOrderModel->getNullMc();
 
-        foreach ($updateOrder as $od) {
-            $reqStartMc = 'http://172.23.44.14/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+        if (!empty($orders)) {
+            $models = array_column($orders, 'no_model');
 
-            try {
-                // Fetch data dari API
-                $json = file_get_contents($reqStartMc);
-                // Decode JSON response
-                $startMc = json_decode($json, true);
-                if (empty($startMc)) {
-                    log_message('error', 'pdk ' . $od['no_model'] . ' gaada start mc');
-                } else {
-                    $this->masterOrderModel->update(
-                        $od['id_order'],
-                        ['start_mc' => $startMc['start_mc']]
-                    );
+            $client = \Config\Services::curlrequest([
+                'timeout' => 5,
+                'http_errors' => false,
+            ]);
+
+            $response = $client->post(
+                'http://172.23.44.14/CapacityApps/public/api/reqstartmc-bulk',
+                [
+                    'json' => $models
+                ]
+            );
+
+            if ($response->getStatusCode() === 200) {
+                $bulkResult = json_decode($response->getBody(), true);
+
+                foreach ($orders as $od) {
+                    if (!empty($bulkResult[$od['no_model']])) {
+                        $this->masterOrderModel->update(
+                            $od['id_order'],
+                            ['start_mc' => $bulkResult[$od['no_model']]]
+                        );
+                    }
                 }
-            } catch (\Exception $e) {
-
-                // Log error
-                log_message('error', 'Error fetching API data: ' . $e->getMessage());
             }
         }
 
-        $kategori = $this->kategoriModel->findAll();
-
-        $data = [
-            'active' => $this->active,
-            'title' => 'Material System',
-            'role' => $this->role,
-            'kategori' => $kategori,
-        ];
-        return view($this->role . '/warehouse/index', $data);
+        return view($this->role . '/warehouse/index', [
+            'active'   => $this->active,
+            'title'    => 'Material System',
+            'role'     => $this->role,
+            'kategori' => $this->kategoriModel->findAll(),
+        ]);
     }
+
 
     public function pemasukan()
     {
@@ -1870,7 +1912,34 @@ class WarehouseController extends BaseController
         $key = $this->request->getGet('key');
         $jenis = $this->request->getGet('jenis') ?? null;
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['color']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['color']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         $cache = [];
         $result = [];
 
@@ -1878,6 +1947,9 @@ class WarehouseController extends BaseController
             $model = isset($row['no_model']) ? $row['no_model'] : '';
             $currentItemType = $row['item_type'];
             $currentKodeWarna = $row['kode_warna'];
+            $currentColor = $row['color'];
+
+            $uniqueKey  = $model . '|' . $currentItemType . '|' . $currentKodeWarna . '|' . $currentColor;
 
             if ($model === '') {
                 $row['start_mc'] = 'Belum Ada Start Mc';
@@ -1904,7 +1976,6 @@ class WarehouseController extends BaseController
 
                 if ($resp !== false) {
                     $json = json_decode($resp, true);
-                    // $startMc[$model] = $json['start_mc'] ?? 'Belum Ada Start Mc';
                     $cache[$model] = [
                         'start_mc' => $json['startMc']['start_mc'] ?? 'Belum Ada Start Mc',
                         'area'     => $json['areaMc'] ?? 'Area Belum di Assign'
@@ -1912,7 +1983,6 @@ class WarehouseController extends BaseController
                     ];
                 } else {
                     // fallback jika API error / tidak dapat diakses
-                    // $startMc[$model] = 'Belum Ada Start Mc';
                     $cache[$model] = [
                         'start_mc' => 'Belum Ada Start Mc',
                         'area'  => 'Area Belum di Assign',
@@ -1920,12 +1990,8 @@ class WarehouseController extends BaseController
                 }
             }
 
-
             // ⭐ GET NOTE
             $note = $this->totalPoTambahanModel->getPoTambahan($model, $jenis);
-
-            // ⭐ LOG NOTE DI SINI
-            log_message('info', 'NOTE for model ' . $model . ': ' . json_encode($note));
 
             $filteredNote = [];
 
@@ -1951,9 +2017,18 @@ class WarehouseController extends BaseController
             }
 
             $row['note'] = $noteString;
-
             $row['start_mc'] = $cache[$model]['start_mc'];
             $row['area']  = $cache[$model]['area'];
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['kg_po']  = $qtyMap[$uniqueKey]['kg_po'];
+                $row['qty_po'] = $qtyMap[$uniqueKey]['qty_po'];
+            } else {
+                $row['kg_po']  = 0;
+                $row['qty_po'] = 0;
+            }
+
             $result[] = $row;
         }
 
@@ -2050,6 +2125,7 @@ class WarehouseController extends BaseController
                 } else {
                     $ketGbn = $ket;
                 }
+
                 // Update field out_jalur pada tabel pemasukan
                 // Siapkan data pengeluaran sesuai masing-masing pemasukan
                 $insertData = [
@@ -2069,6 +2145,62 @@ class WarehouseController extends BaseController
                     'created_at'         => date('Y-m-d H:i:s')
                 ];
                 // dd ($insertData);
+
+                helper('audit');
+
+                $actionAudit = 'OUT_JALUR';
+
+                if ($rawKgsManual > 0 || $rawCnsManual > 0) {
+                    $actionAudit = 'OUT_JALUR_CONES';
+                }
+
+                if ($pinjam === 'YA') {
+                    $actionAudit = 'OUT_JALUR_PINJAM';
+                }
+
+                // optional: snapshot stok sebelum update
+                $payloadOld = [
+                    'cluster' => $pemasukan['nama_cluster'],
+                    'stock' => [
+                        'kgs' => $stok[0]['kgs_stock_awal'] ?? null,
+                        'cns' => $stok[0]['cns_stock_awal'] ?? null,
+                        'krg' => $stok[0]['krg_stock_awal'] ?? null,
+                    ],
+                ];
+
+                // payload sesudah
+                $payloadNew = [
+                    'cluster'   => $pemasukan['nama_cluster'],
+                    'direction' => 'OUT',
+                    'qty'       => [
+                        'kgs' => $kgsOut,
+                        'cns' => $cnsOut,
+                        'krg' => $krgOut,
+                    ],
+                    'area'      => $area,
+                    'lot'       => $outCelup['lot_kirim'],
+                    'pinjam'    => $pinjam === 'YA',
+                    'ref'       => [
+                        'id_stock'          => $pemasukan['id_stock'],
+                        'id_out_celup'       => $pemasukan['id_out_celup'],
+                        'id_pemasukan'       => $pemasukan['id_pemasukan'],
+                        'id_total_pemesanan' => $idTtlPemesanan,
+                    ],
+                    'keterangan' => $ketGbn,
+                    'admin'      => session()->get('username'),
+                    'timestamp'  => date('Y-m-d H:i:s'),
+                ];
+
+                log_audit(
+                    module: 'SELECT_CLUSTER',
+                    action: $actionAudit,
+                    refType: 'STOCK',
+                    refId: $pemasukan['id_stock'],
+                    message: 'Pengeluaran jalur',
+                    payloadOld: $payloadOld,
+                    payloadNew: $payloadNew,
+                );
+
                 // Insert data pengeluaran
                 $this->pengeluaranModel->insert($insertData);
 
@@ -3275,6 +3407,52 @@ class WarehouseController extends BaseController
         return view($this->role . '/warehouse/history-pindah-order', [
             'role'    => $this->role,
             'title'   => 'History Pindah Order',
+            'active'  => $this->active,
+            'history' => $dataPindah,
+        ]);
+    }
+
+    public function historyPindahCluster()
+    {
+        $key  = $this->request->getGet('key')     ?? '';
+
+        // 1) Ambil data
+        if ($key === '') {
+            // $dataPindah = $this->historyStock->getHistoryPindahCluster(null, 10);
+            $dataPindah = [];
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahCluster($key);
+        }
+        // dd ($dataPindah);
+        // // 2) Siapkan HTTP client
+        // $client = \Config\Services::curlrequest([
+        //     'baseURI' => api_url('capacity') . '',
+        //     'timeout' => 5
+        // ]);
+
+        // // 3) Loop dan merge API result
+        // foreach ($dataPindah as &$row) {
+        //     try {
+        //         $res = $client->get('getDeliveryAwalAkhir', [
+        //             'query' => ['model' => $row['no_model_new']]
+        //         ]);
+        //         $body = json_decode($res->getBody(), true);
+        //         $row['delivery_awal']  = $body['delivery_awal']  ?? '-';
+        //         $row['delivery_akhir'] = $body['delivery_akhir'] ?? '-';
+        //     } catch (\Exception $e) {
+        //         $row['delivery_awal']  = '-';
+        //         $row['delivery_akhir'] = '-';
+        //     }
+        // }
+        // unset($row);
+        // 4) Response
+        if ($this->request->isAJAX()) {
+            return $this->response->setJSON($dataPindah);
+        }
+
+        return view($this->role . '/warehouse/history-pindah-cluster', [
+            'role'    => $this->role,
+            'title'   => 'History Pindah Cluster',
             'active'  => $this->active,
             'history' => $dataPindah,
         ]);
@@ -4655,6 +4833,11 @@ class WarehouseController extends BaseController
                 $totalKgs += $kgsIt;
                 $totalCns += $cnsIt;
                 $totalKrg += $krgIt;
+
+                $eps = 1e-9;
+                if (abs($totalKgs) < $eps) $totalKgs = 0;
+                $totalKgs = round($totalKgs, 4);
+
                 // log_message('info', " Kgs: $kgsIt, Cns: $cnsIt, total: $totalKgs");
                 // proses per-id: cek full retur & update pemasukan/bon
                 $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOut)->first();

@@ -264,6 +264,22 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link <?= str_starts_with(uri_string(), 'monitoring/audit') ? 'active' : '' ?>"
+                    href="<?= base_url('monitoring/audit') ?>">
+                        <div class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <!-- icon settings -->
+                            <svg width="12px" height="12px" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                                <g fill="#FFFFFF" fill-rule="nonzero">
+                                    <path class="color-background opacity-6" d="M18.0883333 15.7316667 11.1783333 8.82166667 13.3333333 6.66666667 6.66666667 0 0 6.66666667 6.66666667 13.3333333 8.82166667 11.1783333 15.315 17.6716667z"></path>
+                                    <path class="color-background" d="M33.785 11.285 28.715 6.215 34.0616667.868333333C32.82.315 31.4483333 0 30 0 24.4766667 0 20 4.47666667 20 10c0 .99.1483333 1.9433333.4166667 2.8466667L2.435 27.3966667C.95 28.7083333.0633333333 30.595.00333333333 32.5733333c-.06166666663 1.98.70666666667 3.9183333 2.10666666667 5.3166667C3.47 39.2516667 5.27833333 40 7.20166667 40c2.065 0 4.03499999-.8866667 5.40166666-2.435L27.1533333 19.5833333C28.0566667 19.8516667 29.01 20 30 20c5.5233333 0 10-4.4766667 10-10 0-1.44833333-.315-2.82-.8683333-4.06333333z"></path>
+                                </g>
+                            </svg>
+                        </div>
+                        <span class="nav-link-text ms-1">Audit Log</span>
+                    </a>
+                </li>
+
             </ul>
         </div>
 

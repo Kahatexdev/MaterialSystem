@@ -836,6 +836,34 @@ class ExcelController extends BaseController
         $jenis = $this->request->getGet('jenis') ?? 'BENANG';
 
         $data = $this->materialModel->getFilterPoBenang($key, $jenis);
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['color']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['color']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+        // dd($qtyMap);
+        $cacheAPI = [];
 
         $cacheAPI = [];
 
@@ -863,6 +891,8 @@ class ExcelController extends BaseController
             $model = $item['no_model'];
             $itemType = $item['item_type'];
             $kodeWarna = $item['kode_warna'];
+            $color = $item['color'];
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
 
             // ===== API START_MC & AREA (CACHE-FIRST) =====
             if (!isset($cacheAPI[$model])) {
@@ -922,6 +952,13 @@ class ExcelController extends BaseController
                 }
             } else {
                 $noteString = "-";
+            }
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $item['kg_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $item['kg_po']  = 0;
             }
 
             $sheet->fromArray([
@@ -4347,17 +4384,33 @@ class ExcelController extends BaseController
 
         $data = $this->returModel->getFilterReturArea($area, $kategori, $tglAwal, $tglAkhir);
 
-        if (!empty($data)) {
-            foreach ($data as $key => $dt) {
-                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
-                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
-                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
-                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
-                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
             }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
         }
-        // dd($data);
-        // dd($area, $kategori, $tglAwal, $tglAkhir, $data);
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData);
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -4368,7 +4421,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
         // Header
-        $header = ["NO", "JENIS BAHAN BAKU", "TANGGAL RETUR", "AREA", "NO MODEL", "ITEM TYPE", "KODE WARNA", "WARNA", "LOSS", "QTY PO", "QTY PO(+)", "QTY KIRIM", "CONES KIRIM", "KARUNG KIRIM", "LOT KIRIM", "QTY RETUR", "CONES RETUR", "KARUNG RETUR", "LOT RETUR", "KATEGORI", "KET AREA", "KET GBN", "WAKTU ACC RETUR", "USER"];
+        $header = ["NO", "JENIS BAHAN BAKU", "TANGGAL RETUR", "AREA", "NO MODEL", "ITEM TYPE", "KODE WARNA", "WARNA", "LOSS", "QTY PO", "QTY PO(+)", "QTY KIRIM", "CONES KIRIM", "KARUNG KIRIM", "LOT KIRIM", "QTY RETUR", "CONES RETUR", "NO KARUNG RETUR", "LOT RETUR", "KATEGORI", "KET AREA", "KET GBN", "WAKTU ACC RETUR", "USER"];
         $sheet->fromArray([$header], NULL, 'A3');
 
         // Styling Header
@@ -4376,9 +4429,40 @@ class ExcelController extends BaseController
         $sheet->getStyle('A3:X3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('A3:X3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
+        function formatLotForExcel($lotString, $perRow = 5)
+        {
+            if (empty($lotString)) {
+                return '';
+            }
+
+            $lots = array_map('trim', explode(',', $lotString));
+            $chunks = array_chunk($lots, $perRow);
+
+            $lines = [];
+            foreach ($chunks as $chunk) {
+                $lines[] = implode(', ', $chunk);
+            }
+
+            return implode("\n", $lines); // \n untuk Excel
+        }
+
         // Data
         $row = 4;
         foreach ($data as $index => $item) {
+            $model = isset($item['no_model']) ? $item['no_model'] : '';
+            $currentItemType = $item['item_type'];
+            $currentKodeWarna = $item['kode_warna'];
+            $currentColor = $item['warna'];
+
+            $uniqueKey  = $model . '|' . $currentItemType . '|' . $currentKodeWarna . '|' . $currentColor;
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $item['total_kgs']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $item['total_kgs']  = 0;
+            }
+
             $sheet->fromArray([
                 [
                     $index + 1,
@@ -4392,11 +4476,11 @@ class ExcelController extends BaseController
                     $item['loss'] . '%',
                     $item['total_kgs'],
                     $item['qty_po_plus'] ?? 0,
-                    $item['kg_kirim'],
-                    $item['cns_kirim'],
-                    $item['krg_kirim'],
-                    $item['lot_out'],
-                    $item['kg'],
+                    number_format($item['kg_kirim'], 2) ?? 0,
+                    $item['cns_kirim'] ?? 0,
+                    $item['krg_kirim'] ?? 0,
+                    formatLotForExcel($item['lot_out'], 5),
+                    number_format($item['kg'], 2) ?? 0,
                     $item['cns'],
                     $item['karung'],
                     $item['lot_retur'],
@@ -4409,6 +4493,10 @@ class ExcelController extends BaseController
             ], NULL, 'A' . $row);
             $row++;
         }
+
+        $sheet->getStyle('O4:O' . ($row - 1))
+            ->getAlignment()
+            ->setWrapText(true);
 
         // Atur border untuk seluruh tabel
         $styleArray = [
@@ -7299,16 +7387,57 @@ class ExcelController extends BaseController
         $deliveryAkhir = $this->request->getGet('delivery_akhir');
         $tglAwal       = $this->request->getGet('tanggal_awal');
         $tglAkhir      = $this->request->getGet('tanggal_akhir');
+        $jenis = 'BENANG';
 
         $data = $this->scheduleCelupModel->getFilterSchTagihanBenang($noModel, $kodeWarna, $deliveryAwal, $deliveryAkhir, $tglAwal, $tglAkhir);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            // dd($row);
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
         foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
             $stockAwal    = (float) $row['stock_awal'];
             $datangSolid  = (float) $row['qty_datang_solid'];
             $gantiRetur   = (float) $row['qty_ganti_retur_solid']; // =0 jika null
-            $qtyPo        = (float) $row['qty_po'];
             $poPlus       = (float) ($row['po_plus'] ?? 0);
             $returBelang  = (float) ($row['retur_belang'] ?? 0);
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['qty_po']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['qty_po']  = 0;
+            }
+            $qtyPo = (float) $row['qty_po'];
 
             if ($gantiRetur > 0) {
                 $tagihanDatang = ($stockAwal + $datangSolid + $gantiRetur) - $qtyPo - $poPlus - $returBelang;
@@ -7578,6 +7707,128 @@ class ExcelController extends BaseController
 
         // Set judul file dan header untuk download
         $filename = 'REPORT HISTORY PINDAH ORDER' . $dataFilter . '.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        // Tulis file excel ke output
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
+
+
+    public function exportHistoryPindahCluster()
+    {
+        $key = $this->request->getGet('key') ?? '';
+
+        // 1) Ambil data
+        if ($key === '') {
+            return redirect()->back()->with('error', 'Parameter key diperlukan untuk ekspor history pindah cluster.');
+        } else {
+            $dataPindah = $this->historyStock->getHistoryPindahCluster($key);
+        }
+
+        // Buat spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('REPORT HISTORY PINDAH CLUSTER');
+
+        // border
+        $styleHeader = [
+            'font' => [
+                'bold' => true, // Tebalkan teks
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+        $styleBody = [
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER, // Alignment rata tengah
+            ],
+            'borders' => [
+                'outline' => [
+                    'borderStyle' => Border::BORDER_THIN, // Gaya garis tipis
+                    'color' => ['argb' => 'FF000000'],    // Warna garis hitam
+                ],
+            ],
+        ];
+
+
+        // Judul
+        $sheet->setCellValue('A1', 'REPORT HISTORY PINDAH CLUSTER');
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $row_header = 3;
+
+        $headers = [
+            'A' => 'NO',
+            'B' => 'NO MODEL',
+            'C' => 'ITEM TYPE',
+            'D' => 'KODE WARNA',
+            'E' => 'WARNA',
+            'F' => 'QTY',
+            'G' => 'CONES',
+            'H' => 'LOT',
+            'I' => 'CLUSTER OLD',
+            'J' => 'CLUSTER NEW',
+            'K' => 'KETERANGAN',
+            'L' => 'ADMIN'
+        ];
+
+        foreach ($headers as $col => $title) {
+            $sheet->setCellValue($col . $row_header, $title);
+            $sheet->getStyle($col . $row_header)->applyFromArray($styleHeader);
+        }
+
+
+        // Isi data
+        $row = 4;
+        $no = 1;
+
+        foreach ($dataPindah as $key => $data) {
+            if (!is_array($data)) {
+                continue; // Lewati nilai akumulasi di $result
+            }
+
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $data['no_model']);
+            $sheet->setCellValue('C' . $row, $data['item_type']);
+            $sheet->setCellValue('D' . $row, $data['kode_warna']);
+            $sheet->setCellValue('E' . $row, $data['warna']);
+            $sheet->setCellValue('F' . $row, $data['kgs']);
+            $sheet->setCellValue('G' . $row, $data['cns']);
+            $sheet->setCellValue('H' . $row, $data['lot']);
+            $sheet->setCellValue('I' . $row, $data['cluster_old']);
+            $sheet->setCellValue('J' . $row, $data['cluster_new']);
+            $sheet->setCellValue('K' . $row, $data['created_at'] . ' ' . $data['keterangan'] . ' DARI ' . $data['cluster_old'] . ' KE ' . $data['cluster_new']);
+            $sheet->setCellValue('L' . $row, $data['admin']);
+
+            // style body
+            $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+
+            foreach ($columns as $column) {
+                $sheet->getStyle($column . $row)->applyFromArray($styleBody);
+            }
+
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'] as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set judul file dan header untuk download
+        $filename = 'REPORT HISTORY PINDAH CLUSTER.xlsx';
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: max-age=0');
@@ -15034,7 +15285,7 @@ class ExcelController extends BaseController
         $sheet->getStyle('A4:N' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = 'Report_Request_Schedule' . date('Y-m-d') . '.xlsx';
+        $fileName = 'Report_Request_Schedule ' . $filterTglSch . '_to_' . $filterTglSchsampai . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
