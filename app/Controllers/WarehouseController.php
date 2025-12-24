@@ -1663,7 +1663,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -4833,6 +4833,11 @@ class WarehouseController extends BaseController
                 $totalKgs += $kgsIt;
                 $totalCns += $cnsIt;
                 $totalKrg += $krgIt;
+
+                $eps = 1e-9;
+                if (abs($totalKgs) < $eps) $totalKgs = 0;
+                $totalKgs = round($totalKgs, 4);
+
                 // log_message('info', " Kgs: $kgsIt, Cns: $cnsIt, total: $totalKgs");
                 // proses per-id: cek full retur & update pemasukan/bon
                 $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOut)->first();
@@ -5046,7 +5051,7 @@ class WarehouseController extends BaseController
                     // Buang null/null string kalau kamu mau lebih rapih
                     $pemasukanUpdate = array_filter(
                         $pemasukanUpdate,
-                        fn ($v) => $v !== null
+                        fn($v) => $v !== null
                     );
 
                     if (!empty($pemasukanUpdate)) {
@@ -5066,7 +5071,7 @@ class WarehouseController extends BaseController
 
                     $outUpdate = array_filter(
                         $outUpdate,
-                        fn ($v) => $v !== null
+                        fn($v) => $v !== null
                     );
 
                     if (!empty($outUpdate)) {
@@ -5083,7 +5088,7 @@ class WarehouseController extends BaseController
 
                     $stockUpdate = array_filter(
                         $stockUpdate,
-                        fn ($v) => $v !== null
+                        fn($v) => $v !== null
                     );
 
                     if (!empty($stockUpdate)) {
@@ -5108,7 +5113,7 @@ class WarehouseController extends BaseController
 
                 $historyData = array_filter(
                     $historyData,
-                    fn ($v) => $v !== null
+                    fn($v) => $v !== null
                 );
 
                 if (!empty($historyData)) {
@@ -5149,78 +5154,4 @@ class WarehouseController extends BaseController
             'message' => 'Data fix stock berhasil disimpan.',
         ]);
     }
-
-    // private function getQtyPcs(array $filteredData, $jenis = null)
-    // {
-    //     $client = Services::curlrequest();
-    //     $noModel = array_unique(array_column($filteredData, 'no_model'));
-
-    //     $getQtyUrl = api_url('capacity') . 'getQtyOrderByNoModel';
-
-    //     $qtyResponse = $client->post($getQtyUrl, [
-    //         'json' => [
-    //             'models' => $noModel
-    //         ],
-    //         'http_errors' => false
-    //     ]);
-
-    //     $qtyData = json_decode($qtyResponse->getBody(), true);
-
-    //     $sumQtyBySize = [];
-
-    //     //Jumlahkan qty per size untuk setiap mastermodel
-    //     foreach ($qtyData as $row) {
-    //         $mastermodel = $row['mastermodel'];
-    //         $size = $row['size'];
-    //         $qty  = (int) $row['qty'];
-
-    //         if (!isset($sumQtyBySize[$mastermodel][$size])) {
-    //             $sumQtyBySize[$mastermodel][$size] = 0;
-    //         }
-
-    //         $sumQtyBySize[$mastermodel][$size] += $qty;
-    //     }
-
-    //     foreach ($filteredData as $data) {
-    //         $key = $data['no_model'] . '|' . $data['item_type'] . '|' . $data['kode_warna'] . '|' . $data['color'];
-
-    //         $getStyle = $this->materialModel->getStyleSizeByBb(
-    //             $data['no_model'],
-    //             $data['item_type'],
-    //             $data['kode_warna'],
-    //             $data['color']
-    //         );
-
-    //         $ttlKeb = 0;
-    //         $ttlQty = 0;
-
-    //         foreach ($getStyle as $i => $dataStyle) {
-    //             $styleSize = $dataStyle['style_size'];
-
-    //             $qty = $sumQtyBySize[$data['no_model']][$styleSize] ?? 0;
-
-    //             if ($qty >= 0) {
-    //                 if (isset($dataStyle['item_type']) && stripos($dataStyle['item_type'], 'JHT') !== false) {
-    //                     $kebutuhan = $dataStyle['kgs'] ?? 0;
-    //                 } else {
-    //                     $kebutuhan = (
-    //                         ($qty * $dataStyle['gw'] * $dataStyle['composition'] / 100 / 1000)
-    //                         * (1 + ($dataStyle['loss'] / 100))
-    //                     );
-    //                 }
-
-    //                 $ttlKeb += $kebutuhan;
-    //                 $ttlQty += $qty;
-    //             }
-    //         }
-
-    //         $map[$key] = [
-    //             'kg_po'  => round($ttlKeb, 2),
-    //             'qty_po' => $ttlQty,
-    //             'from_capacity' => !empty($qtyData)
-    //         ];
-    //     }
-
-    //     return $map;
-    // }
 }
