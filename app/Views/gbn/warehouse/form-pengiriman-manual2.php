@@ -627,6 +627,21 @@
     });
     document.addEventListener('input', function(e) {
 
+        if (!e.target.closest('tr')) return;
+
+        const row = e.target.closest('tr');
+
+        // ambil jenis dari hidden input di row ini
+        const jenisInput = row.querySelector('input[name^="jenis"]');
+        if (!jenisInput) return;
+
+        const jenis = jenisInput.value.toUpperCase();
+
+        // JALANKAN VALIDASI HANYA UNTUK BENANG & NYLON
+        if (jenis !== 'BENANG' && jenis !== 'NYLON') {
+            return; // SPANDEX / KARET → lewati validasi
+        }
+
         // VALIDASI KGS
         if (e.target.name && e.target.name.startsWith('kgs_out')) {
             const row = e.target.closest('tr');
