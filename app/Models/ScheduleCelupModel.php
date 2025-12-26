@@ -568,7 +568,7 @@ class ScheduleCelupModel extends Model
             SUM(out_celup.kgs_kirim) AS kgs_datang,
             GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang
         ")
-            ->join('out_celup',     'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup   = out_celup.id_celup', 'left')
             ->join('bon_celup', 'bon_celup.id_bon   = out_celup.id_bon')
             ->groupBy([
@@ -1487,7 +1487,7 @@ class ScheduleCelupModel extends Model
 
         //Sub Pemasukan
         $subPm = $this->db->table('pemasukan')
-            ->select('sc.no_model, sc.item_type, sc.kode_warna, sc.warna, SUM(oc.kgs_kirim) AS qty_datang_solid')
+            ->select('oc.no_model, sc.item_type, sc.kode_warna, sc.warna, SUM(oc.kgs_kirim) AS qty_datang_solid')
             ->join('out_celup oc', 'oc.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup')
             ->groupBy(['oc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);

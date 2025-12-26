@@ -563,7 +563,7 @@ class ScheduleController extends BaseController
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
                 'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
-                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? '0',
                 'user_cek_status' => session()->get('username'),
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),
@@ -1641,7 +1641,7 @@ class ScheduleController extends BaseController
                 'keterangan' => '',
                 'penerima' => 'RETNO',
                 'penanggung_jawab' => session()->get('username'),
-                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? '0',
                 'admin' => session()->get('username')
             ]);
             // dd ($newOrder);
@@ -1659,7 +1659,7 @@ class ScheduleController extends BaseController
                 'tanggal_schedule' => $scheduleData['tanggal_schedule'],
                 'last_status' => 'scheduled',
                 'ket_schedule' => $scheduleData['ket_schedule'][$index] ?? null,
-                'po_plus' => $scheduleData['po_plus'][$index] ?? 0,
+                'po_plus' => $scheduleData['po_plus'][$index] ?? '0',
                 'user_cek_status' => session()->get('username'),
                 'admin' => session()->get('username'),
                 'created_at' => date('Y-m-d H:i:s'),

@@ -2051,9 +2051,53 @@ class WarehouseController extends BaseController
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
         $poPlus = $this->request->getGet('po_plus');
+        $jenis = 'BENANG';
 
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir, $poPlus);
-        // dd($data, $poPlus);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
+        foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['kgs_material']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['kgs_material']  = 0;
+            }
+        }
+        unset($row);
+
         return $this->response->setJSON($data);
     }
 
