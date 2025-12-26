@@ -160,7 +160,7 @@
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaPakaiKaret') ?>">Report Sisa Pakai Karet</a></li>
                                 <!-- <li><a class="dropdown-item" href="<?= base_url($role . '/otherIn/listBarcode') ?>">List Barcode</a></li> -->
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/historyPindahOrder') ?>">Report History Pindah Order</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/historyPindahOrder') ?>">Report History Pindah Cluster</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/historyPindahCluster') ?>">Report History Pindah Cluster</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangBenang') ?>">Report Sisa Datang Benang</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangNylon') ?>">Report Sisa Datang Nylon</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url($role . '/warehouse/reportSisaDatangSpandex') ?>">Report Sisa Datang Spandex</a></li>

@@ -334,10 +334,14 @@
                                         <input type="number" name="kgs_out[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
                                         <input type="hidden" name="max_kgs[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['max_kgs']) ? $row['max_kgs'] : '') ?>" step="0.01" min="0">
                                     </td>
+                                    <!-- <td>
+                                    </td> -->
                                     <td>
                                         <input type="number" name="cns_out[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
                                         <input type="hidden" name="max_cns[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['max_cns']) ? $row['max_cns'] : '') ?>" step="1" min="0">
                                     </td>
+                                    <!-- <td>
+                                    </td> -->
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>
                                     </td>
@@ -621,6 +625,59 @@
             $('#ttl_cns').val(totalCns);
         }
     });
+    document.addEventListener('input', function(e) {
+
+        // VALIDASI KGS
+        if (e.target.name && e.target.name.startsWith('kgs_out')) {
+            const row = e.target.closest('tr');
+            const maxInput = row.querySelector('input[name^="max_kgs"]');
+
+            let kgs = parseFloat(e.target.value) || 0;
+            let max = parseFloat(maxInput.value) || 0;
+
+            if (kgs > max) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input Tidak Valid',
+                    text: 'Kgs melebihi stock per karung, sisa stock ' + max + 'kg',
+                    confirmButtonText: 'OK'
+                });
+                e.target.value = max;
+            }
+        }
+
+        // VALIDASI CNS
+        if (e.target.name && e.target.name.startsWith('cns_out')) {
+            const row = e.target.closest('tr');
+            const maxInput = row.querySelector('input[name^="max_cns"]');
+
+            let cns = parseInt(e.target.value) || 0;
+            let max = parseInt(maxInput.value) || 0;
+
+            if (cns > max) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input Tidak Valid',
+                    text: 'Cns melebihi stock per karung, sisa stock ' + max + 'cns',
+                    confirmButtonText: 'OK'
+                });
+                e.target.value = max;
+            }
+        }
+
+    });
+
+    // // agar max kgs & cones terupdate
+    // let refreshed = false;
+    // $(document).ready(function() {
+    //     if (refreshed) return;
+
+    //     refreshed = true;
+    //     $.get('<?= base_url($role . '/pengiriman/refreshSessionDeliveryArea') ?>');
+    //     console.log(
+    //         <?= json_encode(session()->get('manual_delivery') ?? []) ?>
+    //     );
+    // });
 </script>
 
 <?php $this->endSection(); ?>

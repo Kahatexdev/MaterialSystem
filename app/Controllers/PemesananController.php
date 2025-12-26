@@ -776,7 +776,7 @@ class PemesananController extends BaseController
             db_connect(),
             session()
         );
-        
+
         // $start = microtime(true);
         $result = $service->addToSession(
             $validated,
@@ -785,10 +785,33 @@ class PemesananController extends BaseController
         );
         // log_message('debug', 'SERVICE: ' . (microtime(true) - $start));
 
-        
+
         return $this->response
             ->setStatusCode($result['code'])
             ->setJSON($result);
+    }
+    public function refreshSessionDeliveryArea()
+    {
+        if (! session()->has('manual_delivery')) {
+            return $this->response
+                ->setStatusCode(204) // No Content
+                ->setJSON([
+                    'success' => true,
+                    'message' => 'Session kosong, tidak ada yang direfresh'
+                ]);
+        }
+
+        $service = new ManualDeliveryService(
+            db_connect(),
+            session()
+        );
+
+        // 🔥 INI KUNCINYA
+        $service->refreshSessionMax();
+
+        return $this->response->setJSON([
+            'success' => true
+        ]);
     }
 
     public function removeSessionDelivery()

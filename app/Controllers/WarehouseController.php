@@ -1663,7 +1663,7 @@ class WarehouseController extends BaseController
         }
         //update tabel pemasukan
         if (!empty($checkedIds)) {
-            $whereIds = array_map(fn($index) => $idOutCelup[$index] ?? null, $checkedIds);
+            $whereIds = array_map(fn ($index) => $idOutCelup[$index] ?? null, $checkedIds);
             $whereIds = array_filter($whereIds); // Hapus nilai NULL jika ada
 
             if (!empty($whereIds)) {
@@ -5095,7 +5095,7 @@ class WarehouseController extends BaseController
                     // Buang null/null string kalau kamu mau lebih rapih
                     $pemasukanUpdate = array_filter(
                         $pemasukanUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($pemasukanUpdate)) {
@@ -5115,7 +5115,7 @@ class WarehouseController extends BaseController
 
                     $outUpdate = array_filter(
                         $outUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($outUpdate)) {
@@ -5132,7 +5132,7 @@ class WarehouseController extends BaseController
 
                     $stockUpdate = array_filter(
                         $stockUpdate,
-                        fn($v) => $v !== null
+                        fn ($v) => $v !== null
                     );
 
                     if (!empty($stockUpdate)) {
@@ -5157,7 +5157,7 @@ class WarehouseController extends BaseController
 
                 $historyData = array_filter(
                     $historyData,
-                    fn($v) => $v !== null
+                    fn ($v) => $v !== null
                 );
 
                 if (!empty($historyData)) {
