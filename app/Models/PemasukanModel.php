@@ -180,35 +180,28 @@ class PemasukanModel extends Model
 
     public function getFilterDatangBenang($key, $tanggal_awal, $tanggal_akhir, $poPlus)
     {
-        $subMaterial = $this->db->table('material')
-            ->select('master_order.no_model, material.item_type, material.kode_warna, material.color, SUM(material.kgs) AS total_kgs')
-            ->join('master_order', 'master_order.id_order = material.id_order')
-            ->groupBy('material.id_order, material.item_type, material.kode_warna, material.color')
-            ->getCompiledSelect();
         // Query 1: Untuk data yang punya id_other_bon (other_bon)
         $builder1 = $this->db->table('pemasukan')
-            ->select('out_celup.id_out_celup, other_bon.id_other_bon, out_celup.id_other_bon, out_celup.l_m_d, out_celup.harga, out_celup.no_karung, SUM(DISTINCT out_celup.kgs_kirim) AS kgs_kirim, SUM(DISTINCT out_celup.cones_kirim) AS cones_kirim, SUM(DISTINCT out_celup.gw_kirim) AS gw_kirim,, out_celup.lot_kirim, out_celup.no_model, out_celup.ganti_retur, other_bon.item_type, other_bon.kode_warna, other_bon.warna, other_bon.no_surat_jalan, other_bon.tgl_datang, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, pemasukan.tgl_masuk, pemasukan.nama_cluster, other_bon.keterangan, pemasukan.admin, other_bon.po_tambahan AS po_plus, pemasukan.created_at')
-            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon')
+            ->select('out_celup.id_other_bon,  out_celup.no_model, other_bon.item_type, other_bon.kode_warna, other_bon.warna, out_celup.l_m_d, out_celup.harga, out_celup.no_karung, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.gw_kirim, out_celup.lot_kirim, out_celup.ganti_retur, other_bon.no_surat_jalan, other_bon.tgl_datang, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, pemasukan.tgl_masuk, pemasukan.nama_cluster, other_bon.keterangan, pemasukan.admin, other_bon.po_tambahan AS po_plus, pemasukan.created_at')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('other_bon', 'other_bon.id_other_bon = out_celup.id_other_bon', 'left')
             ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
-            ->join('open_po', 'open_po.no_model = out_celup.no_model AND open_po.kode_warna = other_bon.kode_warna AND open_po.item_type = other_bon.item_type', 'left')
-            ->join("($subMaterial) m", "m.no_model  = out_celup.no_model AND m.item_type  = other_bon.item_type AND m.kode_warna = other_bon.kode_warna AND m.color = other_bon.warna", 'left')
             ->join('master_material', 'master_material.item_type = other_bon.item_type', 'left')
             ->where('out_celup.id_other_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
-            ->groupBy('out_celup.id_out_celup, other_bon.id_other_bon, out_celup.no_model, other_bon.item_type, other_bon.kode_warna');
+            ->groupBy('pemasukan.id_pemasukan');
+
         // Query 2: Untuk data pemasukan biasa dari schedule celup
         $builder2 = $this->db->table('pemasukan')
-            ->select('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, SUM(DISTINCT out_celup.kgs_kirim) AS kgs_kirim, SUM(DISTINCT out_celup.cones_kirim) AS cones_kirim, out_celup.ganti_retur, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, m.total_kgs AS kgs_material, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, SUM(DISTINCT out_celup.gw_kirim) AS gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus, pemasukan.created_at')
-            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->select('bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, out_celup.kgs_kirim, out_celup.cones_kirim, out_celup.ganti_retur, pemasukan.tgl_masuk, pemasukan.nama_cluster, master_order.foll_up, master_order.no_order, master_order.buyer, master_order.delivery_awal, master_order.delivery_akhir, master_order.unit, out_celup.lot_kirim, bon_celup.no_surat_jalan, bon_celup.tgl_datang, out_celup.l_m_d, out_celup.gw_kirim, out_celup.harga, bon_celup.keterangan, pemasukan.admin, schedule_celup.po_plus, pemasukan.created_at')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
             ->join('master_order', 'master_order.no_model = out_celup.no_model', 'left')
-            ->join('open_po', 'open_po.no_model = master_order.no_model AND open_po.kode_warna = schedule_celup.kode_warna AND open_po.item_type = schedule_celup.item_type', 'left')
             ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
-            ->join("($subMaterial) m", "m.no_model  = schedule_celup.no_model AND m.item_type  = schedule_celup.item_type AND m.kode_warna = schedule_celup.kode_warna AND m.color = schedule_celup.warna", 'left')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
+            ->where('out_celup.id_bon IS NOT NULL')
             ->where('master_material.jenis', 'BENANG')
-            ->groupBy('out_celup.id_out_celup, bon_celup.id_bon, out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna');
+            ->groupBy('pemasukan.id_pemasukan');
 
         // Filter PO(+) jika checkbox dicentang
         if (!empty($poPlus)) {
