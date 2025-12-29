@@ -401,7 +401,7 @@
                             <td><p class="text-sm font-weight-bold mb-0">${safe(id.cns_out)}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${safe(id.lot_out)}</p></td>
                             <td><p class="text-sm font-weight-bold mb-0">${safe(id.nama_cluster)}</p></td>
-                            <td><p class="text-sm font-weight-bold mb-0">${id?.model_dipinjam ? `Pindah Order dari ${id.model_dipinjam} / ${id.item_type_dipinjam || ''} / ${id.kode_warna_dipinjam || ''} / ${id.warna_dipinjam || ''}` : ''}</p></td>
+                            <td><p class="text-sm font-weight-bold mb-0">${safe(id.keterangan_gbn)}${id?.model_dipinjam ? `/ Pindah Order dari ${id.model_dipinjam} / ${id.item_type_dipinjam || ''} / ${id.kode_warna_dipinjam || ''} / ${id.warna_dipinjam || ''}` : ''}</p></td>
                             <td>
                                 <button type="button" 
                                         class="btn btn-danger btn-hapus" 
