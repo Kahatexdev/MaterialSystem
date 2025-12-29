@@ -81,35 +81,76 @@ class ManualDeliveryService
 
     protected function applyMaxCalculation(array $rows, array $agg): array
     {
-        foreach ($rows as &$row) {
-            $id = $row['id_out_celup'];
+        // foreach ($rows as &$row) {
+        //     $id = $row['id_out_celup'];
 
-            $other   = $agg['other'][$id]   ?? ['kgs_other' => 0, 'cns_other' => 0];
-            $obc     = $agg['obc'][$id]     ?? ['kgs_out_by_cns' => 0, 'cns_out_by_cns' => 0];
-            $history = $agg['history'][$id] ?? [
+        //     $other   = $agg['other'][$id]   ?? ['kgs_other' => 0, 'cns_other' => 0];
+        //     $obc     = $agg['obc'][$id]     ?? ['kgs_out_by_cns' => 0, 'cns_out_by_cns' => 0];
+        //     $history = $agg['history'][$id] ?? [
+        //         'kgs_pindah' => 0,
+        //         'kgs_retur'  => 0,
+        //         'cns_pindah' => 0,
+        //         'cns_retur'  => 0
+        //     ];
+
+        //     $row['max_kgs_kirim'] = max(0, round(
+        //         $row['kgs_kirim']
+        //             - $other['kgs_other']
+        //             - $obc['kgs_out_by_cns']
+        //             - $history['kgs_pindah']
+        //             - $history['kgs_retur'],
+        //         2
+        //     ));
+
+        //     $row['max_cones_kirim'] = max(
+        //         0,
+        //         $row['cones_kirim']
+        //             - $other['cns_other']
+        //             - $obc['cns_out_by_cns']
+        //             - $history['cns_pindah']
+        //             - $history['cns_retur']
+        //     );
+        // }
+
+        foreach ($rows as &$row) {
+            $idOut = $row['id_out_celup'];
+            $idPeng = $row['id_pengeluaran'] ?? null;
+            $other   = $agg['other'][$idOut]   ?? ['kgs_other' => 0, 'cns_other' => 0];
+            // $obc     = $agg['obc'][$idOut]     ?? ['kgs_out_by_cns' => 0, 'cns_out_by_cns' => 0];
+            $history = $agg['history'][$idOut] ?? [
                 'kgs_pindah' => 0,
                 'kgs_retur'  => 0,
                 'cns_pindah' => 0,
                 'cns_retur'  => 0
             ];
 
+            $baseKgs = (float) $row['kgs_kirim'];
+            $baseCns = (float) $row['cones_kirim'];
+
+            // 🔹 TOTAL semua pengeluaran (DB)
+            $totalKgs = $agg['obc_total'][$idOut]['total_kgs_out'] ?? 0;
+            $totalCns = $agg['obc_total'][$idOut]['total_cns_out'] ?? 0;
+
+            // 🔹 KGS row ini (kalau ada di DB)
+            $rowKgs = 0;
+            if ($idPeng && isset($agg['obc_detail'][$idPeng])) {
+                $rowKgs = (float) $agg['obc_detail'][$idPeng]['kgs_out'];
+            }
+            $rowCns = 0;
+            if ($idPeng && isset($agg['obc_detail'][$idPeng])) {
+                $rowCns = $agg['obc_detail'][$idPeng]['cns_out'];
+            }
+
+
             $row['max_kgs_kirim'] = max(0, round(
-                $row['kgs_kirim']
-                    - $other['kgs_other']
-                    - $obc['kgs_out_by_cns']
-                    - $history['kgs_pindah']
-                    - $history['kgs_retur'],
+                $baseKgs - $totalKgs  - $other['kgs_other'] - $history['kgs_pindah'] - $history['kgs_retur']  + $rowKgs,
                 2
             ));
 
-            $row['max_cones_kirim'] = max(
-                0,
-                $row['cones_kirim']
-                    - $other['cns_other']
-                    - $obc['cns_out_by_cns']
-                    - $history['cns_pindah']
-                    - $history['cns_retur']
-            );
+            $row['max_cones_kirim'] = max(0, round(
+                $baseCns - ($totalCns  - $other['cns_other'] - $history['cns_pindah'] - $history['cns_retur'])  + $rowCns,
+                2
+            ));
         }
 
         return $rows;
@@ -140,8 +181,8 @@ class ManualDeliveryService
             'admin'              => $username,
             'status_pengeluaran' => $status,
             // BASE (TIDAK PERNAH BERUBAH)
-            'base_kgs' => $row['kgs_kirim'],     // ASLI DARI DB
-            'base_cns' => $row['cones_kirim'],   // ASLI DARI DB
+            'kgs_kirim' => $row['kgs_kirim'],     // ASLI DARI DB
+            'cones_kirim' => $row['cones_kirim'],   // ASLI DARI DB
         ];
     }
 
@@ -161,7 +202,7 @@ class ManualDeliveryService
     protected function getAggregatedData(array $idOutCelups): array
     {
         if (empty($idOutCelups)) {
-            return ['other' => [], 'obc' => [], 'history' => []];
+            return ['other' => [], 'obc_total' => [], 'obc_detail' => [], 'history' => []];
         }
 
         $other = $this->db->table('other_out')
@@ -170,12 +211,24 @@ class ManualDeliveryService
             ->groupBy('id_out_celup')
             ->get()->getResultArray();
 
-        $obc = $this->db->table('pengeluaran')
-            ->select('id_out_celup, SUM(kgs_out) kgs_out_by_cns, SUM(cns_out) cns_out_by_cns')
+        $obcTotal = $this->db->table('pengeluaran')
+            ->select('id_out_celup, SUM(kgs_out) total_kgs_out, SUM(cns_out) total_cns_out')
+            ->where('krg_out', 0)
+            // ->where('status', 'Pengiriman Area')
+            ->whereIn('id_out_celup', $idOutCelups)
+            ->groupBy('id_out_celup')
+            ->get()->getResultArray();
+
+        $obcDetail = $this->db->table('pengeluaran')
+            ->select('
+            id_pengeluaran,
+            id_out_celup,
+            kgs_out,
+            cns_out
+        ')
             ->where('krg_out', 0)
             ->where('status', 'Pengiriman Area')
             ->whereIn('id_out_celup', $idOutCelups)
-            ->groupBy('id_out_celup')
             ->get()->getResultArray();
 
         $history = $this->db->table('history_stock')
@@ -191,9 +244,10 @@ class ManualDeliveryService
             ->get()->getResultArray();
 
         return [
-            'other'   => array_column($other, null, 'id_out_celup'),
-            'obc'     => array_column($obc, null, 'id_out_celup'),
-            'history' => array_column($history, null, 'id_out_celup'),
+            'other'      => array_column($other, null, 'id_out_celup'),
+            'obc_total'  => array_column($obcTotal, null, 'id_out_celup'),
+            'obc_detail' => array_column($obcDetail, null, 'id_pengeluaran'),
+            'history'    => array_column($history, null, 'id_out_celup'),
         ];
     }
 
@@ -206,78 +260,101 @@ class ManualDeliveryService
             $row['tgl_out'],
         ]);
     }
-    public function refreshSessionMax(): void
+
+    public function updateKgsOut($idPeng, float $kgsOut, int $cnsOut): void
     {
         $sessionData = $this->session->get('manual_delivery') ?? [];
-        if (empty($sessionData)) {
-            return;
-        }
 
-        /**
-         * 1. Ambil id_out_celup unik dari session
-         */
-        $idOutCelups = array_values(array_unique(
-            array_column($sessionData, 'id_out_celup')
-        ));
-
-        /**
-         * 2. Ambil aggregate GLOBAL (sekali saja)
-         */
-        $aggregates = $this->getAggregatedData($idOutCelups);
-
-        /**
-         * 3. Siapkan base PER id_out_celup (IMMUTABLE)
-         */
-        $baseRows = [];
-        foreach ($sessionData as $item) {
-            $id = $item['id_out_celup'];
-
-            if (!isset($baseRows[$id])) {
-                $baseRows[$id] = [
-                    'id_out_celup' => $id,
-                    'kgs_kirim'    => $item['base_kgs'], // 🔥 ASLI
-                    'cones_kirim'  => $item['base_cns'],
-                ];
+        foreach ($sessionData as &$row) {
+            if (
+                isset($row['id_pengeluaran']) &&
+                (string)$row['id_pengeluaran'] === (string)$idPeng
+            ) {
+                $row['kgs_out'] = $kgsOut;
+                $row['cns_out'] = $cnsOut;
+                break;
             }
         }
-
-        /**
-         * 4. Hitung max SEKALI per id_out_celup
-         */
-        $calculated = $this->applyMaxCalculation(
-            array_values($baseRows),
-            $aggregates
-        );
-
-        /**
-         * 5. Mapping hasil max
-         */
-        $maxMap = [];
-        foreach ($calculated as $row) {
-            $maxMap[$row['id_out_celup']] = [
-                'max_kgs' => $row['max_kgs_kirim'],
-                'max_cns' => $row['max_cones_kirim'],
-            ];
-        }
-
-        /**
-         * 6. Update session TANPA hitung ulang
-         */
-        foreach ($sessionData as &$item) {
-            $id = $item['id_out_celup'];
-
-            $item['max_kgs'] = $maxMap[$id]['max_kgs'];
-            $item['max_cns'] = $maxMap[$id]['max_cns'];
-
-            // safety clamp (WAJIB)
-            if ($item['kgs_out'] > $item['max_kgs']) {
-                $item['kgs_out'] = $item['max_kgs'];
-            }
-            if ($item['cns_out'] > $item['max_cns']) {
-                $item['cns_out'] = $item['max_cns'];
-            }
-        }
+        unset($row);
 
         $this->session->set('manual_delivery', $sessionData);
+    }
+
+    public function recalculateMax(): void
+    {
+        $sessionData = session()->get('manual_delivery') ?? [];
+        if (empty($sessionData)) return;
+
+        $idOutCelups = $this->extractUniqueIds($sessionData, 'id_out_celup');
+        $agg = $this->getAggregatedData($idOutCelups);
+
+        $sessionIndex = [];
+        foreach ($sessionData as $i => $row) {
+            if (isset($row['_dup_key'])) {
+                $sessionIndex[$row['_dup_key']] = $i;
+            }
+        }
+
+        $sessionTotal = [];
+        foreach ($sessionData as $row) {
+            if (!isset($row['id_out_celup'])) continue;
+
+            $idOut = $row['id_out_celup'];
+
+            if (!isset($sessionTotal[$idOut])) {
+                $sessionTotal[$idOut] = [
+                    'kgs' => 0,
+                    'cns' => 0
+                ];
+            }
+
+            $sessionTotal[$idOut]['kgs'] += (float) ($row['kgs_out'] ?? 0);
+            $sessionTotal[$idOut]['cns'] += (int)   ($row['cns_out'] ?? 0);
+        }
+
+        foreach ($sessionData as $row) {
+
+            if (!isset($row['id_out_celup'], $row['_dup_key'])) {
+                continue;
+            }
+
+            $idOut = $row['id_out_celup'];
+            $dupKey = $row['_dup_key'];
+
+            $other   = $agg['other'][$idOut]   ?? ['kgs_other' => 0, 'cns_other' => 0];
+            $history = $agg['history'][$idOut] ?? [
+                'kgs_pindah' => 0,
+                'kgs_retur'  => 0,
+                'cns_pindah' => 0,
+                'cns_retur'  => 0
+            ];
+
+            $baseKgs = (float) $row['kgs_kirim'];
+            $baseCns = (float) $row['cones_kirim'];
+
+            $rowKgs = (float) $row['kgs_out'];
+            $rowCns = (int) $row['cns_out'];
+
+            $totalSessionKgs = $sessionTotal[$idOut]['kgs'] ?? 0;
+            $totalSessionCns = $sessionTotal[$idOut]['cns'] ?? 0;
+
+            $maxKgs = max(0, round(
+                ($baseKgs - $totalSessionKgs  - $other['kgs_other'] - $history['kgs_pindah'] - $history['kgs_retur']) + $rowKgs,
+                2
+            ));
+
+            $maxCns = max(
+                0,
+                ($baseCns - $totalSessionCns - $other['cns_other'] - $history['cns_pindah'] - $history['cns_retur']) + $rowCns
+            );
+
+            $idx = $sessionIndex[$dupKey] ?? null;
+            if ($idx !== null) {
+                $sessionData[$idx]['max_kgs'] = $maxKgs;
+                $sessionData[$idx]['max_cns'] = $maxCns;
+            }
+        }
+
+        session()->set('manual_delivery', $sessionData);
     }
 }

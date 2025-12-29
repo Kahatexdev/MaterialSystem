@@ -801,16 +801,27 @@ class PemesananController extends BaseController
                 ]);
         }
 
+        $idPeng = $this->request->getPost('id_pengeluaran');
+        $kgsOut = (float) $this->request->getPost('kgs_out');
+        $cnsOut = (int) $this->request->getPost('cns_out');
+
         $service = new ManualDeliveryService(
             db_connect(),
             session()
         );
 
-        // 🔥 INI KUNCINYA
-        $service->refreshSessionMax();
+        // 1️⃣ update kgs_out & cns_out di session
+        $service->updateKgsOut($idPeng, $kgsOut, $cnsOut);
+
+        // 2️⃣ hitung ulang max_kgs & max_cns
+        $service->recalculateMax();
+
+        // ambil session terbaru
+        $sessionData = session()->get('manual_delivery') ?? [];
 
         return $this->response->setJSON([
-            'success' => true
+            'success' => true,
+            'data'    => $sessionData
         ]);
     }
 
