@@ -1451,9 +1451,171 @@ class ScheduleController extends BaseController
         $tanggalSch = $this->request->getGet('tanggal_schedule') ?? '';
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
+        $jenis = 'NYLON';
 
         $data = $this->scheduleCelupModel->getFilterSchNylon($tanggalAwal, $tanggalAkhir, $key, $tanggalSch);
-        // dd($data);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+
+            if (strpos($row->no_model, 'POGABUNGAN') === 0) {
+                $cleanModel = str_replace('POGABUNGAN ', '', $row->no_model);
+                $models = explode('_', $cleanModel);
+            } else {
+                $models = [$row->no_model];
+            }
+
+            foreach ($models as $model) {
+
+                if ($model === 'STOCK') {
+                    continue;
+                }
+
+                $keyMap = implode('|', [
+                    $model,
+                    $row->item_type,
+                    $row->kode_warna,
+                    $row->warna
+                ]);
+
+                if (isset($mapKey[$keyMap])) {
+                    continue;
+                }
+
+                $mapKey[$keyMap] = true;
+
+                $filteredData[] = [
+                    'no_model'   => $model,
+                    'item_type'  => $row->item_type,
+                    'kode_warna' => $row->kode_warna,
+                    'color'      => $row->warna
+                ];
+            }
+        }
+
+        $noModel   = array_unique(array_column($filteredData, 'no_model'));
+        $itemType = array_unique(array_column($filteredData, 'item_type'));
+        $kodeWarna = array_unique(array_column($filteredData, 'kode_warna'));
+        $warna = array_unique(array_column($filteredData, 'color'));
+
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
+        $dataPoPlus = $this->totalPoTambahanModel->getTotalPoTambahan([
+            'no_model'   => $noModel,
+            'item_type'  => $itemType,
+            'kode_warna' => $kodeWarna,
+            'warna'      => $warna,
+        ]);
+
+        $poPlusMap = [];
+
+        foreach ($dataPoPlus as $row) {
+
+            $key = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['color']
+            ]);
+
+            $poPlusMap[$key] = $row['ttl_tambahan_kg'];
+        }
+
+        $stockAwalMap = [];
+
+        $stockAwal = $this->historyStock->dataStockAwal([
+            'no_model' => $noModel,
+            'item_type' => $itemType,
+            'kode_warna' => $kodeWarna,
+            'warna' => $warna
+        ]);
+
+        foreach ($stockAwal as $sa) {
+            $keyStock = implode('|', [
+                $sa['no_model'],
+                $sa['item_type'],
+                $sa['kode_warna'],
+                $sa['warna']
+            ]);
+
+            $stockAwalMap[$keyStock] = $sa['kgs_stock_awal'];
+        }
+
+        $datangSolidMap = [];
+        $tglDatangMap = [];
+
+        $datangSolid = $this->pemasukanModel->getTotalDatangSolid([
+            'no_model' => $noModel,
+            'item_type' => $itemType,
+            'kode_warna' => $kodeWarna,
+            'warna' => $warna
+        ]);
+
+        foreach ($datangSolid as $ds) {
+            $keyDatang = implode('|', [
+                $ds['no_model'],
+                $ds['item_type'],
+                $ds['kode_warna'],
+                $ds['warna']
+            ]);
+
+            $datangSolidMap[$keyDatang] = $ds['kgs_datang'];
+            $tglDatangMap[$keyDatang] = $ds['tgl_datang'];
+        }
+
+
+        foreach ($data as &$row) {
+
+            $kgDetails = [];
+            $kgPoPlusDetails = [];
+            $stockAwalDetails = [];
+            $kgDatangDetails = [];
+            $tglDatangDetails = [];
+
+            if (strpos($row->no_model, 'POGABUNGAN') === 0) {
+                $cleanModel = str_replace('POGABUNGAN ', '', $row->no_model);
+                $models = explode('_', $cleanModel);
+            } else {
+                $models = [$row->no_model];
+            }
+
+            foreach ($models as $model) {
+
+                if ($model === 'STOCK') {
+                    continue;
+                }
+
+                $keyQty = implode('|', [
+                    $model,
+                    $row->item_type,
+                    $row->kode_warna,
+                    $row->warna
+                ]);
+
+                $kg = $qtyMap[$keyQty]['kg_po'] ?? 0;
+                $kgPoPlus = $poPlusMap[$keyQty] ?? 0;
+                $kgStockAwal = $stockAwalMap[$keyQty] ?? 0;
+                $kgDatangSolid = $datangSolidMap[$keyQty] ?? 0;
+                $tglDatangSolid = $tglDatangMap[$keyQty] ?? 'Belum Datang';
+
+                $kgDetails[] = $model . '(' . $kg . ')';
+                $kgPoPlusDetails[] = $model . '(' . $kgPoPlus . ')';
+                $stockAwalDetails[] = $model . '(' . $kgStockAwal . ')';
+                $kgDatangDetails[] = $model . '(' . $kgDatangSolid . ')';
+                $tglDatangDetails[] = $model . '(' . $tglDatangSolid . ')';
+            }
+
+            $row->total_kgs = implode(', ', $kgDetails);
+            $row->total_poplus = implode(', ', $kgPoPlusDetails);
+            $row->kgs_stock_awal = implode(', ', $stockAwalDetails);
+            $row->kgs_datang = implode(', ', $kgDatangDetails);
+            $row->tgl_datang = implode(', ', $tglDatangDetails);
+        }
+
+        unset($row);
+
         return $this->response->setJSON($data);
     }
 
