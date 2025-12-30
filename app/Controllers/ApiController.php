@@ -1406,7 +1406,7 @@ class ApiController extends ResourceController
 
             if (!empty($validate)) {
                 $kirim = $this->pengeluaranModel->getQtyKirim($validate);
-                $poPlus = $this->totalPoTambahanModel->getTotalPoTambahan($validate);
+                $poPlus = $this->totalPoTambahanModel->getTotalPolistTambahan($validate);
             }
         }
 
@@ -1558,6 +1558,11 @@ class ApiController extends ResourceController
         $data = [];
         $listRetur = $this->returModel->filterData($area, $tglBuat, $noModel);
 
+        // Pastikan dataRetur selalu array
+        if (empty($listRetur)) {
+            $listRetur = [];
+        }
+
         // Ambil kolom-kolom unik dari hasil filterData
         $noModels    = array_unique(array_column($listRetur, 'no_model'));
         $itemTypes   = array_unique(array_column($listRetur, 'item_type'));
@@ -1574,6 +1579,11 @@ class ApiController extends ResourceController
 
         $dataPoTamabahan = $this->poTambahanModel->getDataPlus($validate);
         $material = $this->materialModel->getMaterialForPPH($noModel);
+
+        // Default jika null / kosong
+        $dataPoTambahan = empty($dataPoTambahan) ? 0 : $dataPoTambahan;
+        $material       = empty($material) ? 0 : $material;
+
         $data = [
             'dataRetur' => $listRetur,
             'dataPoTambahan' => $dataPoTamabahan,
