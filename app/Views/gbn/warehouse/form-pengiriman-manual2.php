@@ -286,7 +286,9 @@
                                 <th>Kekurangan</th>
                                 <th>Lot</th>
                                 <th>Kgs</th>
+                                <th>Max K</th>
                                 <th>Cones</th>
+                                <th>Max C</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -332,7 +334,14 @@
                                         <input type="number" name="kgs_out[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_out']) ? $row['kgs_out'] : '') ?>" step="0.01" min="0">
                                     </td>
                                     <td>
+                                        <input type="text" name="max_kgs[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['max_kgs']) ? $row['max_kgs'] : '') ?>" step="0.01" min="0">
+                                        <input type="text" name="kgs_kirim[<?= $row['id_pengeluaran'] ?>]" class="form-control kgs-val" value="<?= esc(isset($row['kgs_kirim']) ? $row['kgs_kirim'] : '') ?>" step="0.01" min="0">
+                                    </td>
+                                    <td>
                                         <input type="number" name="cns_out[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['cns_out']) ? $row['cns_out'] : '') ?>" step="1" min="0">
+                                    </td>
+                                    <td>
+                                        <input type="text" name="max_cns[<?= $row['id_pengeluaran'] ?>]" class="form-control cns-val" value="<?= esc(isset($row['max_cns']) ? $row['max_cns'] : '') ?>" step="1" min="0">
                                     </td>
                                     <td>
                                         <button type="button" class="btn btn-danger btn-remove" data-index="<?= $i ?>"><i class="fas fa-trash"></i></button>
@@ -616,6 +625,98 @@
             $('#ttl_kgs').val(totalKgs.toFixed(2));
             $('#ttl_cns').val(totalCns);
         }
+    });
+
+    let refreshTimer = null;
+    document.addEventListener('input', function(e) {
+
+        if (!e.target.closest('tr')) return;
+
+        const row = e.target.closest('tr');
+
+        // ambil jenis dari hidden input di row ini
+        const jenisInput = row.querySelector('input[name^="jenis"]');
+        if (!jenisInput) return;
+
+        const jenis = jenisInput.value.toUpperCase();
+
+        const idPeng = e.target.name.match(/\[(\d+)\]/)?.[1];
+        const kgsOut = row.querySelector('input[name^="kgs_out"]')?.value || 0;
+        const cnsOut = row.querySelector('input[name^="cns_out"]')?.value || 0;
+
+        // JALANKAN VALIDASI HANYA UNTUK BENANG & NYLON
+        if (jenis !== 'BENANG' && jenis !== 'NYLON') {
+            return; // SPANDEX / KARET → lewati validasi
+        }
+
+        // VALIDASI KGS
+        if (e.target.name && e.target.name.startsWith('kgs_out')) {
+            const row = e.target.closest('tr');
+            const maxInput = row.querySelector('input[name^="max_kgs"]');
+
+            let kgs = parseFloat(e.target.value) || 0;
+            let max = parseFloat(maxInput.value) || 0;
+
+            if (kgs > max) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input Tidak Valid',
+                    text: 'Kgs melebihi stock per karung, sisa stock ' + max + 'kg',
+                    confirmButtonText: 'OK'
+                });
+                e.target.value = max;
+            }
+        }
+
+        // VALIDASI CNS
+        if (e.target.name && e.target.name.startsWith('cns_out')) {
+            const row = e.target.closest('tr');
+            const maxInput = row.querySelector('input[name^="max_cns"]');
+
+            let cns = parseInt(e.target.value) || 0;
+            let max = parseInt(maxInput.value) || 0;
+
+            if (cns > max) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Input Tidak Valid',
+                    text: 'Cns melebihi stock per karung, sisa stock ' + max + 'cns',
+                    confirmButtonText: 'OK'
+                });
+                e.target.value = max;
+            }
+        }
+
+        // === DEBOUNCE AJAX (tunggu user berhenti ngetik) ===
+        clearTimeout(refreshTimer);
+
+        refreshTimer = setTimeout(function() {
+            $.ajax({
+                    url: '<?= base_url($role . '/pengiriman/refreshSessionDeliveryArea') ?>',
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        id_pengeluaran: idPeng,
+                        kgs_out: kgsOut,
+                        cns_out: cnsOut
+                    }
+                })
+                .done(function(res) {
+                    if (!res.data) return;
+
+                    res.data.forEach(function(row) {
+                        const id = row.id_pengeluaran;
+
+                        // update max kgs
+                        $(`input[name="max_kgs[${id}]"]`).val(row.max_kgs).trigger('change');
+                        // update max kgs
+                        $(`input[name="max_cns[${id}]"]`).val(row.max_cns).trigger('change');
+                    });
+
+                    console.log('Session & input updated');
+                    console.table(res.data);
+                });
+        }, 600); // 600ms setelah berhenti ngetik
     });
 </script>
 

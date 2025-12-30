@@ -288,29 +288,16 @@
                                 <!-- Display Total dari Checkbox -->
                                 <div class="row mt-3">
                                     <div class="col-md-4">
+                                        <label for="inputKgs" class="form-label">Total Kgs</label>
                                         <input type="text" class="form-control" name="ttl_kgs" readonly placeholder="Total Kgs Terpilih" disabled>
                                     </div>
                                     <div class="col-md-4">
+                                        <label for="inputCns" class="form-label">Total Cns</label>
                                         <input type="text" class="form-control" name="ttl_cns" readonly placeholder="Total Cns Terpilih" disabled>
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
-                                    </div>
-                                </div>
-
-                                <!-- Input Total -->
-                                <div class="row mt-4">
-                                    <div class="col-md-4">
-                                        <label for="inputKgs" class="form-label">Total Kgs</label>
-                                        <input type="number" step="0.01" class="form-control" id="inputKgs" name="input_kgs" placeholder="Masukkan Kgs" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="inputCns" class="form-label">Total Cns</label>
-                                        <input type="number" class="form-control" id="inputCns" name="input_cns" placeholder="Masukkan Cns" required>
-                                    </div>
-                                    <div class="col-md-4">
                                         <label for="inputKrg" class="form-label">Total Krg</label>
-                                        <input type="number" class="form-control" id="inputKrg" name="input_krg" placeholder="Masukkan Krg" required>
+                                        <input type="text" class="form-control" name="ttl_krg" readonly placeholder="Total Krg Terpilih" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -1059,105 +1046,216 @@
                 id_stock: idStock
             }, res => {
                 $container.empty();
-                selectedData = res.data || [];
-
-                if (!res.success || !selectedData.length) {
+                if (!res.success || !res.data.length) {
                     return $container.html('<div class="alert alert-warning text-center">Data tidak ditemukan</div>');
                 }
 
-                selectedData.forEach(d => {
+                // aku mau pake checkbox biar bisa pilih banyak
+                selectedData = res.data; // Simpan data untuk referensi nanti
+                res.data.forEach(d => {
                     const lot = d.lot_stock || d.lot_awal;
                     $container.append(`
-                    <div class="col-md-12">
-                        <div class="card result-card h-100">
-                        <div class="form-check">
-                            <input class="form-check-input row-check" type="radio" name="pilih_item" value="${d.id_out_celup}" id="radio${d.id_out_celup}" data-lot="${lot}">
-                            <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
-                            ${d.no_model} | ${d.item_type} | ${d.kode_warna} | ${d.warna}
-                            </label>
-                        </div>
-                        <div class="card-body row">
-                            <div class="col-md-4">
-                            <p><strong>Kode Warna:</strong> ${d.kode_warna}</p>
-                            <p><strong>Warna:</strong> ${d.warna}</p>
+                        <div class="col-md-12">
+                            <div class="card result-card h-100">
+                                <div class="card-body">
+                                <div class="row">
+                                <div class="col-md-6">
+                                <h5><strong>Pengeluaran Perkarung</strong></h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input row-otherOut" type="checkbox" name="pilih_item" value="${d.id_out_celup}" data-lot="${lot}" id="chk${d.id_out_celup}">
+                                        <label class="form-check-label fw-bold" for="chk${d.id_out_celup}">
+                                            <strong>No Model:</strong> ${d.no_model}<br>
+                                            <strong>Item Type:</strong> ${d.item_type}<br>
+                                            <strong>Kode Warna:</strong> ${d.kode_warna}<br>
+                                            <strong>Warna:</strong> ${d.warna}<br>
+                                            <strong>Lot Jalur:</strong> ${lot}<br>
+                                            <strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG<br>
+                                            <strong>Cones:</strong> ${d.cones_kirim} Cns
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- Kanan: input manual -->
+                                    <div class="col-md-6">
+                                        <h5><strong>Pengeluaran Perkones</strong></h5>
+                                        <div class="row gx-2">
+                                            <div class="col-6">
+                                                <label for="kgs_out_${d.id_out_celup}" class="form-label small mb-1">Kg Out Manual</label>
+                                                <input type="number"
+                                                    step="0.01"
+                                                    class="form-control form-control-sm"
+                                                    name="kgs_out[${d.id_out_celup}]"
+                                                    id="kgs_out_${d.id_out_celup}"
+                                                    placeholder="Kg"
+                                                    disabled>
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="cns_out_${d.id_out_celup}" class="form-label small mb-1">Cones Out Manual</label>
+                                                <input type="number"
+                                                    step="1"
+                                                    class="form-control form-control-sm"
+                                                    name="cns_out[${d.id_out_celup}]"
+                                                    id="cns_out_${d.id_out_celup}"
+                                                    placeholder="CNS"
+                                                    disabled>
+                                                <input type="hidden"
+                                                    class="form-control form-control-sm"
+                                                    name="krg_out[${d.id_out_celup}]"
+                                                    id="krg_out_${d.id_out_celup}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </div>
                             </div>
-                            <div class="col-md-4">
-                            <p><strong>Lot Jalur:</strong> ${lot}</p>
-                            <p><strong>No Karung:</strong> ${d.no_karung}</p>
-                            </div>
-                            <div class="col-md-4">
-                            <p><strong>Total Kgs:</strong> ${parseFloat(d.kgs_kirim || 0).toFixed(2)} KG</p>
-                            <p><strong>Cones:</strong> ${d.cones_kirim} Cns</p>
-                            </div>
                         </div>
-                        </div>
-                    </div>
                     `);
                 });
-
-                calculateTotals();
             });
             $('#inputNamaCluster').val(namaCluster);
             $('#id_stock').val(idStock);
-            $container.on('change', '.row-check', calculateTotals);
+            $container.on('change', '.row-otherOut', function() {
+                // Aktifkan/Nonaktifkan input manual
+                const id = $(this).val();
+                const isChecked = $(this).is(':checked');
+
+                $(`#kgs_out_${id}, #cns_out_${id}`).prop('disabled', !isChecked);
+
+                calculateTotals();
+            });
         });
 
         function calculateTotals() {
-            let totalKgs = 0,
-                totalCns = 0,
-                totalKrg = 0;
+            let totalKgs = 0;
+            let totalCns = 0;
+            let totalKrg = 0;
 
-            const selected = $('#pengeluaranSelainOrderContainer .row-check:checked').val();
-            const item = selectedData.find(d => d.id_out_celup == selected);
+            $('#pengeluaranSelainOrderContainer .row-otherOut:checked').each(function () {
+                const id = $(this).val();
 
-            if (item) {
-                totalKgs = parseFloat(item.kgs_kirim || 0);
-                totalCns = parseInt(item.cones_kirim || 0);
-                totalKrg = 1;
-            }
+                const item = selectedData.find(d => d.id_out_celup == id);
+                if (!item) return;
 
+                const rawManualKgs = $(`#kgs_out_${id}`).val();
+                const rawManualCns = $(`#cns_out_${id}`).val();
+
+                const manualKgs = rawManualKgs !== '' ? parseFloat(rawManualKgs) : null;
+                const manualCns = rawManualCns !== '' ? parseInt(rawManualCns) : null;
+                const krg = 1;
+
+                 if (manualKgs !== null) {
+                    totalKgs += manualKgs;
+                    totalCns += manualCns || 0;
+                    totalKrg += krg;
+                } else {
+                    totalKgs += parseFloat(item.kgs_kirim || 0);
+                    totalCns += parseInt(item.cones_kirim || 0);
+                    totalKrg += krg;
+                }
+                // console.log("Selected Items:", totalKrg);
+            });
+
+            // Update UI
             $('input[name="ttl_kgs"]').val(totalKgs.toFixed(2));
             $('input[name="ttl_cns"]').val(totalCns);
             $('input[name="ttl_krg"]').val(totalKrg);
         }
 
+        $('#pengeluaranSelainOrderContainer')
+        .on('input', 'input[id^="kgs_out_"], input[id^="cns_out_"], input[id^="krg_out_"]', function () {
+            calculateTotals();
+        });
+
+
+
         // Validasi Input Manual
-        $('#inputKgs, #inputCns, #inputKrg').on('input', function() {
-            const maxKgs = parseFloat($('input[name="ttl_kgs"]').val()) || 0;
-            const maxCns = parseInt($('input[name="ttl_cns"]').val()) || 0;
-            const maxKrg = parseInt($('input[name="ttl_krg"]').val()) || 0;
+        $('#pengeluaranSelainOrderContainer').on('input', 'input[id^="kgs_out_"]', function() {
+            const el = $(this);
+            const id = this.id.split('_')[2]; // ambil id_out_celup
+            const d = selectedData.find(x => x.id_out_celup == id);
+            if (!d) return; // safety
 
-            const inputKgs = parseFloat($('#inputKgs').val()) || 0;
-            const inputCns = parseInt($('#inputCns').val()) || 0;
-            const inputKrg = parseInt($('#inputKrg').val()) || 0;
+            // Batas maksimum
+            const maxKgs = parseFloat(d.kgs_kirim || 0);
 
-            if (inputKgs > maxKgs) {
-                alert(`Total Kgs tidak boleh melebihi ${maxKgs}`);
-                $('#inputKgs').val(maxKgs);
+            let raw = el.val().replace(',', '.').trim();
+            let v = parseFloat(raw) || 0;
+            if (v > maxKgs) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nilai Terlalu Besar',
+                    text: `Kg Out Manual tidak boleh lebih dari ${maxKgs.toFixed(2)} KG`
+                });
+                el.val(0);
             }
-            if (inputCns > maxCns) {
-                alert(`Total Cns tidak boleh melebihi ${maxCns}`);
-                $('#inputCns').val(maxCns);
+            calculateTotals();
+        }).on('input', 'input[id^="cns_out_"]', function() {
+            const el = $(this);
+            const id = this.id.split('_')[2]; // ambil id_out_celup
+            const d = selectedData.find(x => x.id_out_celup == id);
+            if (!d) return; // safety
+
+            // Batas maksimum
+            const maxCns = parseInt(d.cones_kirim || 0, 10);
+
+            let raw = el.val().trim();
+            let v = parseInt(raw, 10) || 0;
+            if (v > maxCns) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nilai Terlalu Besar',
+                    text: `Cones Out Manual tidak boleh lebih dari ${maxCns} Cns`
+                });
+                el.val(0);
             }
-            if (inputKrg > maxKrg) {
-                alert(`Total Krg tidak boleh melebihi ${maxKrg}`);
-                $('#inputKrg').val(maxKrg);
+            calculateTotals();
+        }).on('input', 'input[id^="krg_out_"]', function() {
+            const el = $(this);
+            const id = this.id.split('_')[2]; // ambil id_out_celup
+            const d = selectedData.find(x => x.id_out_celup == id);
+            if (!d) return; // safety
+
+            // Batas maksimum
+            const maxKrg = 1;
+
+            let raw = el.val().trim();
+            let v = parseInt(raw, 10) || 0;
+            if (v > maxKrg) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Karung tidak valid',
+                    text: `Karung Out Manual tidak boleh lebih dari ${maxKrg} Krg`
+                });
+                el.val(0);
             }
+            calculateTotals();
         });
     });
     // Simpan data dari modal Pengeluaran Selain Order
     $('#formpengeluaranSelainOrder').on('submit', function(e) {
         e.preventDefault(); // penting agar tidak reload halaman
 
-        const idOutCelup = $('input[name="pilih_item"]:checked').val();
+        const idOutCelup = $('input[name="pilih_item"]:checked').map((_, el) => el.value).get();
         const tglOut = $('#tglOut').val();
         const keterangan = $('#keterangan').val();
         const kategori = $('#kategoriSelect').val();
-        const kgsOtherOut = $('#inputKgs').val();
-        const cnsOtherOut = $('#inputCns').val();
-        const krgOtherOut = $('#inputKrg').val();
-        const namaCluster = $('#inputNamaCluster').val();
-        const lot = $('input[name="pilih_item"]:checked').data('lot');
+        const selectedItems = [];
+
+        $('input[name="pilih_item"]:checked').each(function () {
+            const id = $(this).val();
+
+            selectedItems.push({
+                id_out_celup: id,
+                kgs: $(`#kgs_out_${id}`).val() || null,
+                cns: $(`#cns_out_${id}`).val() || null,
+                krg: $(`#krg_out_${id}`).val() || null,
+                lot: $(this).data('lot')
+            });
+        });
+
+        if (selectedItems.length === 0 || !kategori) {
+            return alert('Silakan pilih item dan kategori terlebih dahulu.');
+        }
+
+        // console.log("Selected Items:", selectedItems);
         const idStock = $('#id_stock').val(); // atau sesuaikan jika beda
 
         if (!idOutCelup || !kategori) {
@@ -1168,47 +1266,40 @@
             url: '<?= base_url(session()->get("role") . "/warehouse/savePengeluaranSelainOrder") ?>',
             method: 'POST',
             data: {
+                id_stock: idStock,
                 id_out_celup: idOutCelup,
                 tgl_out: tglOut,
                 keterangan: keterangan,
                 kategori: kategori,
-                kgs_other_out: kgsOtherOut,
-                cns_other_out: cnsOtherOut,
-                krg_other_out: krgOtherOut,
-                lot: lot,
-                nama_cluster: namaCluster,
-                id_stock: idStock // sesuaikan dengan controller kamu yang menerima array
+                items: selectedItems
             },
-            success: function(res) {
+            success: function (res) {
                 if (res.success) {
                     Swal.fire({
-                        title: 'Berhasil!',
-                        text: res.message || 'Data berhasil disimpan!',
                         icon: 'success',
-                        confirmButtonColor: '#4a90e2',
+                        text: res.message || 'Pengeluaran selain order berhasil disimpan.',
+                        confirmButtonText: 'OK',
                         willClose: () => {
-                            // Menutup modal dan reset form jika diperlukan
+                            // Reload halaman setelah modal ditutup
                             $('#pengeluaranSelainOrder').modal('hide');
                             $('#formpengeluaranSelainOrder')[0].reset();
+                            // location.reload();
                             reloadSearchResult(); // refresh data stock tanpa reload page
                         }
                     });
                 } else {
                     Swal.fire({
-                        title: 'Gagal!',
-                        text: 'Gagal menyimpan data: ' + res.message,
                         icon: 'error',
-                        confirmButtonColor: '#e74c3c'
+                        text: res.message || 'Terjadi kesalahan saat menyimpan pengeluaran selain order.',
+                        confirmButtonText: 'OK'
                     });
                 }
             },
-            error: function(xhr, status, error) {
-                console.error(error);
+            error: function (xhr, status, error) {
                 Swal.fire({
-                    title: 'Terjadi Kesalahan!',
-                    text: 'Ada masalah dengan server.',
                     icon: 'error',
-                    confirmButtonColor: '#e74c3c'
+                    text: `Error: ${error}`,
+                    confirmButtonText: 'OK'
                 });
             }
         });

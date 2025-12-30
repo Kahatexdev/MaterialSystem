@@ -328,6 +328,7 @@ $routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
     $routes->get('pengiriman/getKodeWarna', 'PemesananController::getKodeWarna');
     $routes->get('pengiriman/getWarna', 'PemesananController::getWarna');
     $routes->post('pengiriman/saveSessionDeliveryArea', 'PemesananController::saveSessionDeliveryArea');
+    $routes->post('pengiriman/refreshSessionDeliveryArea', 'PemesananController::refreshSessionDeliveryArea');
     $routes->post('pengiriman/removeSessionDelivery', 'PemesananController::removeSessionDelivery');
     $routes->post('updateStatusKirim', 'PemesananController::updateStatusKirim');
     $routes->post('reset_pengiriman/(:any)/(:any)', 'PemesananController::resetPengirimanArea/$1/$2');
@@ -824,6 +825,8 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakai');
     $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
     $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
+    $routes->get('warehouse/historyPindahCluster', 'WarehouseController::historyPindahCluster');
+    $routes->get('warehouse/exportHistoryPindahCluster', 'ExcelController::exportHistoryPindahCluster');
     $routes->get('pemesanan/historyPinjamOrder', 'PemesananController::HistoryPinjamOrder');
     $routes->get('pemesanan/exportHistoryPinjamOrder', 'ExcelController::exportHistoryPinjamOrder');
     $routes->get('warehouse/reportSisaDatangBenang', 'WarehouseController::reportSisaDatangBenang');
@@ -996,6 +999,7 @@ $routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
     $routes->get('pengaduan', 'ApiController::getpengaduan');
 
     $routes->get('audit', 'AuditLogController::index');
+    $routes->get('audit/datatables', 'AuditLogController::datatables');
     $routes->get('locked-users', 'AuthController::lockedUsers');
     $routes->post('unlock-user/(:num)', 'AuthController::unlockUser/$1');
 });
@@ -1163,6 +1167,8 @@ $routes->group('/kantordepan', ['filter' => 'kantordepan'], function ($routes) {
     $routes->get('warehouse/exportReportSisaPakaiKaret', 'ExcelController::exportReportSisaPakai');
     $routes->get('warehouse/historyPindahOrder', 'WarehouseController::historyPindahOrder');
     $routes->get('warehouse/exportHistoryPindahOrder', 'ExcelController::exportHistoryPindahOrder');
+    $routes->get('warehouse/historyPindahCluster', 'WarehouseController::historyPindahCluster');
+    $routes->get('warehouse/exportHistoryPindahCluster', 'ExcelController::exportHistoryPindahCluster');
     $routes->get('pemesanan/historyPinjamOrder', 'PemesananController::HistoryPinjamOrder');
     $routes->get('pemesanan/exportHistoryPinjamOrder', 'ExcelController::exportHistoryPinjamOrder');
     $routes->get('warehouse/reportSisaDatangBenang', 'WarehouseController::reportSisaDatangBenang');

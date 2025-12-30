@@ -418,17 +418,53 @@ class ReturController extends BaseController
 
         $data = $this->returModel->getFilterReturArea($area, $kategori, $tanggalAwal, $tanggalAkhir);
 
-        if (!empty($data)) {
-            foreach ($data as $key => $dt) {
-                $kirim = $this->outCelupModel->getDataKirim($dt['id_retur']);
-                $data[$key]['kg_kirim'] = $kirim['kg_kirim'] ?? 0;
-                $data[$key]['cns_kirim'] = $kirim['cns_kirim'] ?? 0;
-                $data[$key]['krg_kirim'] = $kirim['krg_kirim'] ?? 0;
-                $data[$key]['lot_out'] = $kirim['lot_out'] ?? '-';
+        $mapKey = [];
+        $filteredData = [];
+        $result = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
             }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData);
+
+        foreach ($data as $row) {
+            $model = isset($row['no_model']) ? $row['no_model'] : '';
+            $currentItemType = $row['item_type'];
+            $currentKodeWarna = $row['kode_warna'];
+            $currentColor = $row['warna'];
+
+            $uniqueKey  = $model . '|' . $currentItemType . '|' . $currentKodeWarna . '|' . $currentColor;
+
+            // Override kg_po & qty_po
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['total_kgs']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['total_kgs']  = 0;
+            }
+
+            $result[] = $row;
         }
 
-        return $this->response->setJSON($data);
+        return $this->response->setJSON($result);
     }
     public function returSample()
     {

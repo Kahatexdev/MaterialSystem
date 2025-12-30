@@ -54,7 +54,7 @@ class AuthController extends BaseController
                 ->withInput()
                 ->with('error', 'Akun terkunci sementara')
                 ->with('login_info', [
-                    'locked' => true,
+                    'locked' => $result['locked'] ?? false,
                     'locked_until' => $result['locked_until'] ?? null,
                     'failed' => $result['failed'] ?? 0,
                     'max' => $result['max_attempt'] ?? 3,

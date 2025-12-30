@@ -222,9 +222,10 @@ class ScheduleCelupModel extends Model
                   IF(schedule_celup.po_plus = "0", schedule_celup.kg_celup, 0) AS qty_celup, 
                   IF(schedule_celup.po_plus = "1", schedule_celup.kg_celup, 0) AS qty_celup_plus,
                   open_po.kg_po')
-            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
-            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna');
-
+            ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin', 'left')
+            ->join('open_po', 'open_po.no_model = schedule_celup.no_model AND open_po.item_type = schedule_celup.item_type AND open_po.kode_warna = schedule_celup.kode_warna', 'left')
+            ->where('schedule_celup.id_celup !=', null)
+            ->where('schedule_celup.id_mesin !=', null);
         // Filter berdasarkan tanggal jika ada
         if ($filterTglSch && !$filterTglSchsampai) {
             $builder->where('schedule_celup.tanggal_schedule >=', $filterTglSch)
@@ -559,28 +560,15 @@ class ScheduleCelupModel extends Model
 
         $db = \Config\Database::connect();
 
-        // 2) Build your material-summary subquery
-        $materialSub  = $db->table('material')
-            ->select('
-                           id_order,
-                           item_type,
-                           kode_warna,
-                           color,
-                           SUM(kgs) AS total_kgs
-                       ')
-            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-            ->getCompiledSelect(false);  // false = no trailing semicolon
-
         $datangSub = $db->table('pemasukan')
             ->select("
-            pemasukan.id_out_celup,
             out_celup.no_model,
             schedule_celup.item_type,
             schedule_celup.kode_warna,
             SUM(out_celup.kgs_kirim) AS kgs_datang,
             GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang
         ")
-            ->join('out_celup',     'out_celup.id_out_celup = pemasukan.id_out_celup')
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup', 'schedule_celup.id_celup   = out_celup.id_celup', 'left')
             ->join('bon_celup', 'bon_celup.id_bon   = out_celup.id_bon')
             ->groupBy([
@@ -590,17 +578,20 @@ class ScheduleCelupModel extends Model
             ])
             ->getCompiledSelect(false);
 
-        $poPlus = $db->table('po_tambahan')
-            ->select('SUM(COALESCE(po_tambahan.poplus_mc_kg,0) + COALESCE(po_tambahan.plus_pck_kg,0)) AS total_poplus, po_tambahan.id_material,
+        $poPlus = $db->table('total_potambahan')
+            ->select('SUM(total_potambahan.ttl_tambahan_kg) AS total_poplus, po_tambahan.id_material,
              material.item_type, material.kode_warna, material.color, material.id_order')
-            ->join('material', 'material.id_material = po_tambahan.id_material')
+            ->join('po_tambahan', 'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan', 'left')
+            ->join('material', 'material.id_material = po_tambahan.id_material', 'left')
             ->where('po_tambahan.status', 'approved')
-            ->groupBy(['po_tambahan.id_material', 'po_tambahan.status', 'po_tambahan.admin', 'material.item_type', 'material.kode_warna', 'material.color', 'material.id_order'])
+            ->groupBy(['po_tambahan.id_material', 'material.item_type', 'material.kode_warna', 'material.color', 'material.id_order'])
             ->getCompiledSelect(false);
 
-        $stokAwal = $db->table('stock')
-            ->select('SUM(stock.kgs_stock_awal) AS kgs_stock_awal, stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
-            ->groupBy(['stock.no_model', 'stock.item_type', 'stock.kode_warna', 'stock.warna'])
+        $stokAwal = $db->table('history_stock')
+            ->select('SUM(history_stock.kgs) AS kgs_stock_awal, stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
+            ->join('stock', 'stock.id_stock = history_stock.id_stock_new', 'left')
+            ->where('history_stock.keterangan', 'Pindah Order')
+            ->groupBy('stock.no_model, stock.item_type, stock.kode_warna, stock.warna')
             ->getCompiledSelect(false);
 
         // 3) Main query on schedule_celup
@@ -613,7 +604,6 @@ class ScheduleCelupModel extends Model
                 'mesin_celup.no_mesin',
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',
-                'material_summary.total_kgs',
                 'datang_sub.kgs_datang',
                 'datang_sub.tgl_datang',
                 'po_plus_sub.total_poplus',
@@ -622,16 +612,6 @@ class ScheduleCelupModel extends Model
             ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
             ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
             ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-            // ->join('out_celup',     'out_celup.id_celup        = schedule_celup.id_celup', 'left')
-            // manual derived‐table join:
-            ->join(
-                "({$materialSub}) AS material_summary",
-                'material_summary.item_type   = schedule_celup.item_type
-             AND material_summary.kode_warna = schedule_celup.kode_warna
-             AND material_summary.color      = schedule_celup.warna
-             AND material_summary.id_order   = master_order.id_order',
-                'left'
-            )
             ->join(
                 "({$datangSub}) AS datang_sub",
                 'datang_sub.no_model = schedule_celup.no_model
@@ -675,6 +655,8 @@ class ScheduleCelupModel extends Model
                 ->where("schedule_celup.start_mc <=", $tanggal_akhir);
         }
 
+        $builder->groupBy('schedule_celup.id_celup');
+
         return $builder->get()->getResult();
     }
 
@@ -690,50 +672,10 @@ class ScheduleCelupModel extends Model
 
         $db = \Config\Database::connect();
 
-        // Subquery: summary material per item_type + kode_warna + color
-        $materialSubquery = $db->table('material')
-            ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-            ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-            ->getCompiledSelect(false);
-
         // Subquery: handle gabungan -> ambil anak2 dari open_po
         $openPoSubquery = $db->table('open_po anak')
-            ->select('anak.no_model, anak.kg_po, induk.no_model AS induk_model, induk.item_type AS induk_item_type, induk.kode_warna AS induk_kode_warna')
+            ->select('anak.no_model, induk.no_model AS induk_model, induk.item_type AS induk_item_type, induk.kode_warna AS induk_kode_warna')
             ->join('open_po induk', 'anak.id_induk = induk.id_po')
-            ->getCompiledSelect(false);
-
-        $datangSub = $db->table('pemasukan')
-            ->select("
-        schedule_celup.no_model AS no_model_schedule,
-        out_celup.no_model AS no_model_out,
-        schedule_celup.item_type,
-        schedule_celup.kode_warna,
-        SUM(out_celup.kgs_kirim) AS kgs_datang,
-        GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') 
-            ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang
-    ")
-            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
-            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
-            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
-            ->groupBy([
-                'schedule_celup.no_model',
-                'out_celup.no_model',
-                'schedule_celup.item_type',
-                'schedule_celup.kode_warna'
-            ])
-            ->getCompiledSelect(false);
-
-        $poPlus = $db->table('po_tambahan')
-            ->select('SUM(COALESCE(po_tambahan.poplus_mc_kg,0) + COALESCE(po_tambahan.plus_pck_kg,0)) AS total_poplus, po_tambahan.id_material,
-             material.item_type, material.kode_warna, material.color, material.id_order')
-            ->join('material', 'material.id_material = po_tambahan.id_material')
-            ->where('po_tambahan.status', 'approved')
-            ->groupBy(['po_tambahan.id_material', 'po_tambahan.status', 'po_tambahan.admin', 'material.item_type', 'material.kode_warna', 'material.color', 'material.id_order'])
-            ->getCompiledSelect(false);
-
-        $stokAwal = $db->table('stock')
-            ->select('SUM(stock.kgs_stock_awal) AS kgs_stock_awal,stock.item_type, stock.kode_warna, stock.warna')
-            ->groupBy(['stock.item_type', 'stock.kode_warna', 'stock.warna'])
             ->getCompiledSelect(false);
 
         // Main builder
@@ -746,49 +688,12 @@ class ScheduleCelupModel extends Model
                 'mesin_celup.no_mesin',
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',
-                'material_summary.total_kgs',
                 'open_po_anak.no_model AS no_model_anak',
-                'open_po_anak.kg_po AS kg_po_anak',
-                'datang_sub.kgs_datang AS kgs_datang',
-                'datang_sub.tgl_datang',
-                'po_plus_sub.total_poplus',
-                'stok_awal_sub.kgs_stock_awal',
             ])
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
             ->join("({$openPoSubquery}) AS open_po_anak", 'open_po_anak.induk_model = schedule_celup.no_model AND open_po_anak.induk_item_type = schedule_celup.item_type AND open_po_anak.induk_kode_warna = schedule_celup.kode_warna', 'left')
             ->join('master_order', 'master_order.no_model = COALESCE(open_po_anak.no_model, schedule_celup.no_model)')
-            ->join(
-                "({$materialSubquery}) AS material_summary",
-                'material_summary.item_type = schedule_celup.item_type 
-             AND material_summary.kode_warna = schedule_celup.kode_warna 
-             AND material_summary.color = schedule_celup.warna 
-             AND material_summary.id_order = master_order.id_order',
-                'left'
-            )
-            ->join(
-                "({$datangSub}) AS datang_sub",
-                "datang_sub.no_model_schedule = schedule_celup.no_model
-     AND datang_sub.item_type = schedule_celup.item_type
-     AND datang_sub.kode_warna = schedule_celup.kode_warna
-     AND datang_sub.no_model_out = COALESCE(open_po_anak.no_model, schedule_celup.no_model)",
-                'left'
-            )
-            ->join(
-                "({$poPlus}) AS po_plus_sub",
-                'po_plus_sub.item_type   = schedule_celup.item_type
-             AND po_plus_sub.kode_warna = schedule_celup.kode_warna
-             AND po_plus_sub.color      = schedule_celup.warna
-             AND po_plus_sub.id_order   = master_order.id_order',
-                'left'
-            )
-            ->join(
-                "({$stokAwal}) AS stok_awal_sub",
-                'stok_awal_sub.item_type = schedule_celup.item_type
-             AND stok_awal_sub.kode_warna = schedule_celup.kode_warna
-             AND stok_awal_sub.warna      = schedule_celup.warna',
-                'left'
-            )
             ->where('master_material.jenis', 'NYLON');
 
         if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
@@ -808,330 +713,10 @@ class ScheduleCelupModel extends Model
             $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
         }
 
+        $builder->groupBy('schedule_celup.id_celup');
+
         return $builder->get()->getResult();
     }
-
-
-    // public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
-    // {
-    //     // Format ke datetime jika belum
-    //     if (strlen($tanggal_awal) === 10) {
-    //         $tanggal_awal .= ' 00:00:00';
-    //     }
-    //     if (strlen($tanggal_akhir) === 10) {
-    //         $tanggal_akhir .= ' 23:59:59';
-    //     }
-
-    //     $db = \Config\Database::connect();
-
-    //     // Subquery: summary material per item_type + kode_warna + color
-    //     $materialSubquery = $db->table('material')
-    //         ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-    //         ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-    //         ->getCompiledSelect(false);
-
-    //     //
-    //     // Subquery A: gabungkan rows open_po per (id_induk, no_model) => sum_kg per anak
-    //     // (equivalent to: SELECT id_induk, no_model, SUM(kg_po) AS sum_kg FROM open_po GROUP BY id_induk, no_model)
-    //     //
-    //     $openPoPerChild = $db->table('open_po')
-    //         ->select('id_induk, no_model, SUM(kg_po) AS sum_kg')
-    //         ->groupBy(['id_induk', 'no_model'])
-    //         ->getCompiledSelect(false);
-
-    //     //
-    //     // Subquery B: dari hasil A, join ke induk dan aggregate per induk:
-    //     // - anak_models_detail  => "no_model::sum_kg||no2::sum_kg2..."
-    //     // - child_no_model       => anak dengan sum_kg terbesar (representative) -- tersedia tapi TIDAK dipakai untuk join
-    //     // - total_kg_po          => SUM(sum_kg) per induk (unique per anak)
-    //     //
-    //     $openPoSubquery = $db->table("({$openPoPerChild}) t")
-    //         ->select("
-    //         induk.no_model AS induk_model,
-    //         GROUP_CONCAT(CONCAT(t.no_model, '::', t.sum_kg) SEPARATOR '||') AS anak_models_detail,
-    //         SUBSTRING_INDEX(GROUP_CONCAT(t.no_model ORDER BY t.sum_kg DESC SEPARATOR ','), ',', 1) AS child_no_model,
-    //         SUM(t.sum_kg) AS total_kg_po
-    //     ")
-    //         ->join('open_po induk', 't.id_induk = induk.id_po')
-    //         ->groupBy('induk.no_model')
-    //         ->getCompiledSelect(false);
-
-    //     // Main builder
-    //     $builder = $db->table('schedule_celup')
-    //         ->select([
-    //             'schedule_celup.*',
-    //             'master_order.delivery_awal',
-    //             'master_order.delivery_akhir',
-    //             'master_order.lco_date',
-    //             'mesin_celup.no_mesin',
-    //             'mesin_celup.ket_mesin',
-    //             'master_material.jenis',
-    //             'material_summary.total_kgs',
-    //             'open_po_anak.anak_models_detail',
-    //             'open_po_anak.total_kg_po',
-    //             'open_po_anak.child_no_model' // tersedia jika mau dipakai di view
-    //         ])
-    //         ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-    //         ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
-
-    //         // join ke derived open_po yang sudah aggregated per induk (left karena tidak selalu ada)
-    //         ->join("({$openPoSubquery}) AS open_po_anak", 'open_po_anak.induk_model = schedule_celup.no_model', 'left')
-
-    //         // JOIN master_order HANYA untuk no_model yang BUKAN gabungan (tidak diawali "POGABUNGAN ")
-    //         // note: kondisi join dicantumkan pada ON clause agar baris gabungan tetap muncul tanpa master_order cols
-    //         ->join(
-    //             'master_order',
-    //             "master_order.no_model = schedule_celup.no_model",
-    //             'left'
-    //         )
-
-    //         // material_summary bergantung pada master_order.id_order -> left join
-    //         ->join(
-    //             "({$materialSubquery}) AS material_summary",
-    //             'material_summary.item_type   = schedule_celup.item_type
-    //          AND material_summary.kode_warna = schedule_celup.kode_warna
-    //          AND material_summary.color      = schedule_celup.warna
-    //          AND material_summary.id_order   = master_order.id_order',
-    //             'left'
-    //         )
-    //         ->where('master_material.jenis', 'NYLON')
-    //         ->orderBy('schedule_celup.id_celup', 'DESC');
-
-    //     if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-    //         $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
-    //             ->where("schedule_celup.start_mc <=", $tanggal_akhir);
-    //     }
-
-    //     if (!empty($key)) {
-    //         $builder->groupStart()
-    //             ->like('schedule_celup.no_model', $key)
-    //             ->orLike('schedule_celup.kode_warna', $key)
-    //             ->groupEnd();
-    //     }
-
-    //     if (!empty($tanggal_schedule)) {
-    //         $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-    //     }
-
-    //     return $builder->get()->getResult();
-    // }
-
-    // public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
-    // {
-    //     // Format ke datetime jika belum
-    //     if (strlen($tanggal_awal) === 10) {
-    //         $tanggal_awal .= ' 00:00:00';
-    //     }
-    //     if (strlen($tanggal_akhir) === 10) {
-    //         $tanggal_akhir .= ' 23:59:59';
-    //     }
-
-    //     $db = \Config\Database::connect();
-
-    //     // Subquery: summary material per item_type + kode_warna + color
-    //     $materialSubquery = $db->table('material')
-    //         ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-    //         ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-    //         ->getCompiledSelect(false);
-
-    //     // Subquery: ambil semua anak per induk sebagai string "no_model::kg_po" dipisah "||"
-    //     // + ambil 1 child_no_model representative (MIN) + total kg semua anak
-    //     $openPoSubquery = $db->table('open_po anak')
-    //         ->select("
-    //         induk.no_model AS induk_model,
-    //         GROUP_CONCAT(CONCAT(anak.no_model, '::', anak.kg_po) SEPARATOR '||') AS anak_models_detail,
-    //         MIN(anak.no_model) AS child_no_model,
-    //     ")
-    //         ->join('open_po induk', 'anak.id_induk = induk.id_po')
-    //         ->groupBy('induk.no_model')
-    //         ->getCompiledSelect(false);
-
-    //     // Main builder
-    //     $builder = $db->table('schedule_celup')
-    //         ->select([
-    //             'schedule_celup.*',
-    //             'master_order.delivery_awal',
-    //             'master_order.delivery_akhir',
-    //             'master_order.lco_date',
-    //             'mesin_celup.no_mesin',
-    //             'mesin_celup.ket_mesin',
-    //             'master_material.jenis',
-    //             'material_summary.total_kgs',
-    //             'open_po_anak.anak_models_detail',
-    //         ])
-    //         ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-    //         ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
-    //         // join ke derived open_po yang sudah aggregated per induk
-    //         ->join("({$openPoSubquery}) AS open_po_anak", 'open_po_anak.induk_model = schedule_celup.no_model', 'left')
-    //         // join master_order: pakai child_no_model jika ada, kalau tidak pakai schedule_celup.no_model
-    //         ->join('master_order', 'master_order.no_model = COALESCE(open_po_anak.child_no_model, schedule_celup.no_model)')
-    //         ->join(
-    //             "({$materialSubquery}) AS material_summary",
-    //             'material_summary.item_type   = schedule_celup.item_type
-    //          AND material_summary.kode_warna = schedule_celup.kode_warna
-    //          AND material_summary.color      = schedule_celup.warna
-    //          AND material_summary.id_order   = master_order.id_order',
-    //             'left'
-    //         )
-    //         ->where('master_material.jenis', 'NYLON')
-    //         ->orderBy('schedule_celup.id_celup', 'DESC');
-
-    //     if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-    //         $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
-    //             ->where("schedule_celup.start_mc <=", $tanggal_akhir);
-    //     }
-
-    //     if (!empty($key)) {
-    //         $builder->groupStart()
-    //             ->like('schedule_celup.no_model', $key)
-    //             ->orLike('schedule_celup.kode_warna', $key)
-    //             ->groupEnd();
-    //     }
-
-    //     if (!empty($tanggal_schedule)) {
-    //         $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-    //     }
-
-    //     return $builder->get()->getResult();
-    // }
-
-
-    // public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
-    // {
-    //     if (strlen($tanggal_awal) === 10) {
-    //         $tanggal_awal .= ' 00:00:00';
-    //     }
-    //     if (strlen($tanggal_akhir) === 10) {
-    //         $tanggal_akhir .= ' 23:59:59';
-    //     }
-
-    //     $db = \Config\Database::connect();
-
-    //     // Subquery: summary material
-    //     $materialSubquery = $db->table('material')
-    //         ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-    //         ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-    //         ->getCompiledSelect(false);
-
-    //     // Subquery: anak open_po, tapi group by induk biar ga duplikat
-    //     $openPoSubquery = $db->table('open_po anak')
-    //         ->select('induk.no_model AS induk_model, GROUP_CONCAT(anak.no_model) AS anak_models, SUM(anak.kg_po) AS total_kg_po')
-    //         ->join('open_po induk', 'anak.id_induk = induk.id_po')
-    //         ->groupBy('induk.no_model')
-    //         ->getCompiledSelect(false);
-
-    //     $builder = $db->table('schedule_celup')
-    //         ->select([
-    //             'schedule_celup.*',
-    //             'master_order.delivery_awal',
-    //             'master_order.delivery_akhir',
-    //             'master_order.lco_date',
-    //             'mesin_celup.no_mesin',
-    //             'mesin_celup.ket_mesin',
-    //             'master_material.jenis',
-    //             'material_summary.total_kgs',
-    //             'open_po_anak.total_kg_po',
-    //             'open_po_anak.anak_models'
-    //         ])
-    //         ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-    //         ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
-    //         ->join("({$openPoSubquery}) AS open_po_anak", 'open_po_anak.induk_model = schedule_celup.no_model', 'left')
-    //         ->join('master_order', "(
-    //             (open_po_anak.anak_models IS NOT NULL AND FIND_IN_SET(master_order.no_model, open_po_anak.anak_models))
-    //             OR (open_po_anak.anak_models IS NULL AND master_order.no_model = schedule_celup.no_model)
-    //         )")
-    //         ->join(
-    //             "({$materialSubquery}) AS material_summary",
-    //             'material_summary.item_type   = schedule_celup.item_type
-    //      AND material_summary.kode_warna = schedule_celup.kode_warna
-    //      AND material_summary.color      = schedule_celup.warna
-    //      AND material_summary.id_order   = master_order.id_order',
-    //             'left'
-    //         )
-    //         ->where('master_material.jenis', 'NYLON');
-
-    //     if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-    //         $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
-    //             ->where("schedule_celup.start_mc <=", $tanggal_akhir);
-    //     }
-
-    //     if (!empty($key)) {
-    //         $builder->groupStart()
-    //             ->like('schedule_celup.no_model', $key)
-    //             ->orLike('schedule_celup.kode_warna', $key)
-    //             ->groupEnd();
-    //     }
-
-    //     if (!empty($tanggal_schedule)) {
-    //         $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-    //     }
-
-    //     return $builder->get()->getResult();
-    // }
-
-
-    // public function getFilterSchNylon($tanggal_awal, $tanggal_akhir, $key = null, $tanggal_schedule = null)
-    // {
-    //     // Format ke datetime jika belum
-    //     if (strlen($tanggal_awal) === 10) {
-    //         $tanggal_awal .= ' 00:00:00';
-    //     }
-    //     if (strlen($tanggal_akhir) === 10) {
-    //         $tanggal_akhir .= ' 23:59:59';
-    //     }
-
-    //     $db = \Config\Database::connect();
-
-    //     // Subquery: summary material per item_type + kode_warna + color
-    //     $materialSubquery = $db->table('material')
-    //         ->select('id_order, item_type, kode_warna, color, SUM(kgs) AS total_kgs')
-    //         ->groupBy(['id_order', 'item_type', 'kode_warna', 'color'])
-    //         ->getCompiledSelect(false);
-
-    //     // Main builder
-    //     $builder = $db->table('schedule_celup')
-    //         ->select([
-    //             'schedule_celup.*',
-    //             'master_order.delivery_awal',
-    //             'master_order.delivery_akhir',
-    //             'master_order.lco_date',
-    //             'mesin_celup.no_mesin',
-    //             'mesin_celup.ket_mesin',
-    //             'master_material.jenis',
-    //             'material_summary.total_kgs',
-    //         ])
-    //         ->join('master_order',    'master_order.no_model       = schedule_celup.no_model')
-    //         ->join('master_material', 'master_material.item_type   = schedule_celup.item_type')
-    //         ->join('mesin_celup',     'mesin_celup.id_mesin        = schedule_celup.id_mesin')
-    //         ->join(
-    //             "({$materialSubquery}) AS material_summary",
-    //             'material_summary.item_type   = schedule_celup.item_type
-    //          AND material_summary.kode_warna = schedule_celup.kode_warna
-    //          AND material_summary.color      = schedule_celup.warna
-    //          AND material_summary.id_order   = master_order.id_order',
-    //             'left'
-    //         )
-    //         ->where('master_material.jenis', 'NYLON');
-
-    //     if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-    //         $builder->where("schedule_celup.start_mc >=", $tanggal_awal)
-    //             ->where("schedule_celup.start_mc <=", $tanggal_akhir);
-    //     }
-
-    //     // Cek apakah ada input key untuk pencarian
-    //     if (!empty($key)) {
-    //         $builder->groupStart()
-    //             ->like('schedule_celup.no_model', $key)
-    //             ->orLike('schedule_celup.kode_warna', $key)
-    //             ->groupEnd();
-    //     }
-
-    //     if (!empty($tanggal_schedule)) {
-    //         $builder->where('schedule_celup.tanggal_schedule', $tanggal_schedule);
-    //     }
-
-    //     return $builder->get()->getResult();
-    // }
 
     public function schTerdekat()
     {
@@ -1447,27 +1032,8 @@ class ScheduleCelupModel extends Model
             ->findAll();
     }
 
-    public function getFilterSchTagihanBenang(
-        $noModel       = null,
-        $kodeWarna     = null,
-        $deliveryAwal  = null,
-        $deliveryAkhir = null,
-        $tglAwal       = null,
-        $tglAkhir      = null
-    ) {
-        // 1) Subquery kebutuhan material
-        $subMaterial = $this->db->table('material')
-            ->select('mo.no_model, material.item_type, material.kode_warna, material.color AS warna, SUM(material.kgs) AS qty_po, material.area')
-            ->join('master_order mo', 'mo.id_order = material.id_order')
-            ->groupBy(['mo.no_model', 'material.item_type', 'material.kode_warna', 'material.color',]);
-
-        // Subquery Po Tambahan
-        // $subPo = $this->db->table('po_tambahan')
-        //     ->select('mo.no_model, m.item_type, m.kode_warna, m.color AS warna, SUM(po_tambahan.poplus_mc_kg + po_tambahan.plus_pck_kg) AS po_plus')
-        //     ->join('material m', 'm.id_material = po_tambahan.id_material')
-        //     ->join('master_order mo', 'mo.id_order = m.id_order')
-        //     ->groupBy(['mo.no_model', 'm.item_type', 'm.kode_warna', 'm.color', 'm.id_order',]);
-
+    public function getFilterSchTagihanBenang($noModel = null, $kodeWarna = null, $deliveryAwal  = null, $deliveryAkhir = null, $tglAwal = null, $tglAkhir = null)
+    {
         // Subquery Stock
         $subSt = $this->db->table('stock')
             ->select('stock.no_model,stock.item_type,stock.kode_warna,stock.warna,SUM(kgs_stock_awal) AS stock_awal')
@@ -1481,68 +1047,116 @@ class ScheduleCelupModel extends Model
             ->where('kategori_retur.tipe_kategori', 'SIMPAN ULANG')
             ->groupBy(['retur.no_model', 'retur.item_type', 'retur.kode_warna', 'retur.warna']);
 
-        //Sub Open Po
-        // $subOp = $this->db->table('open_po')
-        //     ->select('no_model, item_type, kode_warna, SUM(kg_po) AS qty_sch')
-        //     ->groupBy(['no_model', 'item_type', 'kode_warna']);
+        // Subquery qty_po_plus 
+        $subPoPlusDistinct = $this->db->table('po_tambahan')
+            ->select([
+                'master_order.no_model',
+                'material.item_type',
+                'material.kode_warna',
+                'material.color',
+                'COALESCE(total_potambahan.ttl_tambahan_kg, 0) AS ttl_tambahan_kg',
+                'po_tambahan.created_at'
+            ])
+            ->join(
+                'total_potambahan',
+                'total_potambahan.id_total_potambahan = po_tambahan.id_total_potambahan',
+                'left'
+            )
+            ->join(
+                'material',
+                'material.id_material = po_tambahan.id_material',
+                'left'
+            )
+            ->join(
+                'master_order',
+                'master_order.id_order = material.id_order',
+                'left'
+            )
+            ->where('po_tambahan.status', 'approved')
+            ->where('po_tambahan.tanggal_approve IS NOT NULL', null, false)
+            ->distinct();
 
-        // Subquery qty_po_plus dari open_po
-        $subPoPlus = $this->db->table('open_po')
-            ->select('open_po.no_model, open_po.item_type, open_po.kode_warna, open_po.color, SUM(open_po.kg_po) AS po_plus')
-            ->where('po_plus', '1')  // kolom penanda po_plus = 1
-            ->groupBy(['open_po.no_model', 'open_po.item_type', 'open_po.kode_warna', 'open_po.color']);
+        $subPoPlus = $this->db->table("({$subPoPlusDistinct->getCompiledSelect()}) ppd")
+            ->select([
+                'ppd.no_model',
+                'ppd.item_type',
+                'ppd.kode_warna',
+                'ppd.color',
+                'SUM(ppd.ttl_tambahan_kg) AS po_plus'
+            ])
+            ->groupBy([
+                'ppd.no_model',
+                'ppd.item_type',
+                'ppd.kode_warna',
+                'ppd.color'
+            ]);
 
         //Sub Pemasukan
         $subPm = $this->db->table('pemasukan')
-            ->select('sc.no_model, sc.item_type, sc.kode_warna, sc.warna, SUM(oc.kgs_kirim) AS qty_datang_solid')
+            ->select('oc.no_model, sc.item_type, sc.kode_warna, sc.warna, SUM(oc.kgs_kirim) AS qty_datang_solid')
             ->join('out_celup oc', 'oc.id_out_celup = pemasukan.id_out_celup')
             ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup')
-            ->groupBy(['sc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);
+            ->groupBy(['oc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);
 
         //Sub Ganti Retur Solid
-        $subOc = $this->db->table('out_celup')
-            ->select('out_celup.no_model, SUM(out_celup.kgs_kirim) AS qty_ganti_retur_solid, sc.item_type, sc.kode_warna, sc.warna')
-            ->join('schedule_celup sc', 'sc.id_celup = out_celup.id_celup')
-            ->where('out_celup.ganti_retur', '1')
-            ->groupBy(['sc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna',]);
+        $subOc = $this->db->table('pemasukan')
+            ->select('oc.no_model, SUM(oc.kgs_kirim) AS qty_ganti_retur_solid, sc.item_type, sc.kode_warna, sc.warna')
+            ->join('out_celup oc', 'oc.id_out_celup = pemasukan.id_out_celup')
+            ->join('schedule_celup sc', 'sc.id_celup = oc.id_celup')
+            ->where('oc.ganti_retur', '1')
+            ->groupBy(['oc.no_model', 'sc.item_type', 'sc.kode_warna', 'sc.warna']);
 
         // Subquery Retur Pengembalian
-        $subRtBl = $this->db->table('retur')
-            ->select('retur.no_model,retur.item_type,retur.kode_warna,retur.warna,SUM(retur.kgs_retur) AS retur_belang')
-            ->join('kategori_retur', 'kategori_retur.nama_kategori = retur.kategori')
-            ->where('waktu_acc_retur IS NOT NULL')
-            ->where('kategori_retur.tipe_kategori', 'PENGEMBALIAN')
-            ->groupBy(['retur.no_model', 'retur.item_type', 'retur.kode_warna', 'retur.warna']);
+        $subRtBl = $this->db->table('history_stock')
+            ->select('out_celup.no_model, schedule_celup.item_type,schedule_celup.kode_warna,schedule_celup.warna,SUM(history_stock.kgs) AS retur_belang')
+            ->join('out_celup', 'out_celup.id_out_celup = history_stock.id_out_celup')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup')
+            ->join(
+                'kategori_retur kr',
+                "kr.nama_kategori = TRIM(
+                SUBSTRING(
+                    history_stock.keterangan,
+                    LOCATE('(', history_stock.keterangan) + 1,
+                    LOCATE(')', history_stock.keterangan) - LOCATE('(', history_stock.keterangan) - 1
+                )
+            )",
+                'left',
+                false
+            )
+            ->like('history_stock.keterangan', 'Retur Celup')
+            ->where('kr.tipe_kategori', 'PENGEMBALIAN')
+            ->groupBy(['history_stock.id_out_celup']);
+
+        $subSc = $this->db->table('schedule_celup')
+            ->select('no_model, item_type, kode_warna, warna, SUM(kg_celup) AS qty_sch, MIN(start_mc) AS start_mc')
+            ->groupBy(['no_model', 'item_type', 'kode_warna', 'warna']);
 
         // 3) Main query
-        $builder = $this->db->table('schedule_celup sc')
+        $builder = $this->db->table("({$subSc->getCompiledSelect()}) sc")
             ->select([
                 'sc.no_model',
                 'sc.item_type',
                 'sc.kode_warna',
                 'sc.warna',
-                'k.area',
-                'k.qty_po', // qty po biasa
-                'pp.po_plus', // qty po plus yg where kolom po_plus='1'
+                'material.area',
+                'pp.po_plus',
                 'mo.delivery_awal',
                 'mo.delivery_akhir',
                 'sc.start_mc',
                 'st.stock_awal',
                 'rt.retur_stock',
-                'SUM(sc.kg_celup) AS qty_sch',
+                'sc.qty_sch',
                 'pm.qty_datang_solid',
                 'oc.qty_ganti_retur_solid',
                 'rtbl.retur_belang',
             ])
             ->join('master_order mo', 'mo.no_model = sc.no_model')
-            ->join("({$subMaterial->getCompiledSelect()}) k", 'k.no_model = sc.no_model AND k.item_type = sc.item_type AND k.kode_warna = sc.kode_warna AND k.warna = sc.warna', 'left')
-            // ->join("({$subPo->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type  = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.warna = sc.warna', 'left')
-            ->join("({$subSt->getCompiledSelect()}) st", 'st.no_model   = sc.no_model AND st.item_type  = sc.item_type AND st.kode_warna = sc.kode_warna AND st.warna = sc.warna', 'left')
-            // ->join("({$subOp->getCompiledSelect()}) op", 'op.no_model = sc.no_model AND op.item_type = sc.item_type AND op.kode_warna = sc.kode_warna', 'left')
-            ->join("({$subPoPlus->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.color = sc.warna', 'left')
-            ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna', 'left')
-            ->join("({$subPm->getCompiledSelect()}) pm", 'pm.no_model = sc.no_model AND pm.item_type   = sc.item_type AND pm.kode_warna  = sc.kode_warna AND pm.warna = sc.warna', 'left')
+            ->join('material', 'material.id_order = mo.id_order')
             ->join("({$subOc->getCompiledSelect()}) oc", 'oc.no_model = sc.no_model AND oc.item_type   = sc.item_type AND oc.kode_warna  = sc.kode_warna AND oc.warna = sc.warna', 'left')
+            ->join("({$subSt->getCompiledSelect()}) st", 'st.no_model   = oc.no_model AND st.item_type  = sc.item_type AND st.kode_warna = sc.kode_warna AND st.warna = sc.warna', 'left')
+            ->join("({$subPoPlus->getCompiledSelect()}) pp", 'pp.no_model = sc.no_model AND pp.item_type = sc.item_type AND pp.kode_warna = sc.kode_warna AND pp.color = sc.warna', 'left')
+            ->join("({$subRt->getCompiledSelect()}) rt", 'rt.no_model = sc.no_model AND rt.item_type = sc.item_type AND rt.kode_warna = sc.kode_warna AND sc.warna = rt.warna', 'left')
+            ->join("({$subPm->getCompiledSelect()}) pm", 'pm.no_model = sc.no_model AND pm.item_type   = sc.item_type AND pm.kode_warna  = sc.kode_warna AND pm.warna = sc.warna', 'left')
             ->join("({$subRtBl->getCompiledSelect()}) rtbl", 'rtbl.no_model = sc.no_model AND rtbl.item_type = sc.item_type AND rtbl.kode_warna = sc.kode_warna', 'left');
 
         // 4) Filter
@@ -1569,10 +1183,6 @@ class ScheduleCelupModel extends Model
                 'sc.item_type',
                 'sc.kode_warna',
                 'sc.warna',
-                'k.qty_po',
-                'mo.delivery_awal',
-                'mo.delivery_akhir',
-                // 'sc.start_mc',
             ])
             ->get()
             ->getResultArray();
@@ -1838,5 +1448,4 @@ class ScheduleCelupModel extends Model
 
         return $builder->get()->getResultArray();
     }
-
 }

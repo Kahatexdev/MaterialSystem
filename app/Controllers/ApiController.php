@@ -115,7 +115,7 @@ class ApiController extends ResourceController
         $model = $this->request->getGet('model') ?? null;
         $search = $this->request->getGet('search') ?? null;
         $rows   = $this->materialModel->MaterialPDK($model, $search);
-
+        // dd ($rows);
         if (empty($rows)) {
             log_message('error', "MaterialPDK kosong untuk model: $model");
             return $this->respond([], 200);
@@ -239,6 +239,7 @@ class ApiController extends ResourceController
                 $res[] = $newRow;
             }
         }
+        // dd ($res);
         return $this->respond($res, 200);
     }
 

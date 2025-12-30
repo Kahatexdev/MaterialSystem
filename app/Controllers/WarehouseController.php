@@ -2051,9 +2051,53 @@ class WarehouseController extends BaseController
         $tanggalAwal = $this->request->getGet('tanggal_awal');
         $tanggalAkhir = $this->request->getGet('tanggal_akhir');
         $poPlus = $this->request->getGet('po_plus');
+        $jenis = 'BENANG';
 
         $data = $this->pemasukanModel->getFilterDatangBenang($key, $tanggalAwal, $tanggalAkhir, $poPlus);
-        // dd($data, $poPlus);
+
+        $mapKey = [];
+        $filteredData = [];
+
+        foreach ($data as $row) {
+            $keyMap = implode('|', [
+                $row['no_model'],
+                $row['item_type'],
+                $row['kode_warna'],
+                $row['warna']
+            ]);
+
+            //JANGAN DIHAPUS, BUAT CEK DUPLIKASI
+            if (isset($mapKey[$keyMap])) {
+                continue;
+            }
+
+            $mapKey[$keyMap] = true;
+
+            $filteredData[] = [
+                'no_model'   => $row['no_model'],
+                'item_type'  => $row['item_type'],
+                'kode_warna' => $row['kode_warna'],
+                'color'      => $row['warna']
+            ];
+        }
+        $qtyMap = $this->qtyPcsService->getQtyPcs($filteredData, $jenis);
+
+        foreach ($data as &$row) {
+            $model        = $row['no_model'];
+            $itemType     = $row['item_type'];
+            $kodeWarna    = $row['kode_warna'];
+            $color        = $row['warna'];
+
+            $uniqueKey  = $model . '|' . $itemType . '|' . $kodeWarna . '|' . $color;
+
+            if (isset($qtyMap[$uniqueKey])) {
+                $row['kgs_material']  = $qtyMap[$uniqueKey]['kg_po'];
+            } else {
+                $row['kgs_material']  = 0;
+            }
+        }
+        unset($row);
+
         return $this->response->setJSON($data);
     }
 
@@ -2637,6 +2681,8 @@ class WarehouseController extends BaseController
 
         return $this->response->setJSON($data);
     }
+
+    // pake radio
     // public function savePengeluaranSelainOrder()
     // {
     //     // Pastikan ini adalah request AJAX / POST
@@ -2764,108 +2810,164 @@ class WarehouseController extends BaseController
         if (!$this->request->isAJAX()) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Invalid request.'
+                'message' => 'Invalid request'
             ]);
         }
 
-        $idOutCelup     = $this->request->getPost('id_out_celup');
-        $tglOut         = $this->request->getPost('tgl_out');
-        $keterangan     = $this->request->getPost('keterangan');
-        $kategori       = $this->request->getPost('kategori');
-        $kgsOtherOut    = $this->request->getPost('kgs_other_out');
-        $cnsOtherOut    = $this->request->getPost('cns_other_out');
-        $krgOtherOut    = $this->request->getPost('krg_other_out');
-        $lot            = $this->request->getPost('lot');
-        $idStock        = $this->request->getPost('id_stock');
-        $namaCluster    = $this->request->getPost('nama_cluster');
+        $items      = $this->request->getPost('items');
+        $idStock    = $this->request->getPost('id_stock');
+        $tglOut     = $this->request->getPost('tgl_out');
+        $kategori   = $this->request->getPost('kategori');
+        $keterangan = $this->request->getPost('keterangan');
 
-        if (!$idOutCelup || !$kategori) {
+        if (empty($items) || !is_array($items)) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'ID celup atau kategori tidak boleh kosong.'
+                'message' => 'Items tidak valid'
+            ]);
+        }
+
+        $stock = $this->stockModel->find($idStock);
+        if (!$stock) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Stock tidak ditemukan'
             ]);
         }
 
         $this->db->transBegin();
 
         try {
-            $save = $this->otherOutModel->insert([
-                'id_out_celup'  => $idOutCelup,
-                'kategori'      => $kategori,
-                'tgl_other_out' => $tglOut,
-                'keterangan'    => $keterangan,
-                'kgs_other_out' => $kgsOtherOut,
-                'cns_other_out' => $cnsOtherOut,
-                'krg_other_out' => $krgOtherOut,
-                'lot_other_out' => $lot,
-                'admin'         => session()->get('username'),
-                'created_at'    => date('Y-m-d H:i:s'),
-                'nama_cluster'  => $namaCluster,
-            ]);
 
-            if ($save) {
-                $selectStock = $this->stockModel->where('id_stock', $idStock)->first();
+            foreach ($items as $row) {
 
-                if ($selectStock) {
-                    $kgsStockAwal = $selectStock['kgs_stock_awal'];
-                    $kgsInOut     = $selectStock['kgs_in_out'];
-
-                    if ($kgsStockAwal >= $kgsOtherOut) {
-                        $kgsNew = $selectStock['kgs_stock_awal'] - $kgsOtherOut;
-                        $cnsNew = $selectStock['cns_stock_awal'] - $cnsOtherOut;
-                        $krgNew = $selectStock['krg_stock_awal'] - $krgOtherOut;
-
-                        $this->stockModel->set('kgs_stock_awal', $kgsNew)
-                            ->set('cns_stock_awal', $cnsNew)
-                            ->set('krg_stock_awal', $krgNew)
-                            ->where('id_stock', $idStock)
-                            ->update();
-                    } elseif ($kgsInOut >= $kgsOtherOut) {
-                        $kgsNew = $selectStock['kgs_in_out'] - $kgsOtherOut;
-                        $cnsNew = $selectStock['cns_in_out'] - $cnsOtherOut;
-                        $krgNew = $selectStock['krg_in_out'] - $krgOtherOut;
-
-                        $this->stockModel->set('kgs_in_out', $kgsNew)
-                            ->set('cns_in_out', $cnsNew)
-                            ->set('krg_in_out', $krgNew)
-                            ->where('id_stock', $idStock)
-                            ->update();
-                    }
+                // ===== VALIDASI ITEM =====
+                if (empty($row['id_out_celup'])) {
+                    throw new \Exception('ID Out Celup tidak boleh kosong');
                 }
 
-                $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOutCelup)->first();
-                $totalPengeluaran = $this->pengeluaranModel
-                    ->selectSum('kgs_out')
-                    ->where('id_out_celup', $idOutCelup)
-                    ->first();
+                $kgsMasuk = (float) (
+                    $this->outCelupModel
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->first()['kgs_kirim'] ?? 0
+                    );
 
-                $totalOtherOut = $this->otherOutModel
-                    ->selectSum('kgs_other_out')
-                    ->where('id_out_celup', $idOutCelup)
-                    ->first();
+                $kgsKeluar = (float) (
+                    ($this->pengeluaranModel
+                        ->selectSum('kgs_out')
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->first()['kgs_out'] ?? 0)
+                    +
+                    ($this->otherOutModel
+                        ->selectSum('kgs_other_out')
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->first()['kgs_other_out'] ?? 0)
+                );
 
-                $kgsMasuk  = $selectOutCelup['kgs_kirim'];
-                $kgsKeluar = ($totalPengeluaran['kgs_out'] ?? 0) + ($totalOtherOut['kgs_other_out'] ?? 0);
+                $cnsKeluar = (int) (
+                    ($this->pengeluaranModel
+                        ->selectSum('cns_out')
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->first()['cns_out'] ?? 0)
+                    +
+                    ($this->otherOutModel
+                        ->selectSum('cns_other_out')
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->first()['cns_other_out'] ?? 0)
+                );
 
-                if (round($kgsKeluar, 2) == round($kgsMasuk, 2)) {
-                    $this->pemasukanModel->set('out_jalur', '1')
-                        ->where('id_out_celup', $idOutCelup)
+                $oc = $this->outCelupModel->find($row['id_out_celup']);
+
+                if (!isset($row['kgs']) || floatval($row['kgs']) <= 0) {
+                    $row['kgs'] = $oc['kgs_kirim'] - $kgsKeluar;
+                }
+
+                if (!isset($row['cns']) || intval($row['cns']) <= 0) {
+                    $row['cns'] = $oc['cones_kirim'] - $cnsKeluar;
+                }
+
+                $rowKgs = (float)$row['kgs'];
+                $rowCns = (int)$row['cns'];
+
+                // BARU hitung krg
+                $kgsKeluarReal = $kgsKeluar + $rowKgs;
+
+                $row['krg'] = round($kgsMasuk, 2) === round($kgsKeluarReal, 2) ? 1 : 0;
+
+                if (round($kgsMasuk, 2) === round($kgsKeluarReal, 2)) {
+                    $this->pemasukanModel
+                        ->where('id_out_celup', $row['id_out_celup'])
+                        ->where('id_stock', $idStock)
+                        ->set('out_jalur', '1')
+                        ->update();
+                }
+
+
+                $rowKgs = (float) ($row['kgs'] ?? 0);
+                $rowCns = (int)   ($row['cns'] ?? 0);
+                $rowKrg = (int)   ($row['krg'] ?? 0);
+
+                $stockKgsAwal = (float) $stock['kgs_stock_awal'];
+                $stockCnsAwal = (int)   $stock['cns_stock_awal'];
+                $stockKrgAwal = (int)   $stock['krg_stock_awal'];
+
+                $stockKgsInOut = (float) $stock['kgs_in_out'];
+                $stockCnsInOut = (int)   $stock['cns_in_out'];
+                $stockKrgInOut = (int)   $stock['krg_in_out'];
+
+                if ($stockKgsAwal >= $rowKgs) {
+                    $kgsNew = $stockKgsAwal - $rowKgs;
+                    $cnsNew = $stockCnsAwal - $rowCns;
+                    $krgNew = $stockKrgAwal - $rowKrg;
+                    $this->stockModel->set('kgs_stock_awal', $kgsNew)
+                        ->set('cns_stock_awal', $cnsNew)
+                        ->set('krg_stock_awal', $krgNew)
+                        ->where('id_stock', $idStock)
+                        ->update();
+                } elseif ($stockKgsInOut >= $rowKgs) {
+                    $kgsNew = $stockKgsInOut - $rowKgs;
+                    $cnsNew = $stockCnsInOut - $rowCns;
+                    $krgNew = $stockKrgInOut - $rowKrg;
+                    $this->stockModel->set('kgs_in_out', $kgsNew)
+                        ->set('cns_in_out', $cnsNew)
+                        ->set('krg_in_out', $krgNew)
                         ->where('id_stock', $idStock)
                         ->update();
                 }
+
+                // ===== INSERT OTHER OUT =====
+                $this->otherOutModel->insert([
+                    'id_out_celup'  => $row['id_out_celup'],
+                    'kategori'      => $kategori,
+                    'tgl_other_out' => $tglOut,
+                    'keterangan'    => $keterangan,
+                    'kgs_other_out' => $row['kgs'],
+                    'cns_other_out' => $row['cns'] ?? 0,
+                    'krg_other_out' => $row['krg'] ?? 0,
+                    'lot_other_out' => $row['lot'] ?? null,
+                    'admin'         => session('username'),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                    'nama_cluster'  => $stock['nama_cluster'],
+                ]);
             }
 
-            // cek hasil transaksi
-            if ($this->db->transStatus() === false) {
-                $this->db->transRollback();
-                return $this->response->setJSON(['success' => false, 'message' => 'Transaksi gagal.']);
-            } else {
-                $this->db->transCommit();
-                return $this->response->setJSON(['success' => true, 'message' => 'Data berhasil disimpan.']);
-            }
-        } catch (\Exception $e) {
+            $this->db->transCommit();
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Pengeluaran berhasil disimpan'
+            ]);
+
+        } catch (\Throwable $e) {
+
             $this->db->transRollback();
-            return $this->response->setJSON(['success' => false, 'message' => $e->getMessage()]);
+
+            log_message('error', '[savePengeluaranSelainOrder] ' . $e->getMessage());
+
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -4833,6 +4935,11 @@ class WarehouseController extends BaseController
                 $totalKgs += $kgsIt;
                 $totalCns += $cnsIt;
                 $totalKrg += $krgIt;
+
+                $eps = 1e-9;
+                if (abs($totalKgs) < $eps) $totalKgs = 0;
+                $totalKgs = round($totalKgs, 4);
+
                 // log_message('info', " Kgs: $kgsIt, Cns: $cnsIt, total: $totalKgs");
                 // proses per-id: cek full retur & update pemasukan/bon
                 $selectOutCelup = $this->outCelupModel->where('id_out_celup', $idOut)->first();
@@ -5149,78 +5256,4 @@ class WarehouseController extends BaseController
             'message' => 'Data fix stock berhasil disimpan.',
         ]);
     }
-
-    // private function getQtyPcs(array $filteredData, $jenis = null)
-    // {
-    //     $client = Services::curlrequest();
-    //     $noModel = array_unique(array_column($filteredData, 'no_model'));
-
-    //     $getQtyUrl = api_url('capacity') . 'getQtyOrderByNoModel';
-
-    //     $qtyResponse = $client->post($getQtyUrl, [
-    //         'json' => [
-    //             'models' => $noModel
-    //         ],
-    //         'http_errors' => false
-    //     ]);
-
-    //     $qtyData = json_decode($qtyResponse->getBody(), true);
-
-    //     $sumQtyBySize = [];
-
-    //     //Jumlahkan qty per size untuk setiap mastermodel
-    //     foreach ($qtyData as $row) {
-    //         $mastermodel = $row['mastermodel'];
-    //         $size = $row['size'];
-    //         $qty  = (int) $row['qty'];
-
-    //         if (!isset($sumQtyBySize[$mastermodel][$size])) {
-    //             $sumQtyBySize[$mastermodel][$size] = 0;
-    //         }
-
-    //         $sumQtyBySize[$mastermodel][$size] += $qty;
-    //     }
-
-    //     foreach ($filteredData as $data) {
-    //         $key = $data['no_model'] . '|' . $data['item_type'] . '|' . $data['kode_warna'] . '|' . $data['color'];
-
-    //         $getStyle = $this->materialModel->getStyleSizeByBb(
-    //             $data['no_model'],
-    //             $data['item_type'],
-    //             $data['kode_warna'],
-    //             $data['color']
-    //         );
-
-    //         $ttlKeb = 0;
-    //         $ttlQty = 0;
-
-    //         foreach ($getStyle as $i => $dataStyle) {
-    //             $styleSize = $dataStyle['style_size'];
-
-    //             $qty = $sumQtyBySize[$data['no_model']][$styleSize] ?? 0;
-
-    //             if ($qty >= 0) {
-    //                 if (isset($dataStyle['item_type']) && stripos($dataStyle['item_type'], 'JHT') !== false) {
-    //                     $kebutuhan = $dataStyle['kgs'] ?? 0;
-    //                 } else {
-    //                     $kebutuhan = (
-    //                         ($qty * $dataStyle['gw'] * $dataStyle['composition'] / 100 / 1000)
-    //                         * (1 + ($dataStyle['loss'] / 100))
-    //                     );
-    //                 }
-
-    //                 $ttlKeb += $kebutuhan;
-    //                 $ttlQty += $qty;
-    //             }
-    //         }
-
-    //         $map[$key] = [
-    //             'kg_po'  => round($ttlKeb, 2),
-    //             'qty_po' => $ttlQty,
-    //             'from_capacity' => !empty($qtyData)
-    //         ];
-    //     }
-
-    //     return $map;
-    // }
 }

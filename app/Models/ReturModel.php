@@ -222,25 +222,20 @@ class ReturModel extends Model
     public function getFilterReturArea($area = null, $kategori = null, $tanggal_awal = null, $tanggal_akhir = null)
     {
         $this->select('
-        retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna,
-        ROUND(SUM(retur.kgs_retur), 2) AS kg, 
-        SUM(retur.cns_retur) AS cns, 
-        SUM(retur.krg_retur) AS karung,
-        retur.lot_retur, retur.keterangan_area, retur.keterangan_gbn,
-        retur.admin, retur.area_retur, retur.tgl_retur, retur.kategori, retur.waktu_acc_retur,
-        mm.jenis,
-        m.total_kgs,
-        m.loss
-    ')
+        retur.id_retur, retur.no_model, retur.item_type, retur.kode_warna, retur.warna, SUM(retur.kgs_retur) AS kg, SUM(retur.cns_retur) AS cns, COUNT(retur.krg_retur) AS karung, retur.lot_retur, retur.keterangan_area, retur.keterangan_gbn, retur.admin, retur.area_retur, retur.tgl_retur, retur.kategori, retur.waktu_acc_retur, mm.jenis, pengeluaran.loss, pengeluaran.kg_kirim, pengeluaran.cns_kirim, pengeluaran.krg_kirim, pengeluaran.lot_out')
             ->join('master_material mm', 'mm.item_type = retur.item_type', 'inner')
             ->join(
-                '(SELECT item_type, kode_warna, ROUND(SUM(kgs), 2) as total_kgs, loss as loss FROM material GROUP BY item_type, kode_warna) m',
-                'm.item_type = retur.item_type AND m.kode_warna = retur.kode_warna',
+                '(SELECT m.no_model, m.item_type, m.kode_warna, m.color, m.loss, pengeluaran.area_out, SUM(pengeluaran.kgs_out) AS kg_kirim, SUM(pengeluaran.cns_out) AS cns_kirim, SUM(pengeluaran.krg_out) AS krg_kirim, GROUP_CONCAT(DISTINCT pengeluaran.lot_out SEPARATOR ",") AS lot_out, m.admin
+                FROM pengeluaran LEFT JOIN (SELECT master_order.no_model, material.item_type, material.kode_warna, material.color, material.loss, pemesanan.id_total_pemesanan, pemesanan.admin FROM pemesanan
+                    LEFT JOIN material ON material.id_material = pemesanan.id_material
+                    LEFT JOIN master_order ON master_order.id_order = material.id_order 
+                    GROUP BY master_order.no_model, material.item_type, material.kode_warna, material.color, pemesanan.id_total_pemesanan) m ON m.id_total_pemesanan = pengeluaran.id_total_pemesanan
+                    WHERE pengeluaran.status = "pengiriman area" AND m.admin = "' . $area . '" 
+                    GROUP BY m.no_model, m.item_type, m.kode_warna, m.color, pengeluaran.area_out, m.admin) pengeluaran',
+                'pengeluaran.no_model = retur.no_model AND pengeluaran.item_type  = retur.item_type AND pengeluaran.kode_warna = retur.kode_warna AND pengeluaran.color = retur.warna AND pengeluaran.admin = retur.area_retur',
                 'left'
             )
-            // ->where('retur.waktu_acc_retur IS NOT NULL')
-            // ->like('retur.keterangan_gbn', 'Approve:')
-            ->groupBy('retur.no_model, retur.item_type, retur.kode_warna, retur.kategori');
+            ->groupBy('retur.no_model, retur.item_type, retur.kode_warna, retur.warna, retur.kategori, retur.tgl_retur, retur.lot_retur');
 
         // Filter opsional
         if (!empty($area)) {
@@ -661,9 +656,9 @@ class ReturModel extends Model
     public function countRequest()
     {
         return $this->select('id_retur')
-                ->where('retur.waktu_acc_retur IS NULL')
-                ->where('retur.area_retur !=', 'GUDANG BENANG')
-                ->countAllResults();
+            ->where('retur.waktu_acc_retur IS NULL')
+            ->where('retur.area_retur !=', 'GUDANG BENANG')
+            ->countAllResults();
     }
     public function getListTglRetur()
     {
