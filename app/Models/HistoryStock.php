@@ -277,4 +277,29 @@ class HistoryStock extends Model
 
         return $builder->get()->getResultArray();
     }
+
+    public function dataStockAwal($val, $jenis = null)
+    {
+        $noModel   = $val['no_model'] ?? [];
+        $itemType  = $val['item_type'] ?? [];
+        $kodeWarna = $val['kode_warna'] ?? [];
+        $warna     = $val['warna'] ?? [];
+
+        $builder = $this->db->table('history_stock hs')
+            ->select('s_new.no_model, s_new.item_type, s_new.kode_warna, s_new.warna, SUM(hs.kgs) AS kgs_stock_awal')
+            ->join('stock s_new', 's_new.id_stock = hs.id_stock_new', 'left')
+            ->join('master_material mm ', 'mm.item_type = s_new.item_type', 'left')
+            ->whereIn('s_new.no_model', $noModel)
+            ->whereIn('s_new.item_type', $itemType)
+            ->whereIn('s_new.kode_warna', $kodeWarna)
+            ->whereIn('s_new.warna', $warna)
+            ->where('hs.keterangan', 'Pindah Order');
+
+        if (!empty($jenis)) {
+            $builder->where('mm.jenis', $jenis);
+        }
+        return $builder->groupBy('s_new.no_model, s_new.item_type, s_new.kode_warna, s_new.warna')
+            ->get()
+            ->getResultArray();
+    }
 }

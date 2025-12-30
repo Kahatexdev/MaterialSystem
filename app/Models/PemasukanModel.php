@@ -891,4 +891,29 @@ class PemasukanModel extends Model
             $stock['nama_cluster']
         ]);
     }
+
+    public function getTotalDatangSolid($val, $jenis = null)
+    {
+        $noModel   = $val['no_model'] ?? [];
+        $itemType  = $val['item_type'] ?? [];
+        $kodeWarna = $val['kode_warna'] ?? [];
+        $warna     = $val['warna'] ?? [];
+
+        $builder = $this->select("out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna, ROUND(SUM(out_celup.kgs_kirim),2) AS kgs_datang, GROUP_CONCAT(DISTINCT DATE_FORMAT(bon_celup.tgl_datang, '%d-%m-%Y') ORDER BY bon_celup.tgl_datang SEPARATOR ' / ') AS tgl_datang")
+            ->join('out_celup', 'out_celup.id_out_celup = pemasukan.id_out_celup', 'left')
+            ->join('schedule_celup', 'schedule_celup.id_celup = out_celup.id_celup', 'left')
+            ->join('bon_celup', 'bon_celup.id_bon = out_celup.id_bon', 'left')
+            ->join('master_material', 'master_material.item_type = schedule_celup.item_type', 'left')
+            ->whereIn('out_celup.no_model', $noModel)
+            ->whereIn('schedule_celup.item_type', $itemType)
+            ->whereIn('schedule_celup.kode_warna', $kodeWarna)
+            ->whereIn('schedule_celup.warna', $warna)
+            ->groupBy('out_celup.no_model, schedule_celup.item_type, schedule_celup.kode_warna, schedule_celup.warna');
+
+        if (!empty($jenis)) {
+            $builder->where('master_material.jenis', $jenis);
+        }
+
+        return $builder->findAll();
+    }
 }
