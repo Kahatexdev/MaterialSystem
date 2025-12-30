@@ -672,6 +672,12 @@ class ScheduleCelupModel extends Model
 
         $db = \Config\Database::connect();
 
+        // Subquery: handle gabungan -> ambil anak2 dari open_po
+        $openPoSubquery = $db->table('open_po anak')
+            ->select('anak.no_model, induk.no_model AS induk_model, induk.item_type AS induk_item_type, induk.kode_warna AS induk_kode_warna')
+            ->join('open_po induk', 'anak.id_induk = induk.id_po')
+            ->getCompiledSelect(false);
+
         // Main builder
         $builder = $db->table('schedule_celup')
             ->select([
@@ -683,10 +689,10 @@ class ScheduleCelupModel extends Model
                 'mesin_celup.ket_mesin',
                 'master_material.jenis',
                 'open_po_anak.no_model AS no_model_anak',
-                'open_po_anak.kg_po AS kg_po_anak',
             ])
             ->join('mesin_celup', 'mesin_celup.id_mesin = schedule_celup.id_mesin')
             ->join('master_material', 'master_material.item_type = schedule_celup.item_type')
+            ->join("({$openPoSubquery}) AS open_po_anak", 'open_po_anak.induk_model = schedule_celup.no_model AND open_po_anak.induk_item_type = schedule_celup.item_type AND open_po_anak.induk_kode_warna = schedule_celup.kode_warna', 'left')
             ->join('master_order', 'master_order.no_model = COALESCE(open_po_anak.no_model, schedule_celup.no_model)')
             ->where('master_material.jenis', 'NYLON');
 

@@ -162,6 +162,7 @@
                 },
                 success: function(response) {
                     dataTable.clear().draw();
+                    console.log(response);
 
                     if (response.length > 0) {
                         $.each(response, function(index, item) {
@@ -170,7 +171,7 @@
                                 item.no_mesin,
                                 item.ket_mesin,
                                 item.lot_urut,
-                                noModel, // sudah ada tambahan anak kalau pogabungan
+                                item.no_model,
                                 item.item_type,
                                 item.kode_warna,
                                 item.warna,
