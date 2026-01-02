@@ -1391,6 +1391,14 @@ class ApiController extends ResourceController
         $poPlus = [];
         $listRetur = $this->returModel->getListRetur($area, $noModel, $tglBuat);
 
+        if (empty($listRetur)) {
+            return $this->response->setJSON([
+                'listRetur' => [],
+                'material'  => [],
+                'kirim'     => [],
+                'poPlus'    => [],
+            ]);
+        }
         $noModels    = array_unique(array_column($listRetur, 'no_model'));
         if (!empty($noModels)) {
             $material = $this->materialModel->getMaterialByModels($noModels);
@@ -1407,7 +1415,7 @@ class ApiController extends ResourceController
 
             if (!empty($validate)) {
                 $kirim = $this->pengeluaranModel->getQtyKirim($validate);
-                $poPlus = $this->totalPoTambahanModel->getTotalPolistTambahan($validate);
+                $poPlus = $this->totalPoTambahanModel->getTotalPoTambahan($validate);
             }
         }
 
