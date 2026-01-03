@@ -41,6 +41,7 @@ class Filters extends BaseFilters
         'monitoring' => \App\Filters\MonitoringAuth::class,
         'area' => \App\Filters\AreaAuth::class,
         'kantordepan' => \App\Filters\KantorDepanAuth::class,
+        'auth.token' => \App\Filters\AuthTokenFilter::class,
     ];
 
     /**

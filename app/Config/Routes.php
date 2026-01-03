@@ -16,7 +16,7 @@ $routes->post('authverify', 'AuthController::login');
 $routes->post('schedule/validateSisaJatah', 'ScheduleController::validateSisaJatah');
 // $routes->get('schedule/getQtyPO', 'ScheduleController::getQtyPO');
 
-$routes->group('/gbn', ['filter' => 'gbn'], function ($routes) {
+$routes->group('/gbn',['filter' => 'auth.token'], function ($routes) {
     $routes->get('', 'DashboardGbnController::index');
     // $routes->get('getGroupData', 'DashboardGbnController::getGroupData');
     $routes->post('getGroupData', 'DashboardGbnController::getGroupData');
@@ -613,7 +613,7 @@ $routes->group('/covering', ['filter' => 'covering'], function ($routes) {
 
 
 // monitoring routes
-$routes->group('/monitoring', ['filter' => 'monitoring'], function ($routes) {
+$routes->group('/monitoring',['filter' => 'auth.token'], function ($routes) {
     $routes->get('', 'MonitoringController::index');
     // User
     $routes->get('user', 'MonitoringController::user');

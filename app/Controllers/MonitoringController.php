@@ -61,33 +61,54 @@ class MonitoringController extends BaseController
 
     public function user()
     {
-        $getData = $this->userModel->findAll();
+        $client = service('curlrequest');
+
+        $response = $client->get(
+            'http://172.23.39.117/ComplaintSystem/public/api/MS/user',
+            [
+                'http_errors' => false, // 🔥 PENTING
+            ]
+        );
+
+        $getData = json_decode($response->getBody(), true);
 
         $data = [
             'active' => $this->active,
             'title' => 'Monitoring',
             'role' => $this->role,
-            'dataUser' => $getData,
+            'dataUser' => $getData['userData'],
         ];
         return view($this->role . '/user/index', $data);
     }
 
     public function tambahUser()
     {
-        $getData = $this->request->getPost();
+        $username = $this->request->getPost("username");
+        $password = $this->request->getPost("password");
+        $role     = $this->request->getPost("role");
 
-        // Hash password sebelum menyimpan
-        $data = [
-            'username' => $getData['username'],
-            'password' => password_hash($getData['password'], PASSWORD_BCRYPT), // Hash password dengan BCRYPT
-            'role' => $getData['role'],
-            'area' => $getData['area'],
-        ];
+        $client = service('curlrequest');
 
+        $response = $client->post(
+            'http://172.23.39.117/ComplaintSystem/public/api/userAdd',
+            [
+                'http_errors' => false, // 🔥 PENTING
+                'form_params' => [
+                    'username' => $username,
+                    'password' => $password,
+                    'role' => $role,
+                    'ket' => 'MS',
+                ]
+            ]
+        );
 
-        $this->userModel->save($data);
-
-        return redirect()->to(base_url($this->role . '/user'))->with('success', 'Data berhasil ditambah.');
+        $data = json_decode($response->getBody(), true);
+        // dd($data);
+        if ($data['success']) {
+            return redirect()->to(base_url(session()->get('role') . '/user'))->with('success', 'User Berhasil di input');
+        } else {
+            return redirect()->to(base_url(session()->get('role') . '/user'))->with('error', 'User Gagal di input');
+        }
     }
 
     public function getUserDetails($id)
@@ -113,28 +134,67 @@ class MonitoringController extends BaseController
 
     public function updateUser()
     {
-        $id = $this->request->getPost('id_user');
-        $pw = $this->request->getPost('password');
-        $data = [
-            'id_user' => $this->request->getPost('id_user'),
-            'username' => $this->request->getPost('username'),
-            'password' => password_hash($pw, PASSWORD_BCRYPT),
-            'role' => $this->request->getPost('role'),
-            'area' => $this->request->getPost('area')
-        ];
-        // dd($data);
+        $id_user = $this->request->getPost('id_user');
+        $username = $this->request->getPost('username');
+        $password = $this->request->getPost('password');
+        $role     = $this->request->getPost('role');
 
-        if ($this->userModel->update($id, $data)) {
-            return redirect()->to(base_url($this->role . '/user'))->with('success', 'Data berhasil diubah.');
-        } else {
-            return redirect()->to(base_url($this->role . '/user'))->with('error', 'Data gagal diubah.');
+        // payload API
+        $payload = [
+            'id_user'       => $id_user,
+            'username' => $username,
+            'role'     => $role,
+        ];
+
+        // dd($username,$password,$role,$payload);
+        if (!empty($password)) {
+            $payload['password'] = password_hash($password, PASSWORD_DEFAULT);
         }
+
+        $client = service('curlrequest');
+
+        try {
+            $response = $client->post(
+                'http://172.23.39.117/ComplaintSystem/public/api/userUpdate',
+                [
+                    'http_errors' => false,
+                    'form_params' => $payload,
+                ]
+            );
+            // dd($payload);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Gagal koneksi ke API');
+        }
+
+        // 🔥 WAJIB cek status API
+        if ($response->getStatusCode() !== 200) {
+            return redirect()->back()->with('error', 'Update user gagal (API)');
+        }
+
+        return redirect()->back()->with('success', 'User berhasil di update');
     }
 
     public function deleteUser($id)
     {
-        $this->userModel->delete($id);
-        return redirect()->to(base_url($this->role . '/user'))->with('success', 'Data berhasil dihapus.');
+        $client = service('curlrequest');
+
+        $response = $client->post(
+            'http://172.23.39.117/ComplaintSystem/public/api/userDelete',
+            [
+                'http_errors' => false, // 🔥 PENTING
+                'form_params' => [
+                    'id_user' => $id
+                ]
+            ]
+        );
+
+        $data = json_decode($response->getBody(), true);
+        // dd($data);
+        if ($data['success']) {
+            return redirect()->to(base_url(session()->get('role') . '/user'))->with('success', 'User Berhasil di hapus');
+        } else {
+            return redirect()->to(base_url(session()->get('role') . '/user'))->with('error', 'User Gagal di hapus');
+        }
     }
 
     public function retur()

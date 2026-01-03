@@ -47,7 +47,6 @@
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">No</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Username</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Role</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Area</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Aksi</th>
                         </tr>
                     </thead>
@@ -58,7 +57,6 @@
                                 <td class="text-center"><?= $no++ ?></td>
                                 <td class="text-center"><?= $user['username'] ?></td>
                                 <td class="text-center"><?= $user['role'] ?></td>
-                                <td class="text-center"><?= $user['area'] ?></td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-warning btn-edit" data-id="<?= $user['id_user'] ?>">Edit</button>
                                     <button class="btn btn-sm btn-danger btn-delete" data-id="<?= $user['id_user'] ?>">Hapus</button>
@@ -102,10 +100,6 @@
                             <option value="monitoring">Monitoring</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="area" class="form-label">Area</label>
-                        <input type="text" class="form-control" id="add_area" name="area">
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -133,7 +127,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                        <input type="password" class="form-control" id="password" name="password">
                     </div>
                     <div class="mb-3">
                         <label for="role" class="form-label">Role</label>
@@ -146,10 +140,6 @@
                             <option value="kantordepan">Kantor Depan</option>
                             <option value="monitoring">Monitoring</option>
                         </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="area" class="form-label">Area</label>
-                        <input type="text" class="form-control" id="area" name="area" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -170,20 +160,32 @@
 
             // Lakukan AJAX request untuk mendapatkan data
             $.ajax({
-                url: '<?= base_url($role . '/getUserDetails') ?>/' + id,
-                type: 'GET',
-                success: function(response) {
-                    // Isi data ke dalam form modal
-                    $('#id_user').val(response.id_user);
-                    $('#username').val(response.username);
-                    $('#password').val(response.password);
-                    $('#role').val(response.role);
-                    $('#area').val(response.area);
-                    // Show modal dialog
+                url: 'http://172.23.39.117/ComplaintSystem/public/api/userById',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    id_user: id
+                },
+                success: function (response) {
+
+                    if (!response.success) {
+                        alert(response.message);
+                        return;
+                    }
+
+                    // isi form
+                    $('#id_user').val(response.data.id_user);
+                    $('#username').val(response.data.username);
+                    $('#role').val(response.data.role);
+
+                    // password selalu kosong
+                    $('#password').val('');
+
                     $('#editModal').modal('show');
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr) {
                     console.error(xhr.responseText);
+                    alert('Gagal mengambil data user');
                 }
             });
         });
