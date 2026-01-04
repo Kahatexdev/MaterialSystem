@@ -64,7 +64,7 @@ class MonitoringController extends BaseController
         $client = service('curlrequest');
 
         $response = $client->get(
-            'http://172.23.39.117/ComplaintSystem/public/api/MS/user',
+            'http://192.168.1.5/ComplaintSystem/public/api/MS/user',
             [
                 'http_errors' => false, // 🔥 PENTING
             ]
@@ -90,7 +90,7 @@ class MonitoringController extends BaseController
         $client = service('curlrequest');
 
         $response = $client->post(
-            'http://172.23.39.117/ComplaintSystem/public/api/userAdd',
+            'http://192.168.1.5/ComplaintSystem/public/api/userAdd',
             [
                 'http_errors' => false, // 🔥 PENTING
                 'form_params' => [
@@ -155,7 +155,7 @@ class MonitoringController extends BaseController
 
         try {
             $response = $client->post(
-                'http://172.23.39.117/ComplaintSystem/public/api/userUpdate',
+                'http://192.168.1.5/ComplaintSystem/public/api/userUpdate',
                 [
                     'http_errors' => false,
                     'form_params' => $payload,
@@ -179,7 +179,7 @@ class MonitoringController extends BaseController
         $client = service('curlrequest');
 
         $response = $client->post(
-            'http://172.23.39.117/ComplaintSystem/public/api/userDelete',
+            'http://192.168.1.5/ComplaintSystem/public/api/userDelete',
             [
                 'http_errors' => false, // 🔥 PENTING
                 'form_params' => [

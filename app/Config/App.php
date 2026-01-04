@@ -18,15 +18,17 @@ class App extends BaseConfig
      */
 
     // public string $baseURL = 'http://localhost:8080';
-    public string $baseURL = 'http://172.23.44.14/MaterialSystem/public/';
+    public string $baseURL = 'http://192.168.1.5/MaterialSystem/public/';
     // public string $baseURL = 'http://localhost:8080/';
     public $capacityUrl;
+    public $complaintUrl;
 
     public function __construct()
     {
         parent::__construct();
 
-        $this->capacityUrl = getenv('CAPACITY_API_URL') ?: 'http://172.23.44.14/CapacityApps/public/api/';
+        $this->capacityUrl = getenv('CAPACITY_API_URL') ?: 'http://192.168.1.5/CapacityApps/public/api/';
+        $this->complaintUrl = getenv('COMPLAINT_API_URL') ?: 'http://192.168.1.5/ComplaintSystem/public/api/';
     }
 
     /**

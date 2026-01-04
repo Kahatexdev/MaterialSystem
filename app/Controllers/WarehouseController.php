@@ -110,7 +110,7 @@ class WarehouseController extends BaseController
     //     $updateOrder = $this->masterOrderModel->getNullMc();
 
     //     foreach ($updateOrder as $od) {
-    //         $reqStartMc = 'http://172.23.39.117/CapacityApps/public/api/reqstartmc/' . $od['no_model'];
+    //         $reqStartMc = 'http://192.168.1.5/CapacityApps/public/index.php/api/reqstartmc/' . $od['no_model'];
 
     //         try {
     //             // Fetch data dari API
@@ -156,7 +156,7 @@ class WarehouseController extends BaseController
             ]);
 
             $response = $client->post(
-                'http://172.23.39.117/CapacityApps/public/api/reqstartmc-bulk',
+                'http://192.168.1.5/CapacityApps/public/index.php/api/reqstartmc-bulk',
                 [
                     'json' => $models
                 ]

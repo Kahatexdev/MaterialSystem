@@ -888,7 +888,7 @@
                             data-text="Baik, data sedang kami lakukan pengecekan.">
                             <i class="fas fa-bolt"></i> Cek dulu
                         </button>
-
+                        
                         <button type="button" class="btn-quick-reply" data-mode="replace"
                             data-text="Data sudah diperbarui. Mohon lakukan pengecekan kembali.">
                             <i class="fas fa-bolt"></i> Sudah diperbarui
@@ -898,7 +898,7 @@
                             data-text="Silahkan Konfirmasi Ke Gudang Benang.">
                             <i class="fas fa-bolt"></i> Konfirmasi GBN
                         </button>
-
+                        
                         <button type="button" class="btn-quick-reply" data-mode="replace"
                             data-text="Sudah dikirim permintaan manualnya, Mohon lakukan pengecekan kembali.">
                             <i class="fas fa-bolt"></i> Permintaan manual
@@ -921,6 +921,7 @@
 <!-- Modal Create Pengaduan -->
 <div class="modal fade" id="modalCreatePengaduan" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- FORM membungkus body + footer -->
         <form id="formCreate" class="modal-content">
             <div class="modal-header">
                 <div>
@@ -933,54 +934,34 @@
             </div>
 
             <div class="modal-body">
-                <input type="hidden" name="id_user" value="<?= esc(session()->get('id_user')) ?>">
+                <input type="hidden" name="username" value="<?= esc(session()->get('username')) ?>">
 
                 <div class="alert alert-info mb-3">
                     <i class="fas fa-lightbulb"></i>
                     <strong>Tips:</strong> Jelaskan kronologi singkat, tanggal kejadian, dan detail penting lainnya.
                 </div>
 
-                <!-- BARIS 1 -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="target_role" class="form-label">
-                            Ditujukan ke <span style="color: #dc3545;">*</span>
-                        </label>
-                        <select id="target_role" name="target_role" class="form-select" required>
-                            <option value="">— Pilih Bagian —</option>
-                            <option value="capacity">Capacity</option>
-                            <option value="planning">PPC</option>
-                            <option value="aps">Planner</option>
-                            <option value="user">Area</option>
-                            <option value="rosso">Rosso</option>
-                            <option value="gbn">GBN</option>
-                            <option value="celup">Celup Cones</option>
-                            <option value="covering">Covering</option>
-                            <option value="sudo">Monitoring Planning & Produksi</option>
-                            <option value="monitoring">Monitoring Bahan Baku</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="user" class="form-label">Nama User</label>
-                        <select id="user" name="user" class="form-select" required>
-                            <option>Pilih User</option>
-                            <option value="tes">tes</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- BARIS 2 -->
                 <div class="mb-3">
-                    <label for="subject" class="form-label">
-                        Judul Pengaduan <span style="color: #dc3545;">*</span>
+                    <label for="target_role" class="form-label">
+                        Ditujukan ke <span style="color: #dc3545;">*</span>
                     </label>
-                    <input type="text" class="form-control" id="subject" name="subject" required>
+                    <select id="target_role" name="target_role" class="form-select" required>
+                        <option value="">— Pilih Bagian —</option>
+                        <option value="capacity">Capacity</option>
+                        <option value="planning">PPC</option>
+                        <option value="aps">Planner</option>
+                        <option value="user">Area</option>
+                        <option value="rosso">Rosso</option>
+                        <option value="gbn">GBN</option>
+                        <option value="celup">Celup Cones</option>
+                        <option value="covering">Covering</option>
+                        <option value="sudo">Monitoring Planning &amp; Produksi</option>
+                        <option value="monitoring">Monitoring Bahan Baku</option>
+                    </select>
                 </div>
 
-                <!-- BARIS 3 -->
                 <div class="mb-3">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <label for="isi" class="form-label mb-0">
                             Isi Pengaduan <span style="color: #dc3545;">*</span>
                         </label>
@@ -1006,7 +987,6 @@
         </form>
     </div>
 </div>
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -1137,7 +1117,7 @@
             e.preventDefault();
 
             $.ajax({
-                url: complaintUrl + 'chat/thread/create',
+                url: CapacityUrl + 'pengaduan/create',
                 method: 'POST',
                 dataType: 'json',
                 data: $(this).serialize(),
@@ -1176,279 +1156,279 @@
         });
 
         // ===== AJAX REPLY PENGADUAN =====
-        // $(document).on('submit', '.form-reply', function(e) {
-        //     e.preventDefault();
+        $(document).on('submit', '.form-reply', function(e) {
+            e.preventDefault();
 
-        //     const id = $(this).data('id');
-        //     if (!id) return;
+            const id = $(this).data('id');
+            if (!id) return;
 
-        //     $.ajax({
-        //         url: CapacityUrl + 'pengaduan/reply/' + id,
-        //         method: 'POST',
-        //         dataType: 'json',
-        //         data: $(this).serialize(),
-        //         success: function(res) {
-        //             if (res.status === 'success' || res.success) {
-        //                 Swal.fire({
-        //                     icon: 'success',
-        //                     title: 'Success!',
-        //                     text: 'Balasan terkirim.'
-        //                 });
-        //                 loadPengaduan();
-        //             } else {
-        //                 Swal.fire({
-        //                     icon: 'error',
-        //                     title: 'Gagal',
-        //                     text: res.message || 'Gagal mengirim balasan.'
-        //                 });
-        //             }
-        //         },
-        //         error: function(xhr) {
-        //             console.error(xhr.responseText);
-        //             Swal.fire({
-        //                 icon: 'error',
-        //                 title: 'Error',
-        //                 text: 'Terjadi kesalahan saat mengirim balasan.'
-        //             });
-        //         }
-        //     });
-        // });
+            $.ajax({
+                url: CapacityUrl + 'pengaduan/reply/' + id,
+                method: 'POST',
+                dataType: 'json',
+                data: $(this).serialize(),
+                success: function(res) {
+                    if (res.status === 'success' || res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Balasan terkirim.'
+                        });
+                        loadPengaduan();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: res.message || 'Gagal mengirim balasan.'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan saat mengirim balasan.'
+                    });
+                }
+            });
+        });
 
-        // // ===== RELOAD LIST PENGADUAN =====
-        // window.loadPengaduan = function() {
-        //     $.get('<?= base_url($role . "/pengaduan") ?>', function(html) {
-        //         const $html = $(html);
-        //         const $newList = $html.find('#listPengaduan').html();
+        // ===== RELOAD LIST PENGADUAN =====
+        window.loadPengaduan = function() {
+            $.get('<?= base_url($role . "/pengaduan") ?>', function(html) {
+                const $html = $(html);
+                const $newList = $html.find('#listPengaduan').html();
 
-        //         $('#listPengaduan').html($newList);
+                $('#listPengaduan').html($newList);
 
-        //         // re-apply filter setelah reload
-        //         if (typeof window.applyFilter === 'function') {
-        //             window.applyFilter();
-        //         }
+                // re-apply filter setelah reload
+                if (typeof window.applyFilter === 'function') {
+                    window.applyFilter();
+                }
 
-        //         // re-init auto-resize utk textarea yang baru
-        //         if (typeof window.initAutoResize === 'function') {
-        //             window.initAutoResize();
-        //         }
-        //     });
-        // };
+                // re-init auto-resize utk textarea yang baru
+                if (typeof window.initAutoResize === 'function') {
+                    window.initAutoResize();
+                }
+            });
+        };
     });
 </script>
 
 <script>
-//     let lastPengaduanId = 0;
-//     let lastReplyId = 0;
+    let lastPengaduanId = 0;
+    let lastReplyId = 0;
 
-//     function initCursorFromDOM() {
-//         // ambil dari card terakhir (kalau mau)
-//         const cards = document.querySelectorAll('.pengaduan-card');
-//         cards.forEach(c => {
-//             const id = parseInt(c.getAttribute('data-id') || '0', 10);
-//             if (id > lastPengaduanId) lastPengaduanId = id;
-//         });
+    function initCursorFromDOM() {
+        // ambil dari card terakhir (kalau mau)
+        const cards = document.querySelectorAll('.pengaduan-card');
+        cards.forEach(c => {
+            const id = parseInt(c.getAttribute('data-id') || '0', 10);
+            if (id > lastPengaduanId) lastPengaduanId = id;
+        });
 
-//         // kalau reply punya data-id juga
-//         const replies = document.querySelectorAll('.reply-item[data-reply-id]');
-//         replies.forEach(r => {
-//             const rid = parseInt(r.getAttribute('data-reply-id') || '0', 10);
-//             if (rid > lastReplyId) lastReplyId = rid;
-//         });
-//     }
+        // kalau reply punya data-id juga
+        const replies = document.querySelectorAll('.reply-item[data-reply-id]');
+        replies.forEach(r => {
+            const rid = parseInt(r.getAttribute('data-reply-id') || '0', 10);
+            if (rid > lastReplyId) lastReplyId = rid;
+        });
+    }
 
-//     function escapeHtml(str) {
-//         return String(str ?? '')
-//             .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
-//             .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
-//             .replaceAll("'", "&#039;");
-//     }
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+            .replaceAll("'", "&#039;");
+    }
 
-//     function nl2br(str) {
-//         return escapeHtml(str).replace(/\n/g, '<br>');
-//     }
+    function nl2br(str) {
+        return escapeHtml(str).replace(/\n/g, '<br>');
+    }
 
-//     function renderPengaduanCard(p, currentUser) {
-//         const username = escapeHtml(p.username);
-//         const initial = username ? username[0].toUpperCase() : '?';
-//         const role = escapeHtml(p.display_role || p.target_role);
-//         const waktu = escapeHtml(p.formatted_time || p.created_at);
+    function renderPengaduanCard(p, currentUser) {
+        const username = escapeHtml(p.username);
+        const initial = username ? username[0].toUpperCase() : '?';
+        const role = escapeHtml(p.display_role || p.target_role);
+        const waktu = escapeHtml(p.formatted_time || p.created_at);
 
-//         return `
-//   <div class="pengaduan-card"
-//        data-id="${p.id_pengaduan}"
-//        data-role="${escapeHtml(p.target_role)}"
-//        data-user="${escapeHtml((p.username||'').toLowerCase())}"
-//        data-date="${escapeHtml(p.date_iso || '')}"
-//        data-search="${escapeHtml((p.search_blob || '').toLowerCase())}">
-//     <div class="pengaduan-header">
-//       <div class="pengaduan-sender">
-//         <div class="sender-avatar">${escapeHtml(initial)}</div>
-//         <div class="sender-info">
-//           <h6>${username} <i class="fa-solid fa-angles-right"></i>
-//             <span class="badge">${role}</span>
-//           </h6>
-//         </div>
-//       </div>
-//       <div class="pengaduan-meta">
-//         <div class="pengaduan-time">
-//           <i class="fas fa-clock"></i>
-//           <strong>${waktu}</strong>
-//         </div>
-//       </div>
-//     </div>
+        return `
+  <div class="pengaduan-card"
+       data-id="${p.id_pengaduan}"
+       data-role="${escapeHtml(p.target_role)}"
+       data-user="${escapeHtml((p.username||'').toLowerCase())}"
+       data-date="${escapeHtml(p.date_iso || '')}"
+       data-search="${escapeHtml((p.search_blob || '').toLowerCase())}">
+    <div class="pengaduan-header">
+      <div class="pengaduan-sender">
+        <div class="sender-avatar">${escapeHtml(initial)}</div>
+        <div class="sender-info">
+          <h6>${username} <i class="fa-solid fa-angles-right"></i>
+            <span class="badge">${role}</span>
+          </h6>
+        </div>
+      </div>
+      <div class="pengaduan-meta">
+        <div class="pengaduan-time">
+          <i class="fas fa-clock"></i>
+          <strong>${waktu}</strong>
+        </div>
+      </div>
+    </div>
 
-//     <div class="pengaduan-content">${nl2br(p.isi)}</div>
+    <div class="pengaduan-content">${nl2br(p.isi)}</div>
 
-//     <hr class="pengaduan-divider">
+    <hr class="pengaduan-divider">
 
-//     <div class="replies-container">
-//       <div class="no-reply">Belum ada balasan.</div>
-//     </div>
+    <div class="replies-container">
+      <div class="no-reply">Belum ada balasan.</div>
+    </div>
 
-//     <form class="form-reply" data-id="${pid}">
-//       <input type="hidden" name="username" value="${escapeHtml(p.current_user || '')}">
-//       <textarea id="reply-ta-${pid}" name="isi" class="auto-resize" placeholder="Tulis balasan..." required></textarea>
-//       <button type="submit"><i class="fas fa-paper-plane"></i></button>
-//     </form>
+    <form class="form-reply" data-id="${pid}">
+      <input type="hidden" name="username" value="${escapeHtml(p.current_user || '')}">
+      <textarea id="reply-ta-${pid}" name="isi" class="auto-resize" placeholder="Tulis balasan..." required></textarea>
+      <button type="submit"><i class="fas fa-paper-plane"></i></button>
+    </form>
 
-//     <div class="quick-reply-wrap" data-target="#reply-ta-${pid}">
-//         <button type="button" class="btn-quick-reply" data-mode="replace"
-//             data-text="Baik, data sedang kami lakukan pengecekan.">
-//             <i class="fas fa-bolt"></i> Cek dulu
-//         </button>
+    <div class="quick-reply-wrap" data-target="#reply-ta-${pid}">
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Baik, data sedang kami lakukan pengecekan.">
+            <i class="fas fa-bolt"></i> Cek dulu
+        </button>
         
-//         <button type="button" class="btn-quick-reply" data-mode="replace"
-//             data-text="Data sudah diperbarui. Mohon lakukan pengecekan kembali.">
-//             <i class="fas fa-bolt"></i> Sudah diperbarui
-//         </button>
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Data sudah diperbarui. Mohon lakukan pengecekan kembali.">
+            <i class="fas fa-bolt"></i> Sudah diperbarui
+        </button>
 
-//         <button type="button" class="btn-quick-reply" data-mode="replace"
-//             data-text="Silahkan Konfirmasi Ke Gudang Benang.">
-//             <i class="fas fa-bolt"></i> Konfirmasi GBN
-//         </button>
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Silahkan Konfirmasi Ke Gudang Benang.">
+            <i class="fas fa-bolt"></i> Konfirmasi GBN
+        </button>
         
-//         <button type="button" class="btn-quick-reply" data-mode="replace"
-//             data-text="Sudah dikirim permintaan manualnya, Mohon lakukan pengecekan kembali.">
-//             <i class="fas fa-bolt"></i> Permintaan manual
-//         </button>
+        <button type="button" class="btn-quick-reply" data-mode="replace"
+            data-text="Sudah dikirim permintaan manualnya, Mohon lakukan pengecekan kembali.">
+            <i class="fas fa-bolt"></i> Permintaan manual
+        </button>
 
-//         <button type="button" class="btn-quick-reply" data-mode="append"
-//             data-text=" Mohon dilengkapi detail: PDK/jenis/cluster, tanggal & jam pemesanan, serta kronologi singkat.">
-//             <i class="fas fa-bolt"></i> Minta detail
-//         </button>
-//     </div>
+        <button type="button" class="btn-quick-reply" data-mode="append"
+            data-text=" Mohon dilengkapi detail: PDK/jenis/cluster, tanggal & jam pemesanan, serta kronologi singkat.">
+            <i class="fas fa-bolt"></i> Minta detail
+        </button>
+    </div>
 
-//   </div>`;
-//     }
+  </div>`;
+    }
 
-//     function renderReplyBubble(r, currentUser) {
-//         const isMe = (String(r.username || '').toLowerCase() === String(currentUser || '').toLowerCase());
-//         return `
-//   <div class="reply-row ${isMe ? 'reply-row-me' : 'reply-row-other'}">
-//     <div class="reply-item ${isMe ? 'reply-me' : 'reply-other'}" data-reply-id="${r.id_reply}">
-//       <div class="reply-author"><i class="fas fa-reply"></i> ${escapeHtml(r.username)}</div>
-//       <div class="reply-text">${nl2br(r.isi)}</div>
-//       <div class="reply-time">${escapeHtml(r.created_at)}</div>
-//     </div>
-//   </div>`;
-//     }
+    function renderReplyBubble(r, currentUser) {
+        const isMe = (String(r.username || '').toLowerCase() === String(currentUser || '').toLowerCase());
+        return `
+  <div class="reply-row ${isMe ? 'reply-row-me' : 'reply-row-other'}">
+    <div class="reply-item ${isMe ? 'reply-me' : 'reply-other'}" data-reply-id="${r.id_reply}">
+      <div class="reply-author"><i class="fas fa-reply"></i> ${escapeHtml(r.username)}</div>
+      <div class="reply-text">${nl2br(r.isi)}</div>
+      <div class="reply-time">${escapeHtml(r.created_at)}</div>
+    </div>
+  </div>`;
+    }
 
-//     function upsertReplyToCard(reply, currentUser) {
-//         const card = document.querySelector(`.pengaduan-card[data-id="${reply.id_pengaduan}"]`);
-//         if (!card) return; // kalau card belum ada, bisa skip atau nanti handle
+    function upsertReplyToCard(reply, currentUser) {
+        const card = document.querySelector(`.pengaduan-card[data-id="${reply.id_pengaduan}"]`);
+        if (!card) return; // kalau card belum ada, bisa skip atau nanti handle
 
-//         const container = card.querySelector('.replies-container');
-//         if (!container) return;
+        const container = card.querySelector('.replies-container');
+        if (!container) return;
 
-//         // hilangkan "Belum ada balasan"
-//         const noReply = container.querySelector('.no-reply');
-//         if (noReply) noReply.remove();
+        // hilangkan "Belum ada balasan"
+        const noReply = container.querySelector('.no-reply');
+        if (noReply) noReply.remove();
 
-//         // cegah duplikasi
-//         if (container.querySelector(`.reply-item[data-reply-id="${reply.id_reply}"]`)) return;
+        // cegah duplikasi
+        if (container.querySelector(`.reply-item[data-reply-id="${reply.id_reply}"]`)) return;
 
-//         container.insertAdjacentHTML('beforeend', renderReplyBubble(reply, currentUser));
-//     }
+        container.insertAdjacentHTML('beforeend', renderReplyBubble(reply, currentUser));
+    }
 
-//     function startPollingPengaduan({
-//         role,
-//         currentUser
-//     }) {
-//         initCursorFromDOM();
+    function startPollingPengaduan({
+        role,
+        currentUser
+    }) {
+        initCursorFromDOM();
 
-//         async function tick() {
-//             try {
-//                 const url = `${CapacityUrl}pengaduan/fetchNew?last_id=${lastPengaduanId}&last_reply_id=${lastReplyId}&role=${encodeURIComponent(role)}` +
-//                     `&username=${encodeURIComponent(currentUser)}`;
-//                 const res = await fetch(url, {
-//                     headers: {
-//                         'Accept': 'application/json'
-//                     }
-//                 });
-//                 const json = await res.json();
+        async function tick() {
+            try {
+                const url = `${CapacityUrl}pengaduan/fetchNew?last_id=${lastPengaduanId}&last_reply_id=${lastReplyId}&role=${encodeURIComponent(role)}` +
+                    `&username=${encodeURIComponent(currentUser)}`;
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const json = await res.json();
 
-//                 if (!json || !json.success) return;
+                if (!json || !json.success) return;
 
-//                 // 1) pengaduan baru -> prepend
-//                 if (Array.isArray(json.data) && json.data.length) {
-//                     const list = document.getElementById('listPengaduan');
-//                     json.data
-//                         .sort((a, b) => a.id_pengaduan - b.id_pengaduan)
-//                         .forEach(p => {
-//                             if (document.querySelector(`.pengaduan-card[data-id="${p.id_pengaduan}"]`)) return;
-//                             list.insertAdjacentHTML('afterbegin', renderPengaduanCard(p, currentUser));
-//                         });
+                // 1) pengaduan baru -> prepend
+                if (Array.isArray(json.data) && json.data.length) {
+                    const list = document.getElementById('listPengaduan');
+                    json.data
+                        .sort((a, b) => a.id_pengaduan - b.id_pengaduan)
+                        .forEach(p => {
+                            if (document.querySelector(`.pengaduan-card[data-id="${p.id_pengaduan}"]`)) return;
+                            list.insertAdjacentHTML('afterbegin', renderPengaduanCard(p, currentUser));
+                        });
 
-//                     // re-init textarea resize + re-apply filter
-//                     window.initAutoResize?.();
-//                     window.applyFilter?.();
-//                 }
+                    // re-init textarea resize + re-apply filter
+                    window.initAutoResize?.();
+                    window.applyFilter?.();
+                }
 
-//                 // 2) reply baru -> append ke card yg sesuai
-//                 if (Array.isArray(json.replies) && json.replies.length) {
-//                     json.replies
-//                         .sort((a, b) => a.id_reply - b.id_reply)
-//                         .forEach(r => upsertReplyToCard(r, currentUser));
+                // 2) reply baru -> append ke card yg sesuai
+                if (Array.isArray(json.replies) && json.replies.length) {
+                    json.replies
+                        .sort((a, b) => a.id_reply - b.id_reply)
+                        .forEach(r => upsertReplyToCard(r, currentUser));
 
-//                     window.applyFilter?.();
-//                 }
+                    window.applyFilter?.();
+                }
 
-//                 // update cursor
-//                 if (json.max_id) lastPengaduanId = Math.max(lastPengaduanId, Number(json.max_id));
-//                 if (json.max_reply_id) lastReplyId = Math.max(lastReplyId, Number(json.max_reply_id));
+                // update cursor
+                if (json.max_id) lastPengaduanId = Math.max(lastPengaduanId, Number(json.max_id));
+                if (json.max_reply_id) lastReplyId = Math.max(lastReplyId, Number(json.max_reply_id));
 
-//             } catch (e) {
-//                 console.error('poll error', e);
-//             }
-//         }
+            } catch (e) {
+                console.error('poll error', e);
+            }
+        }
 
-//         tick();
-//         setInterval(tick, 5000);
-//     }
+        tick();
+        setInterval(tick, 5000);
+    }
 
-//     // panggil ini setelah DOM ready
-//     startPollingPengaduan({
-//         role: '<?= esc($role) ?>', // atau session role
-//         currentUser: '<?= esc(session()->get('username')) ?>'
-//     });
+    // panggil ini setelah DOM ready
+    startPollingPengaduan({
+        role: '<?= esc($role) ?>', // atau session role
+        currentUser: '<?= esc(session()->get('username')) ?>'
+    });
 
-//     // ===== QUICK REPLY HANDLER (delegation - aman untuk AJAX reload & polling) =====
-//     $(document).on('click', '.btn-quick-reply', function() {
-//         const text = $(this).data('text') || '';
-//         const mode = String($(this).data('mode') || 'replace').toLowerCase();
+    // ===== QUICK REPLY HANDLER (delegation - aman untuk AJAX reload & polling) =====
+    $(document).on('click', '.btn-quick-reply', function() {
+        const text = $(this).data('text') || '';
+        const mode = String($(this).data('mode') || 'replace').toLowerCase();
 
-//         // cari target textarea dari wrapper
-//         const $wrap = $(this).closest('.quick-reply-wrap');
-//         const targetSel = $wrap.data('target');
-//         const $ta = targetSel ? $(targetSel) : $wrap.nextAll('form.form-reply:first').find('textarea[name="isi"]');
+        // cari target textarea dari wrapper
+        const $wrap = $(this).closest('.quick-reply-wrap');
+        const targetSel = $wrap.data('target');
+        const $ta = targetSel ? $(targetSel) : $wrap.nextAll('form.form-reply:first').find('textarea[name="isi"]');
 
-//         if (!$ta.length) return;
+        if (!$ta.length) return;
 
-//         const current = $ta.val() || '';
-//         const next = (mode === 'append') ? (current ? (current + text) : text) : text;
+        const current = $ta.val() || '';
+        const next = (mode === 'append') ? (current ? (current + text) : text) : text;
 
-//         $ta.val(next).trigger('input').focus();
-//     });
+        $ta.val(next).trigger('input').focus();
+    });
 </script>
 
 

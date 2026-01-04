@@ -160,7 +160,7 @@
 
             // Lakukan AJAX request untuk mendapatkan data
             $.ajax({
-                url: 'http://172.23.39.117/ComplaintSystem/public/api/userById',
+                url: 'http://192.168.1.5/ComplaintSystem/public/api/userById',
                 type: 'POST',
                 dataType: 'json',
                 data: {

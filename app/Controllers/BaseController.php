@@ -128,6 +128,7 @@ abstract class BaseController extends Controller
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
         service('renderer')->setVar('capacityUrl', api_url('capacity'));
+        service('renderer')->setVar('complaintUrl', api_url('complaint'));
 
         $this->db = \Config\Database::connect();
         // Preload any models, libraries, etc, here.

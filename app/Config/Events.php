@@ -58,7 +58,7 @@ Events::on('pre_system', static function (): void {
     Events::on('post_controller_constructor', function () {
         $renderer = Services::renderer();
         $role = session()->get('role');
-        $url = 'http://172.23.39.117/CapacityApps/public/api/getNotif/' . $role;
+        $url = 'http://192.168.1.5/CapacityApps/public/index.php/api/getNotif/' . $role;
 
         try {
             $json = @file_get_contents($url);

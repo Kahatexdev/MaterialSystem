@@ -102,6 +102,7 @@ class ApiController extends ResourceController
         $this->role = session()->get('role');
         $this->active = '/index.php/' . session()->get('role');
         service('renderer')->setVar('capacityUrl', api_url('capacity'));
+        service('renderer')->setVar('complaintUrl', api_url('complaint'));
     }
 
     public function index()

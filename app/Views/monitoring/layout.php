@@ -335,6 +335,7 @@
     <script src="<?= base_url('assets/js/plugins/smooth-scrollbar.min.js') ?>"></script>
     <script>
         const CapacityUrl = "<?= $capacityUrl ?>";
+        const ComplaintUrl = "<?= $complaintUrl ?>";
     </script>
     <script>
         var ctx = document.getElementById("chart-bars").getContext("2d");
